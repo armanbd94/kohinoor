@@ -2,13 +2,9 @@
 
 namespace App\Exceptions;
 
-
-use Exception;
-use Illuminate\Support\Arr;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
-use Auth;
+
 class Handler extends ExceptionHandler
 {
     /**
@@ -17,12 +13,7 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        \Illuminate\Auth\AuthenticationException::class,
-        \Illuminate\Auth\Access\AuthorizationException::class,
-        \Symfony\Component\HttpKernel\Exception\HttpException::class,
-        \Illuminate\Database\Eloquent\ModelNotFoundException::class,
-        \Illuminate\Session\TokenMismatchException::class,
-        \Illuminate\Validation\ValidationException::class,
+        //
     ];
 
     /**
@@ -31,6 +22,7 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontFlash = [
+        'current_password',
         'password',
         'password_confirmation',
     ];
@@ -42,60 +34,8 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        //
-    }
-
-    /**
-     * Report or log an exception.
-     *
-     * @param  \Throwable  $exception
-     * @return void
-     *
-     * @throws \Exception
-     */
-    public function report(Throwable $exception)
-    {
-        parent::report($exception);
-    }
-
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $exception
-     * @return \Symfony\Component\HttpFoundation\Response
-     *
-     * @throws \Throwable
-     */
-    public function render($request, Throwable $exception)
-    {
-        return parent::render($request, $exception);
-    }
-
-    /**
-     * @param \Illuminate\Http\Request $request
-     * @param AuthenticationException $exception
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\Response
-     */
-
-    protected function unauthenticated($request, AuthenticationException $exception)
-    {
-        if ($request->expectsJson()) {
-            return response()->json(['message' => $exception->getMessage()], 401);
-        }
-        if ($request->is('asm') || $request->is('asm/*')) {
-            return redirect()->guest('asm/login');
-        }
-        return redirect()->guest(route('login'));
-        // $guard = Arr::get($exception->guards(), 0);
-        // switch($guard){
-        //     case 'asm':
-        //         $login = 'asm/login';
-        //         break;
-        //     default:
-        //         $login = 'login';
-        //         break;
-        // }
-        // return redirect()->guest($login);
+        $this->reportable(function (Throwable $e) {
+            //
+        });
     }
 }

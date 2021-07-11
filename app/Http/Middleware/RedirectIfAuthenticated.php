@@ -17,32 +17,16 @@ class RedirectIfAuthenticated
      * @param  string|null  ...$guards
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, ...$guards)
     {
-        if ($guard == "asm" && Auth::guard($guard)->check()) {
-            return redirect('asm/dashboard');
-        }
-        if (Auth::guard($guard)->check()) {
-            return redirect('/');
+        $guards = empty($guards) ? [null] : $guards;
+
+        foreach ($guards as $guard) {
+            if (Auth::guard($guard)->check()) {
+                return redirect(RouteServiceProvider::HOME);
+            }
         }
 
         return $next($request);
     }
-    // public function handle($request, Closure $next, $guard = null)
-    // {
-    //     switch($guard){
-    //         case 'asm':
-    //             if (Auth::guard($guard)->check()) {
-    //                 return redirect('asm/dashboard');
-    //             }
-    //             break;
-    //         default:
-    //             if (Auth::guard($guard)->check()) {
-    //                 return redirect('/');
-    //             }
-    //             break;
-    //     }
-    //     return $next($request);
-    // }
-    
 }

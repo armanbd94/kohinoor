@@ -41,20 +41,9 @@ return [
             'provider' => 'users',
         ],
 
-        'asm' => [
-            'driver' => 'session',
-            'provider' => 'asms',
-        ],
-
         'api' => [
             'driver' => 'token',
             'provider' => 'users',
-            'hash' => false,
-        ],
-
-        'salesmen-api' => [
-            'driver' => 'jwt',
-            'provider' => 'salesmen',
             'hash' => false,
         ],
     ],
@@ -81,15 +70,6 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-        'asms' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\ASM::class,
-        ],
-
-        'salesmen' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Salesmen::class,
-        ],
 
         // 'users' => [
         //     'driver' => 'database',
@@ -115,18 +95,6 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_resets',
-            'expire' => 60,
-            'throttle' => 60,
-        ],
-        'asms' => [
-            'provider' => 'asms',
-            'table' => 'password_resets',
-            'expire' => 60,
-            'throttle' => 60,
-        ],
-        'salesmen' => [
-            'provider' => 'salesmen',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
