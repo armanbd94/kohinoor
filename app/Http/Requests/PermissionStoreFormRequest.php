@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use App\Http\Requests\FormRequest;
 
 class PermissionStoreFormRequest extends FormRequest
@@ -33,7 +34,7 @@ class PermissionStoreFormRequest extends FormRequest
         if($collection->has('permission')){
             foreach (request()->permission as $key => $value) {
                 $this->rules['permission.'.$key.'.name'] = ['required','string'];
-                $this->rules['permission.'.$key.'.slug'] = ['required','string','unique:permissions,slug'];
+                $this->rules['permission.'.$key.'.slug'] = ['required','string'];
 
                 $this->messages['permission.'.$key.'.name.required'] = 'The name field is required';
                 $this->messages['permission.'.$key.'.name.string'] = 'The name field value must be string';

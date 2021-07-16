@@ -174,7 +174,7 @@ class PermissionController extends BaseController
     }
 
     private function restore_session_permission_list(){
-        $permissions = $this->model->select('slug')->get();
+        $permissions = $this->model->join('modules','permissions.module_id','=','modules.id')->where('modules.menu_id',1)->select('slug')->get();
         $permission_list = [];
         if(!$permissions->isEmpty()){
             foreach ($permissions as $value) {

@@ -19,7 +19,6 @@
                 <div class="row">
                     <input type="hidden" name="update_id" id="update_id"/>
                     <input type="hidden" name="type" value="2"/>
-                    <x-form.textbox labelName="Upazila Name" name="name" required="required" col="col-md-12" placeholder="Enter upazila name"/>
                     <x-form.selectbox labelName="District" name="parent_id" required="required" col="col-md-12" class="selectpicker">
                       @if (!$districts->isEmpty())
                           @foreach ($districts as $district)
@@ -27,6 +26,7 @@
                           @endforeach
                       @endif
                   </x-form.selectbox>
+                  <x-form.textbox labelName="Upazila Name" name="name" required="required" col="col-md-12" placeholder="Enter upazila name"/>
                 </div>
             </div>
             <!-- /modal body -->

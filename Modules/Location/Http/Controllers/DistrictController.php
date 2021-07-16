@@ -12,7 +12,7 @@ class DistrictController extends BaseController
 {
     public function __construct(District $model)
     {
-        parent::__construct($model);
+        $this->model = $model;
     }
 
     public function index()

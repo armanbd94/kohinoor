@@ -19,7 +19,7 @@
                 <div class="row">
                     <input type="hidden" name="update_id" id="update_id"/>
                     <input type="hidden" name="type" value="3"/>
-                    <x-form.textbox labelName="Route Name" name="name" required="required" col="col-md-12" placeholder="Enter route name"/>
+                    
                     <x-form.selectbox labelName="District" name="grand_parent_id" required="required" col="col-md-12" class="selectpicker"  onchange="getUpazilaList(this.value,2)">
                       @if (!$districts->isEmpty())
                           @foreach ($districts as $district)
@@ -28,6 +28,7 @@
                       @endif
                   </x-form.selectbox>
                   <x-form.selectbox labelName="Upazila" name="parent_id" required="required" col="col-md-12" class="selectpicker"/>
+                  <x-form.textbox labelName="Route Name" name="name" required="required" col="col-md-12" placeholder="Enter route name"/>
                 </div>
             </div>
             <!-- /modal body -->

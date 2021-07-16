@@ -180,7 +180,7 @@ class LoginController extends Controller
             /*
             * *get method list* *
             */
-            $permissions = Permission::select('slug');
+            $permissions = Permission::join('modules','permissions.module_id','=','modules.id')->where('modules.menu_id',1)->select('slug');
 
             /* 
             * ! if not super admin then permission wise modules and methods data fetched !

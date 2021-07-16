@@ -16,6 +16,7 @@ class HomeController extends BaseController
 {
     public function index()
     {
+
         if (permission('dashboard-access')){
 
             $this->setPageData('Dashboard','Dashboard','fas fa-technometer');

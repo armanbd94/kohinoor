@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth']], function () {
          Route::post('bulk-delete', 'WarehouseController@bulk_delete')->name('bulk.delete');
          Route::post('change-status', 'WarehouseController@change_status')->name('change.status');
      });
+    
 
     //Customer Group Routes
     Route::get('customer-group', 'CustomerGroupController@index')->name('customer.group');

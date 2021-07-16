@@ -3,6 +3,7 @@
 namespace Modules\Setting\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Setting\Http\Requests\WarehouseFormRequest;
@@ -20,7 +21,8 @@ class WarehouseController extends BaseController
         if(permission('warehouse-access')){
             $this->setPageData('Warehouse','Warehouse','fas fa-warehouse',[['name' => 'Warehouse']]);
             $deletable = self::DELETABLE;
-            return view('setting::warehouse.index',compact('deletable'));
+            $districts = DB::table('locations')->where([['type',1],['status',1]])->orderBy('id','asc')->pluck('name','id');
+            return view('setting::warehouse.index',compact('deletable','districts'));
         }else{
             return $this->access_blocked();
         }
@@ -57,11 +59,11 @@ class WarehouseController extends BaseController
                     }
                     $row[] = $no;
                     $row[] = $value->name;
+                    $row[] = $value->district_name;
+                    $row[] = $value->asm_name;
                     $row[] = $value->phone;
                     $row[] = $value->email;
                     $row[] = $value->address;
-                    $row[] = '';
-                    $row[] = '';
                     $row[] = permission('warehouse-edit') ? change_status($value->id,$value->status, $value->name) : STATUS_LABEL[$value->status];
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
@@ -113,6 +115,7 @@ class WarehouseController extends BaseController
             if(permission('warehouse-delete')){
                 $result   = $this->model->find($request->id)->delete();
                 $output   = $this->delete_message($result);
+                $this->model->flushCache();
             }else{
                 $output   = $this->unauthorized();
 

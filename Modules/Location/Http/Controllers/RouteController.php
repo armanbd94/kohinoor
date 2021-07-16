@@ -13,7 +13,7 @@ class RouteController extends BaseController
 {
     public function __construct(Route $model)
     {
-        parent::__construct($model);
+        $this->model = $model;
     }
 
     public function index()

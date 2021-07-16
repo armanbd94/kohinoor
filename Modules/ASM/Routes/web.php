@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,6 +13,16 @@
 |
 */
 
-Route::prefix('asm')->group(function() {
-    Route::get('/', 'ASMController@index');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('assistant-sales-manager', 'ASMController@index')->name('asm');
+    Route::group(['prefix' => 'assistant-sales-manager', 'as'=>'asm.'], function () {
+        Route::post('datatable-data', 'ASMController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'ASMController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'ASMController@edit')->name('edit');
+        Route::post('view', 'ASMController@show')->name('view');
+        Route::post('delete', 'ASMController@delete')->name('delete');
+        Route::post('bulk-delete', 'ASMController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'ASMController@change_status')->name('change.status');
+    });
+    Route::get('district-id-wise-asm-list/{id}','ASMController@district_id_wise_asm_list');
 });

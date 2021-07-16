@@ -2,10 +2,10 @@
 
 namespace Modules\ASM\Entities;
 
-use App\Models\Warehouse;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Modules\Location\Entities\District;
 use Illuminate\Support\Facades\Hash;
+use Modules\Location\Entities\District;
+use Modules\Setting\Entities\Warehouse;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class ASM extends Authenticatable
 {
@@ -21,7 +21,7 @@ class ASM extends Authenticatable
 
     public function warehouse()
     {
-        return $this->hasOne(Warehouse::class);
+        return $this->hasOne(Warehouse::class,'asm_id','id')->withDefault(['name'=>'-']);
     }
     public function district()
     {
@@ -31,6 +31,11 @@ class ASM extends Authenticatable
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
+    }
+
+    public function district_id_wise_asm_list(int $id)
+    {
+        return self::where('district_id',$id)->pluck('name','id');
     }
 
     /******************************************

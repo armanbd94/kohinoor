@@ -6,7 +6,7 @@ define('MATERIAL_IMAGE_PATH','material/');
 define('PRODUCT_IMAGE_PATH','product/');
 define('EMPLOYEE_NID_PHOTO','employee/');
 define('EMPLOYEE_IMAGE_PATH','employee/');
-
+define('ASM_AVATAR_PATH','asm/');
 
 
 define('GENDER_LABEL',[

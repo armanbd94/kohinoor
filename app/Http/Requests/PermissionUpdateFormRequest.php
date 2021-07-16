@@ -24,7 +24,7 @@ class PermissionUpdateFormRequest extends FormRequest
     public function rules()
     {
         $rules['name'] = ['required','string'];
-        $rules['slug'] = ['required','string','unique:permissions,slug,'.request()->update_id];
+        $rules['slug'] = ['required','string'];
         return $rules;
     }
 }

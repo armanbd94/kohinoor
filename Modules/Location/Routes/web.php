@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['auth','xss']], function () {
+Route::group(['middleware' => ['auth']], function () {
+    //District Routes
     Route::get('district', 'DistrictController@index')->name('district');
     Route::group(['prefix' => 'district', 'as'=>'district.'], function () {
         Route::post('datatable-data', 'DistrictController@get_datatable_data')->name('datatable.data');
@@ -24,6 +25,7 @@ Route::group(['middleware' => ['auth','xss']], function () {
         Route::post('change-status', 'DistrictController@change_status')->name('change.status');
     });
 
+    //Upazila Routes
     Route::get('upazila', 'UpazilaController@index')->name('upazila');
     Route::group(['prefix' => 'upazila', 'as'=>'upazila.'], function () {
         Route::post('datatable-data', 'UpazilaController@get_datatable_data')->name('datatable.data');
@@ -35,6 +37,7 @@ Route::group(['middleware' => ['auth','xss']], function () {
     });
     Route::get('district-id-wise-upazila-list/{id}','UpazilaController@district_id_wise_upazila_list');
 
+    //Route Route List
     Route::get('route', 'RouteController@index')->name('route');
     Route::group(['prefix' => 'route', 'as'=>'route.'], function () {
         Route::post('datatable-data', 'RouteController@get_datatable_data')->name('datatable.data');
@@ -45,4 +48,16 @@ Route::group(['middleware' => ['auth','xss']], function () {
         Route::post('change-status', 'RouteController@change_status')->name('change.status');
     });
     Route::get('upazila-id-wise-route-list/{id}','RouteController@upazila_id_wise_route_list');
+
+    //Area Route List
+    Route::get('area', 'AreaController@index')->name('area');
+    Route::group(['prefix' => 'area', 'as'=>'area.'], function () {
+        Route::post('datatable-data', 'AreaController@get_datatable_data')->name('datatable.data');
+        Route::post('store-or-update', 'AreaController@store_or_update_data')->name('store.or.update');
+        Route::post('edit', 'AreaController@edit')->name('edit');
+        Route::post('delete', 'AreaController@delete')->name('delete');
+        Route::post('bulk-delete', 'AreaController@bulk_delete')->name('bulk.delete');
+        Route::post('change-status', 'AreaController@change_status')->name('change.status');
+    });
+    Route::get('route-id-wise-area-list/{id}','AreaController@upazila_id_wise_route_list');
 });

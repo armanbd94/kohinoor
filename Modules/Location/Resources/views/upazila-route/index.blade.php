@@ -137,18 +137,18 @@
             },
             "columnDefs": [{
                     @if (permission('route-bulk-delete'))
-                    "targets": [0,5],
+                    "targets": [0,6],
                     @else 
-                    "targets": [4],
+                    "targets": [5],
                     @endif
                     "orderable": false,
                     "className": "text-center"
                 },
                 {
                     @if (permission('route-bulk-delete'))
-                    "targets": [1,4],
+                    "targets": [1,5],
                     @else 
-                    "targets": [0,3],
+                    "targets": [0,4],
                     @endif
                     "className": "text-center"
                 }

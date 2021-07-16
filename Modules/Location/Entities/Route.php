@@ -7,7 +7,7 @@ use App\Models\BaseModel;
 class Route extends BaseModel
 {
     protected $table='locations';
-    protected $fillable = ['name','parent_id','grand_parent_id','type','status','created_by','modified_by'];
+    protected $fillable = ['name','parent_id','grand_parent_id','grand_grand_parent_id','type','status','created_by','modified_by'];
 
     public function district()
     {

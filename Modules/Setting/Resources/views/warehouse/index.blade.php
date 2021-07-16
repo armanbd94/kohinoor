@@ -18,7 +18,7 @@
                 <div class="card-toolbar">
                     <!--begin::Button-->
                     @if (permission('warehouse-add'))
-                    <a href="javascript:void(0);" onclick="showFormModal('Add New Warehouse','Save')" class="btn btn-primary btn-sm font-weight-bolder"> 
+                    <a href="javascript:void(0);" onclick="showFormModal('Add New Warehouse','Save')" class="btn btn-primary btn-sm font-weight-bolder add-btn"> 
                         <i class="fas fa-plus-circle"></i> Add New</a>
                         @endif
                     <!--end::Button-->
@@ -66,11 +66,11 @@
                                         @endif
                                         <th>Sl</th>
                                         <th>Name</th>
+                                        <th>District Name</th>
+                                        <th>Control By</th>
                                         <th>Phone</th>
                                         <th>Email</th>
                                         <th>Address</th>
-                                        <th>Total Product</th>
-                                        <th>Stock Qty</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -132,9 +132,9 @@
                 },
                 {
                     @if (permission('warehouse-bulk-delete'))
-                    "targets": [1,3,6,7,8],
+                    "targets": [1],
                     @else 
-                    "targets": [0,2,5,6,7],
+                    "targets": [0],
                     @endif
                     "className": "text-center"
                 }
@@ -223,6 +223,11 @@
             $('#form-filter')[0].reset();
             table.ajax.reload();
         });
+
+        $(document).on('click', '.add-btn', function () {
+            $('#store_or_update_form #asm_id').empty();
+            $('#store_or_update_form .selectpicker').selectpicker('refresh');
+        });
     
         $(document).on('click', '#save-btn', function () {
             let form = document.getElementById('store_or_update_form');
@@ -258,9 +263,11 @@
                             $('#store_or_update_form #name').val(data.name);
                             $('#store_or_update_form #phone').val(data.phone);
                             $('#store_or_update_form #email').val(data.email);
+                            $('#store_or_update_form #district_id').val(data.district_id);
                             $('#store_or_update_form #address').val(data.address);
                             $('#store_or_update_form #deletable').val(data.deletable);
                             $('#store_or_update_form .selectpicker').selectpicker('refresh');
+                            getASMList(data.district_id,data.asm_id);
                             $('#store_or_update_modal').modal({
                                 keyboard: false,
                                 backdrop: 'static',
@@ -317,5 +324,30 @@
     
     
     });
+
+    function getASMList(district_id,asm_id='')
+    {
+        $.ajax({
+            url:"{{ url('district-id-wise-asm-list') }}/"+district_id,
+            type:"GET",
+            dataType:"JSON",
+            success:function(data){
+                html = `<option value="">Select Please</option>`;
+                $.each(data, function(key, value) {
+                       html += '<option value="'+ key +'">'+ value +'</option>';
+                });
+
+                $('#store_or_update_form #asm_id').empty();
+                $('#store_or_update_form #asm_id').append(html);
+                
+                $('.selectpicker').selectpicker('refresh');
+                if(asm_id){
+                    $('#store_or_update_form #asm_id').val(asm_id);
+                    $('#store_or_update_form #asm_id.selectpicker').selectpicker('refresh');
+                }
+                
+            },
+        });
+    }
     </script>
 @endpush

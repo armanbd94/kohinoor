@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use App\Http\Requests\FormRequest;
 
 class ModuleFormRequest extends FormRequest
@@ -31,7 +32,7 @@ class ModuleFormRequest extends FormRequest
             if(request()->update_id){
                 $rules['url']         = ['nullable','string','unique:modules,url,'.request()->update_id];
             }else{
-                $rules['url']         = ['nullable','string','unique:modules,url'];
+                $rules['url']         = ['nullable','string',Rule::unique('modules','url')->where('menu_id',request()->menu_id)];
             }
             $rules['icon_class']      = ['nullable','string'];
             $rules['target']          = ['nullable','string'];

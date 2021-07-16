@@ -12,7 +12,7 @@ class UpazilaController extends BaseController
 {
     public function __construct(Upazila $model)
     {
-        parent::__construct($model);
+        $this->model = $model;
     }
 
     public function index()
