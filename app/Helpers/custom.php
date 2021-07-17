@@ -6,7 +6,11 @@ define('MATERIAL_IMAGE_PATH','material/');
 define('PRODUCT_IMAGE_PATH','product/');
 define('EMPLOYEE_NID_PHOTO','employee/');
 define('EMPLOYEE_IMAGE_PATH','employee/');
+define('SALESMEN_AVATAR_PATH','salesmen/');
 define('ASM_AVATAR_PATH','asm/');
+define('PURCHASE_DOCUMENT_PATH','purchase-document/');
+define('SALE_DOCUMENT_PATH','sale-document/');
+define('TRANSFER_DOCUMENT_PATH','transfer-document/');
 
 
 define('GENDER_LABEL',[

@@ -2,5 +2,7 @@
     "Supplier": true,
     "Location": true,
     "Setting": true,
-    "ASM": true
+    "ASM": true,
+    "SalesMen": true,
+    "Material": true
 }

@@ -68,7 +68,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group col-md-12 mb-0">
-                            <label for="logo" class="form-control-label">Product Image</label>
+                            <label for="logo" class="form-control-label">Person Image</label>
                             <div class="col=md-12 px-0  text-center">
                                 <div id="avatar">
                 
