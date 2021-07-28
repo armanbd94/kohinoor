@@ -108,9 +108,11 @@ class MaterialController extends BaseController
             if(permission('material-add') || permission('material-edit')){
                 DB::beginTransaction();
                 try {
-                    $collection = collect($request->validated())->except('cost','alert_qty','tax_id','material_image');
-                    $cost       = $request->cost ? $request->cost : 0;
-                    $old_cost   = $request->cost ? $request->cost : 0;
+                    $collection = collect($request->validated())->except('alert_qty','tax_id','material_image');
+                    if(empty($request->update_id)){
+                        $cost       = $request->opening_cost ? $request->opening_cost : 0;
+                        $collection = $collection->merge(compact('cost'));
+                    }
                     $alert_qty  = $request->alert_qty ? $request->alert_qty : 0;
                     $tax_id     = ($request->tax_id != 0) ? $request->tax_id : null;
                     $has_opening_stock     = $request->has_opening_stock ? $request->has_opening_stock : 2;
@@ -122,7 +124,7 @@ class MaterialController extends BaseController
                             $this->delete_file($request->old_material_image, MATERIAL_IMAGE_PATH);
                         }  
                     }
-                    $collection = $collection->merge(compact('material_image','cost','has_opening_stock','opening_cost','alert_qty','tax_id'));
+                    $collection = $collection->merge(compact('material_image','has_opening_stock','opening_cost','alert_qty','tax_id'));
                     $collection = $this->track_data($collection,$request->update_id);
                     if($request->update_id)
                     {
@@ -409,10 +411,5 @@ class MaterialController extends BaseController
         }
     }
 
-    public function materialCode()
-    {
-        $material = DB::table('materials')->orderBy('id','desc')->first();
-        $id = $material ? $material->id : 1;
-        return response()->json($id);
-    }
+
 }

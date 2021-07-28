@@ -2,6 +2,10 @@
 
 @section('title', $page_title)
 
+@push('styles')
+<link href="plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+@endpush
+
 @section('content')
 <div class="d-flex flex-column-fluid">
     <div class="container-fluid">
@@ -99,7 +103,8 @@
 @endsection
 
 @push('scripts')
-<script src="js/spartan-multi-image-picker-min.js"></script>
+<script src="plugins/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+<script src="js/spartan-multi-image-picker.min.js"></script>
 <script>
     var table;
     $(document).ready(function(){
@@ -393,12 +398,12 @@
                             $('#store_or_update_form .selectpicker').selectpicker('refresh');
                             $('#store_or_update_form #old_material_image').val(data.material_image);
                             if(data.material_image){
-                                $('#store_or_update_form .spartan_image_placeholder').css('display','none');
+                                $('#store_or_update_form img').css('display','none');
                                 $('#store_or_update_form .spartan_remove_row').css('display','none');
                                 $('#store_or_update_form .img_').css('display','block');
                                 $('#store_or_update_form .img_').attr('src',`{{ 'storage/'.MATERIAL_IMAGE_PATH }}`+data.material_image);
                             }else{
-                                $('#store_or_update_form .spartan_image_placeholder').css('display','block');
+                                $('#store_or_update_form img').css('display','block');
                                 $('#store_or_update_form .spartan_remove_row').css('display','none');
                                 $('#store_or_update_form .img_').css('display','none');
                                 $('#store_or_update_form .img_').attr('src','');
@@ -508,31 +513,19 @@
         $(document).on('change','#opening_stock', function(){
             if($(this).is(':checked')) {
                 $('#has_opening_stock').val(1);
-                $('.material-qty,.opening-warehouse-id').removeClass('d-none');
-                $('#opening_stock_qty,#opening_warehouse_id').val('');
+                $('.material-qty,.opening-warehouse-id,.material-cost').removeClass('d-none');
+                $('#opening_stock_qty,#opening_warehouse_id,#opening_cost').val('');
                 $('#store_or_update_form .selectpicker').selectpicker('refresh');
             }else{
                 $('#has_opening_stock').val(2);
-                $('#opening_stock_qty,#opening_warehouse_id').val('');
+                $('#opening_stock_qty,#opening_warehouse_id,#opening_cost').val('');
                 $('#store_or_update_form .selectpicker').selectpicker('refresh');
-                $('.material-qty,.opening-warehouse-id').addClass('d-none');
+                $('.material-qty,.opening-warehouse-id,.material-cost').addClass('d-none');
             }
         });
     
     
     });
-
-    function material_code()
-    {
-        $.ajax({
-            url:"{{ url('material/code') }}",
-            type:"GET",
-            dataType:"JSON",
-            success:function(data){
-                $('#store_or_update_form #material_code').val(data);
-            },
-        });
-    }
 
     function populate_unit(unit_id,purchase_unit_id='')
     {
@@ -569,7 +562,7 @@
         $('#store_or_update_form .spartan_remove_row').css('display','none');
         $('#store_or_update_form .img_').css('display','none');
         $('#store_or_update_form .img_').attr('src','');
-        material_code();
+   
         $('#store_or_update_modal').modal({
             keyboard: false,
             backdrop: 'static',

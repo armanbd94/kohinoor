@@ -25,7 +25,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('bulk-delete', 'MaterialController@bulk_delete')->name('bulk.delete');
         Route::post('change-status', 'MaterialController@change_status')->name('change.status');
         Route::get('generate-code', 'MaterialController@generateMaterialCode')->name('generate.code');
-        Route::get('code', 'MaterialController@materialCode')->name('code');
     });
     Route::post('material-autocomplete-search', 'MaterialController@autocomplete_search_material');
     Route::post('material-search', 'MaterialController@search_material')->name('material.search');

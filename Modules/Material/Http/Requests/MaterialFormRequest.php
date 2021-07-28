@@ -16,7 +16,6 @@ class MaterialFormRequest extends FormRequest
         $rules['material_name']        = ['required','string','unique:materials,material_name'];
         $rules['material_code']        = ['required','string','unique:materials,material_code'];
         $rules['material_image']       = ['nullable','image','mimes:png,jpg,jpeg,svg'];
-        $rules['cost']                 = ['nullable','numeric','gte:0'];
         $rules['category_id']          = ['required'];
         $rules['unit_id']              = ['required'];
         $rules['purchase_unit_id']     = ['required'];
@@ -24,7 +23,7 @@ class MaterialFormRequest extends FormRequest
         $rules['tax_id']               = ['nullable','numeric'];
         $rules['tax_method']           = ['required','numeric'];
         $rules['opening_stock_qty']    = ['nullable','numeric'];
-        $rules['opening_cost']    = ['nullable','numeric'];
+        $rules['opening_cost']         = ['nullable','numeric'];
         $rules['opening_warehouse_id'] = ['nullable','numeric'];
 
         if(request()->update_id){

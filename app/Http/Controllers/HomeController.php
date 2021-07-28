@@ -2,15 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Modules\Sale\Entities\Sale;
-use Illuminate\Support\Facades\Auth;
-use Modules\Customer\Entities\Customer;
-use Modules\Purchase\Entities\Purchase;
+
 use App\Http\Controllers\BaseController;
-use Modules\Account\Entities\Transaction;
-use Modules\Account\Entities\ChartOfAccount;
+
 
 class HomeController extends BaseController
 {

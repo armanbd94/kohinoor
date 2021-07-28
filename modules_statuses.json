@@ -4,5 +4,6 @@
     "Setting": true,
     "ASM": true,
     "SalesMen": true,
-    "Material": true
+    "Material": true,
+    "Product": true
 }

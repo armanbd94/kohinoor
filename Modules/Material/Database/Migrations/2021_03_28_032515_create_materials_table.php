@@ -17,11 +17,13 @@ class CreateMaterialsTable extends Migration
             $table->id();
             $table->string('material_name');
             $table->string('material_code')->unique();
+            $table->unsignedBigInteger('category_id');
+            $table->foreign('category_id')->references('id')->on('categories');
             $table->unsignedBigInteger('unit_id');
             $table->foreign('unit_id')->references('id')->on('units');
             $table->unsignedBigInteger('purchase_unit_id');
             $table->foreign('purchase_unit_id')->references('id')->on('units');
-            $table->double('cost');
+            $table->double('cost')->nullable();
             $table->double('qty')->nullable();
             $table->double('alert_qty')->nullable();
             $table->unsignedBigInteger('tax_id')->nullable();

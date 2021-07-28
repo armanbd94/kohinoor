@@ -27,7 +27,7 @@
                                 <div class="input-group" id="code_section">
                                     <input type="text" class="form-control" name="material_code" id="material_code" readonly>
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary" onclick="material_code()"  data-toggle="tooltip" data-theme="dark" title="Generate Code"
+                                        <span class="input-group-text bg-primary" id="generate-code"  data-toggle="tooltip" data-theme="dark" title="Generate Code"
                                         style="border-top-right-radius: 0.42rem;border-bottom-right-radius: 0.42rem;border:0;cursor: pointer;">
                                             <i class="fas fa-retweet text-white"></i>
                                         </span>
@@ -39,7 +39,6 @@
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </x-form.selectbox>
-                            <x-form.textbox labelName="Material Cost" name="cost" col="col-md-6" placeholder="0"/>
                             <x-form.selectbox labelName="Unit" name="unit_id" required="required"  col="col-md-6" class="selectpicker" onchange="populate_unit(this.value)">
                                 @if (!$units->isEmpty())
                                     @foreach ($units as $unit)
