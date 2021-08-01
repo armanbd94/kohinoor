@@ -87,7 +87,16 @@
                                         <th>Name</th>
                                         <th>Product Type</th>
                                         <th>Category</th>
-                                        <th>Type</th>
+                                        <th>Cost Base Unit</th>
+                                        <th>Base Unit</th>
+                                        <th>Unit</th>
+                                        <th>MRP (Price) Unit</th>
+                                        <th>TP (Price) Unit</th>
+                                        <th>MRP (Price) Base Unit</th>
+                                        <th>TP (Price) Base Unit</th>
+                                        <th>Stock Qty Unit</th>
+                                        <th>Stock Qty Base Unit</th>
+                                        <th>Alert Qty</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -143,20 +152,28 @@
             },
             "columnDefs": [{
                     @if (permission('product-bulk-delete'))
-                    "targets": [0,8],
+                    "targets": [0,17],
                     @else 
-                    "targets": [7],
+                    "targets": [16],
                     @endif
                     "orderable": false,
                     "className": "text-center"
                 },
                 {
                     @if (permission('product-bulk-delete'))
-                    "targets": [1,2,4,5,6,7],
+                    "targets": [1,2,4,5,6,7,8,13,14,15,16],
                     @else 
-                    "targets": [0,1,3,4,5,6],
+                    "targets": [0,1,3,4,5,6,7,12,13,14,15],
                     @endif
                     "className": "text-center"
+                },
+                {
+                    @if (permission('product-bulk-delete'))
+                    "targets": [9,10,11,12],
+                    @else 
+                    "targets": [8,9,10,11],
+                    @endif
+                    "className": "text-right"
                 }
 
             ],
@@ -178,9 +195,9 @@
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
                         @if (permission('product-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(8))' 
+                        columns: ':visible:not(:eq(0),:eq(17))' 
                         @else 
-                        columns: ':visible:not(:eq(7))' 
+                        columns: ':visible:not(:eq(16))' 
                         @endif
                     },
                     customize: function (win) {
@@ -200,9 +217,9 @@
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
                          @if (permission('product-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(8))' 
+                        columns: ':visible:not(:eq(0),:eq(17))' 
                         @else 
-                        columns: ':visible:not(:eq(7))' 
+                        columns: ':visible:not(:eq(16))' 
                         @endif
                     }
                 },
@@ -214,9 +231,9 @@
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
                          @if (permission('product-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(8))' 
+                        columns: ':visible:not(:eq(0),:eq(17))' 
                         @else 
-                        columns: ':visible:not(:eq(7))' 
+                        columns: ':visible:not(:eq(16))' 
                         @endif
                     },
                 },
@@ -230,9 +247,9 @@
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
                          @if (permission('product-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(8))' 
+                        columns: ':visible:not(:eq(0),:eq(17))' 
                         @else 
-                        columns: ':visible:not(:eq(7))' 
+                        columns: ':visible:not(:eq(16))' 
                         @endif
                     },
                     customize: function(doc) {

@@ -15,11 +15,10 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->index('name');
+            $table->string('code')->index('code')->unique();
             $table->unsignedBigInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories');
-            $table->string('name');
-            $table->string('code')->nullable();
-            $table->enum('type',['1','2'])->comment="1=Standard,2=Variant";
             $table->enum('product_type',['1','2'])->comment="1=Can,2=Foil";
             $table->string('barcode_symbology')->nullable();
             $table->unsignedBigInteger('base_unit_id')->nullable();

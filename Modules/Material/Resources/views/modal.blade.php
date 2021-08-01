@@ -25,7 +25,7 @@
                             <div class="col-md-6 form-group required">
                                 <label for="material_code">Material Code</label>
                                 <div class="input-group" id="code_section">
-                                    <input type="text" class="form-control" name="material_code" id="material_code" readonly>
+                                    <input type="text" class="form-control" name="material_code" id="material_code">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary" id="generate-code"  data-toggle="tooltip" data-theme="dark" title="Generate Code"
                                         style="border-top-right-radius: 0.42rem;border-bottom-right-radius: 0.42rem;border:0;cursor: pointer;">
@@ -34,9 +34,15 @@
                                     </div>
                                 </div>
                             </div>
+                            
                             <x-form.selectbox labelName="Category" name="category_id" required="required" col="col-md-6" class="selectpicker">
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </x-form.selectbox>
+                            <x-form.selectbox labelName="Material Type" name="type" required="required"  col="col-md-6" class="selectpicker" >
+                                @foreach (MATERIAL_TYPE as $key => $value)
+                                    <option value="{{ $key }}">{{ $value }}</option>
                                 @endforeach
                             </x-form.selectbox>
                             <x-form.selectbox labelName="Unit" name="unit_id" required="required"  col="col-md-6" class="selectpicker" onchange="populate_unit(this.value)">
@@ -49,9 +55,9 @@
                                 @endif
                             </x-form.selectbox>
                             <x-form.selectbox labelName="Purchase Unit" name="purchase_unit_id" required="required" col="col-md-6" class="selectpicker"/>
-                            <x-form.textbox labelName="Opening Stock Quantity" name="opening_stock_qty" col="col-md-6 material-qty d-none" required="required" placeholder="0"/>
                             <x-form.textbox labelName="Opening Cost" name="opening_cost" col="col-md-6 material-cost d-none" required="required" placeholder="0"/>
-                            <x-form.selectbox labelName="Opening Stock Warehouse" name="opening_warehouse_id" required="required"  col="col-md-6 opening-warehouse-id d-none" class="selectpicker" onchange="populate_unit(this.value)">
+                            <x-form.textbox labelName="Opening Stock Quantity" name="opening_stock_qty" col="col-md-6 material-qty d-none" required="required" placeholder="0"/>
+                            <x-form.selectbox labelName="Opening Stock Warehouse" name="opening_warehouse_id" required="required"  col="col-md-6 opening-warehouse-id d-none" class="selectpicker">
                                 @if (!$warehouses->isEmpty())
                                     @foreach ($warehouses as $warehouse)
                                         <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>

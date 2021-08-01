@@ -29,6 +29,7 @@ class CreateMaterialsTable extends Migration
             $table->unsignedBigInteger('tax_id')->nullable();
             $table->foreign('tax_id')->references('id')->on('taxes');
             $table->enum('tax_method',['1','2'])->comment = "1=Exclusive,2=Inclusive";
+            $table->enum('type',['1','2'])->comment = "1=Raw, 2=Packaging";
             $table->enum('status',['1','2'])->default('1')->comment = "1=Active, 2=Inactive";
             $table->enum('has_opening_stock',['1','2'])->default('2')->comment = "1=Yes, 2=No";
             $table->double('opening_stock_qty')->nullable();

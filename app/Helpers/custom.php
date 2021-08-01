@@ -19,6 +19,7 @@ define('GENDER_LABEL',[
     '3' => '<span class="label label-warning label-pill label-inline" style="min-width:70px !important;">Other</span>',
 ]);
 define('STATUS',['1' => 'Active', '2' => 'Inactive']);
+define('MATERIAL_TYPE',['1' => 'Raw', '2' => 'Packaging']);
 define('PRODUCT_TYPE',['1' => 'Can', '2' => 'Foil']);
 define('APPROVE_STATUS',['1' => 'Approved', '2' => 'Processing']);
 define('EXPENSE_APPROVE_STATUS',['1' => 'Approved', '2' => 'Rejected','3'=>'Pending']);
@@ -27,6 +28,10 @@ define('TYPE',['1'=>'Standard','2'=>'Variant']);
 define('TYPE_LABEL',[
     '1'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Standard</span>',
     '2'=>'<span class="label label-primary label-pill label-inline" style="min-width:70px !important;">Variant</span>',
+]);
+define('MATERIAL_TYPE_LABEL',[
+    '1'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Raw</span>',
+    '2'=>'<span class="label label-primary label-pill label-inline" style="min-width:70px !important;">Packaging</span>',
 ]);
 define('PRODUCT_TYPE_LABEL',[
     '1'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Can</span>',

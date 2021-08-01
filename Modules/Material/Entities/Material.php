@@ -10,7 +10,7 @@ use App\Models\BaseModel;
 class Material extends BaseModel
 {
     protected $fillable = ['category_id','material_name', 'material_code', 'unit_id', 'purchase_unit_id', 'cost', 'qty', 'alert_qty', 
-    'tax_id', 'tax_method', 'status', 'has_opening_stock', 'opening_stock_qty','opening_cost', 'opening_warehouse_id', 'created_by', 'modified_by'];
+    'tax_id', 'tax_method','type', 'status', 'has_opening_stock', 'opening_stock_qty','opening_cost', 'opening_warehouse_id', 'created_by', 'modified_by'];
 
 
     /******************************************
@@ -45,9 +45,9 @@ class Material extends BaseModel
     {
         //set column sorting index table column name wise (should match with frontend table header)
         if (permission('material-bulk-delete')){
-            $this->column_order = [null,'id','material_image','material_name','material_code','category_id','cost','unit_id','purchase_unit_id','qty', 'opening_stock_qty','opening_cost','alert_qty', 'status',null];
+            $this->column_order = [null,'id','material_image','material_name','material_code','category_id','type','cost','unit_id','purchase_unit_id','qty', 'alert_qty', 'status',null];
         }else{
-            $this->column_order = ['id','material_image','material_name','material_code','category_id','cost','unit_id', 'purchase_unit_id','qty', 'opening_stock_qty','opening_cost','alert_qty', 'status',null];
+            $this->column_order = ['id','material_image','material_name','material_code','category_id','type','cost','unit_id', 'purchase_unit_id','qty', 'alert_qty', 'status',null];
         }
         
         $query = self::with('unit:id,unit_name,unit_code','purchase_unit:id,unit_name,unit_code','category:id,name');

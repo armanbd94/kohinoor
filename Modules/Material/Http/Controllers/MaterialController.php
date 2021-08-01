@@ -83,12 +83,11 @@ class MaterialController extends BaseController
                     $row[] = $value->material_name;
                     $row[] = $value->material_code;
                     $row[] = $value->category->name;
+                    $row[] = MATERIAL_TYPE[$value->type];
                     $row[] = $value->cost ? number_format($value->cost,2,'.',',') : 0;
                     $row[] = $value->unit->unit_name;
                     $row[] = $value->purchase_unit->unit_name;
                     $row[] = $value->qty ? $value->qty : "<span class='label label-rounded label-danger'>0</span>";
-                    $row[] = $value->opening_stock_qty ? $value->opening_stock_qty : "<span class='label label-rounded label-danger'>0</span>";
-                    $row[] = $value->opening_cost ? $value->opening_cost : '0';
                     $row[] = $value->alert_qty ? $value->alert_qty : "<span class='label label-rounded label-danger'>0</span>";
                     $row[] = permission('material-edit') ? change_status($value->id,$value->status, $value->material_name) : STATUS_LABEL[$value->status];
                     $row[] = action_button($action);//custom helper function for action button

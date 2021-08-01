@@ -11,11 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Product\Entities\Product;
 use Modules\Material\Entities\Material;
-use Modules\Product\Entities\Attribute;
 use App\Http\Controllers\BaseController;
-use Modules\Product\Entities\ProductVariant;
-use Modules\Product\Entities\ProductAttribute;
-use Modules\Product\Entities\ProductAttributeOption;
 use Modules\Product\Http\Requests\ProductFormRequest;
 
 class ProductController extends BaseController
@@ -97,7 +93,16 @@ class ProductController extends BaseController
                     $row[] = $value->name;
                     $row[] = PRODUCT_TYPE_LABEL[$value->product_type];
                     $row[] = $value->category->name;
-                    $row[] = TYPE_LABEL[$value->type];
+                    $row[] = number_format($value->cost,2,'.','');
+                    $row[] = $value->base_unit->unit_name.' ('.$value->base_unit->unit_code.')';
+                    $row[] = $value->unit->unit_name.' ('.$value->unit->unit_code.')';
+                    $row[] = number_format($value->unit_mrp,2,'.','');
+                    $row[] = number_format($value->unit_price,2,'.','');
+                    $row[] = number_format($value->base_unit_mrp,2,'.','');
+                    $row[] = number_format($value->base_unit_price,2,'.','');
+                    $row[] = $value->unit_qty ?? 0;
+                    $row[] = $value->base_unit_qty ?? 0;
+                    $row[] = $value->alert_quantity ?? 0;
                     $row[] = permission('product-edit') ? change_status($value->id,$value->status, $value->name) : STATUS_LABEL[$value->status];
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
@@ -119,7 +124,6 @@ class ProductController extends BaseController
                 'categories' => Category::allProductCategories(),
                 'units'      => Unit::all(),
                 'taxes'      => Tax::activeTaxes(),
-                'attributes' => Attribute::allattributes(),
             ];
             return view('product::create',$data);
         }else{
@@ -128,69 +132,26 @@ class ProductController extends BaseController
     }
 
 
-    public function store(ProductFormRequest $request)
+    public function store_or_update(ProductFormRequest $request)
     {
         if($request->ajax()){
             if(permission('product-add')){
                 DB::beginTransaction();
                 try {
-                    // dd($request->all());
-                    // dd(json_decode($request->attribute[1]['value'])[0]->value);
-                    $collection   = collect($request->validated())->except(['materials','image','attribute','variants','product_id']);
-                    $collection   = $this->track_data($collection,$request->update_id);
-                    $image = $request->old_image;
+                    $collection = collect($request->validated())->except(['materials','image','product_id']);
+                    $collection = $this->track_data($collection,$request->update_id);
+                    $image      = $request->old_image;
                     if ($request->hasFile('image')) {
                         $image = $this->upload_file($request->file('image'), PRODUCT_IMAGE_PATH);
                         if (!empty($request->old_image)) {
                             $this->delete_file($request->old_image, PRODUCT_IMAGE_PATH);
                         }
                     }
-                    $tax_id = $request->tax_id ? $request->tax_id : null;
+                    $tax_id     = $request->tax_id ? $request->tax_id : null;
                     $collection = $collection->merge(compact('tax_id','image'));
-                    $result       = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
-                    $product = $this->model->with('attributes','attribute_options','variants','product_material')->find($result->id);
-                    if($request->type == 2){
-                        if ($request->has('attribute')) {
-                            foreach ($request->attribute as $value) {
-                                $product_attribute = ProductAttribute::create([
-                                    'product_id'=>$result->id,
-                                    'attribute_id'=>$value['id'],
-                                ]);
-                                $attribute_options = [];
-                                if($product_attribute)
-                                {
-                                    foreach (json_decode($value['value']) as $key => $value) {
-                                        $attribute_options[] = [
-                                            'product_id' => $result->id,
-                                            'product_attribute_id' => $product_attribute->id,
-                                            'name' => $value->value
-                                        ];
-                                    }
-                                    ProductAttributeOption::insert($attribute_options);
-                                }
+                    $result     = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
+                    $product    = $this->model->with('product_material')->find($result->id);
 
-                            }
-                            
-                        }
-                        $variants=[];
-                        if($request->has('variants')) {
-                            foreach ($request->variants as $value) {
-                                $variants[] = [
-                                    'product_id'           => $result->id,
-                                    'item_name'            => $value['name'],
-                                    'item_code'            => $value['code'],
-                                    'item_base_unit_id'    => $value['item_base_unit_id'],
-                                    'item_unit_id'         => $value['item_unit_id'],
-                                    'item_base_unit_mrp'   => $value['item_base_unit_mrp'],
-                                    'item_base_unit_price' => $value['item_base_unit_price'],
-                                    'item_unit_mrp'        => $value['item_unit_mrp'],
-                                    'item_unit_price'      => $value['item_unit_price'],
-                                    'alert_qty'            => $value['alert_qty'],
-                                ];
-                            }
-                            ProductVariant::insert($variants);
-                        }
-                    }
                     $product_materials = [];
                     if($request->has('materials')){
                         foreach($request->materials as $value)
@@ -224,8 +185,7 @@ class ProductController extends BaseController
                 'categories' => Category::allProductCategories(),
                 'units'      => Unit::all(),
                 'taxes'      => Tax::activeTaxes(),
-                'attributes' => Attribute::allattributes(),
-                'product' => Product::with('attributes','variants','product_material')->find($id)
+                'product' => Product::with('product_material')->find($id)
             ];
             return view('product::edit',$data);
         }else{
@@ -239,81 +199,20 @@ class ProductController extends BaseController
             if(permission('product-add')){
                 DB::beginTransaction();
                 try {
-                    // dd($request->all());
-                    // dd(json_decode($request->attribute[1]['value'])[0]->value);
-                    $collection   = collect($request->validated());
-                    $collection   = $this->track_data($collection,$request->update_id);
-                    $image = $request->old_image;
+                    $collection = collect($request->validated())->except(['materials','image','product_id']);
+                    $collection = $this->track_data($collection,$request->update_id);
+                    $image      = $request->old_image;
                     if ($request->hasFile('image')) {
                         $image = $this->upload_file($request->file('image'), PRODUCT_IMAGE_PATH);
                         if (!empty($request->old_image)) {
                             $this->delete_file($request->old_image, PRODUCT_IMAGE_PATH);
                         }
                     }
-                    $promotion = $request->promotion ? $request->promotion : 2;
                     $tax_id = $request->tax_id ? $request->tax_id : null;
-                    $collection = $collection->merge(compact('tax_id','image','promotion'));
-                    if($promotion == 2){
-                        $collection = $collection->merge([
-                            'promotion_price' => null, 'start_date' => null, 'end_date' => null
-                        ]);
-                    
-                    }
+                    $collection = $collection->merge(compact('tax_id','image'));
                     $result       = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
-                    $product = $this->model->with('attributes','attribute_options','variants')->find($result->id);
-                    if($product->type == 2){
-                        
-                        
-                        if ($request->has('attribute')) {
-                            foreach ($request->attribute as $value) {
-                                ProductAttributeOption::where([['product_id', $request->update_id],['product_attribute_id',$value['product_attribute_id']]])->delete();
-                                ProductAttribute::find($value['product_attribute_id'])->delete();
+                    $product = $this->model->with('product_material')->find($result->id);
 
-                                $product_attribute = ProductAttribute::create([
-                                    'product_id'=> $result->id,
-                                    'attribute_id'=>$value['id'],
-                                ]);
-                                $attribute_options = [];
-                                if($product_attribute)
-                                {
-                                    foreach (json_decode($value['value']) as $key => $value) {
-                                        $attribute_options[] = [
-                                            'product_id' => $result->id,
-                                            'product_attribute_id' => $product_attribute->id,
-                                            'name' => $value->value
-                                        ];
-                                    }
-                                    ProductAttributeOption::insert($attribute_options);
-                                }
-
-                            }
-                            
-                        }
-
-                        if($request->has('variants')) {
-                            $variant_id_to_keep = [];
-                            foreach ($request->variants as $value) {
-                                $variant = ProductVariant::updateOrCreate([
-                                    'product_id' => $result->id,
-                                    'item_name'  => $value['name'],
-                                    'item_code'  => $value['code']
-                                ],[
-                                    'product_id' => $result->id,
-                                    'item_name'  => $value['name'],
-                                    'item_code'  => $value['code'],
-                                    'item_price' => $value['price'],
-                                ]);
-                                if($variant){
-                                    $variant_id_to_keep[] = $variant->id;
-                                }
-                                
-                            }
-                            if(count($variant_id_to_keep) > 0){
-                               ProductVariant::where('product_id',$result->id)->whereNotIn('id',$variant_id_to_keep)->delete();
-                               
-                            }
-                        }
-                    }
                     $output = $this->store_message($result, $request->update_id);
                     DB::commit();
                 }catch (\Throwable $th) {
@@ -334,7 +233,7 @@ class ProductController extends BaseController
 
         if(permission('product-view')){
             $this->setPageData('Product Details','Product Details','fas fa-paste',[['name'=>'Product','link'=> route('product')],['name' => 'Product Details']]);
-            $product = $this->model->with('category','tax','unit','base_unit','variants','product_material')->findOrFail($id);
+            $product = $this->model->with('category','tax','unit','base_unit','product_material')->findOrFail($id);
             return view('product::details',compact('product'));
         }else{
             return $this->access_blocked();
@@ -349,13 +248,10 @@ class ProductController extends BaseController
                 DB::beginTransaction();
                 try {
                     $sale_product = SaleProduct::where('product_id',$request->id)->get()->count();
-                    $purchase_product = PurchaseProduct::where('product_id',$request->id)->get()->count();
-                    if($sale_product > 0 && $purchase_product > 0){
+                    if($sale_product > 0){
                         $output = ['status'=>'error','message'=>'Cannot delete because this product is realted with sale and purchase data'];
                     }else{
-                        ProductAttributeOption::where('product_id',$request->id)->delete();
-                        ProductAttribute::where('product_id',$request->id)->delete();
-                        ProductVariant::where('product_id',$request->id)->delete();
+       
                         $product  = $this->model->find($request->id);
                         $old_image = $product ? $product->image : '';
                         $result    = $product->delete();

@@ -13,7 +13,7 @@ use Modules\Product\Entities\ProductAttribute;
 
 class Product extends BaseModel
 {
-    protected $fillable = [ 'category_id', 'name', 'code', 'type', 'product_type', 'barcode_symbology', 
+    protected $fillable = [ 'category_id', 'name', 'code',  'product_type', 'barcode_symbology', 
     'base_unit_id', 'unit_id', 'cost', 'base_unit_mrp', 'base_unit_price', 'unit_mrp', 'unit_price',
     'base_unit_qty', 'unit_qty', 'alert_quantity', 'image', 'tax_id', 'tax_method', 'status', 
     'description', 'created_by', 'modified_by'];
@@ -22,6 +22,7 @@ class Product extends BaseModel
     {
         return $this->belongsTo(Category::class);
     }
+
     public function unit()
     {
         return $this->belongsTo(Unit::class,'unit_id','id');
@@ -37,25 +38,6 @@ class Product extends BaseModel
         return $this->belongsTo(Tax::class)->withDefault(['name'=>'No Tax','rate' => 0]);
     }
 
-    public function variants()
-    {
-        return $this->hasMany(ProductVariant::class);
-    }
-
-    public function attributes()
-    {
-        return $this->belongsToMany(Attribute::class,'product_attributes','product_id','attribute_id','id','id')
-        ->withPivot('id')
-        ->withTimeStamps(); 
-    }
-
-    public function attribute_options()
-    {
-        return $this->belongsToMany(ProductAttribute::class,'product_attribute_options','product_id','product_attribute_id','id','id')
-        ->withPivot('name')
-        ->withTimeStamps(); 
-    }
-
     public function product_material(){
         return $this->belongsToMany(Material::class,'product_material','product_id','material_id','id','id')
                     ->withTimestamps();
@@ -69,7 +51,6 @@ class Product extends BaseModel
     protected $_category_id; 
     protected $_status; 
     protected $_product_type; 
-    protected $_type; 
 
     //methods to set custom search property value
     public function setName($name)
@@ -87,11 +68,6 @@ class Product extends BaseModel
         $this->_status = $status;
     }
 
-    public function setType($type)
-    {
-        $this->_type = $type;
-    }
-
     public function setProductType($product_type)
     {
         $this->_product_type = $product_type;
@@ -102,9 +78,9 @@ class Product extends BaseModel
     {
         //set column sorting index table column name wise (should match with frontend table header)
         if (permission('product-bulk-delete')){
-            $this->column_order = [null,'id', 'id', 'name', 'product_type', 'category_id', 'unit_id', 'type', 'status', null];
+            $this->column_order = [null,'id', 'id', 'name', 'product_type', 'category_id', 'cost', 'base_unit_qty', 'unit_qty','unit_mrp', 'unit_price','base_unit_mrp', 'base_unit_price',  'unit_qty', 'base_unit_qty','alert_quantity', 'status', null];
         }else{
-            $this->column_order = ['id', 'id', 'name', 'product_type', 'category_id', 'unit_id', 'type', 'status', null];
+            $this->column_order = ['id', 'id', 'name', 'product_type', 'category_id', 'cost','base_unit_qty', 'unit_qty', 'unit_mrp', 'unit_price','base_unit_mrp', 'base_unit_price','unit_qty', 'base_unit_qty','alert_quantity', 'status', null];
         }
         
         $query = self::with('category:id,name');
@@ -122,9 +98,7 @@ class Product extends BaseModel
         if (!empty($this->_product_type)) {
             $query->where('product_type', $this->_product_type);
         }
-        if (!empty($this->_type)) {
-            $query->where('type', $this->_type);
-        }
+
 
         //order by data fetching code
         if (isset($this->orderValue) && isset($this->dirValue)) { //orderValue is the index number of table header and dirValue is asc or desc

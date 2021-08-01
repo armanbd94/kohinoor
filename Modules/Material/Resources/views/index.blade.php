@@ -76,12 +76,11 @@
                                         <th>Name</th>
                                         <th>Code</th>
                                         <th>Category</th>
+                                        <th>Type</th>
                                         <th>Cost</th>
                                         <th>Stock Unit</th>
                                         <th>Purchase Unit</th>
                                         <th>Stock Qty</th>
-                                        <th>Opening Stock Qty</th>
-                                        <th>Opening Cost</th>
                                         <th>Alert Qty</th>
                                         <th>Status</th>
                                         <th>Action</th>
@@ -140,26 +139,26 @@
             },
             "columnDefs": [{
                     @if (permission('material-bulk-delete'))
-                    "targets": [0,14],
+                    "targets": [0,13],
                     @else 
-                    "targets": [13],
+                    "targets": [12],
                     @endif
                     "orderable": false,
                     "className": "text-center"
                 },
                 {
                     @if (permission('material-bulk-delete'))
-                    "targets": [1,2,4,5,7,8,9,10,12,13],
+                    "targets": [1,2,4,5,6,8,9,10,11,12],
                     @else 
-                    "targets": [0,1,3,4,6,7,8,9,11,12],
+                    "targets": [0,1,3,4,5,7,8,9,10,11],
                     @endif
                     "className": "text-center"
                 },
                 {
                     @if (permission('material-bulk-delete'))
-                    "targets": [6,11],
+                    "targets": [7],
                     @else 
-                    "targets": [5,10],
+                    "targets": [6],
                     @endif
                     "className": "text-right"
                 }
@@ -182,9 +181,9 @@
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
                         @if (permission('material-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(14))' 
+                        columns: ':visible:not(:eq(0),:eq(13))' 
                         @else 
-                        columns: ':visible:not(:eq(13))' 
+                        columns: ':visible:not(:eq(12))' 
                         @endif
                     },
                     customize: function (win) {
@@ -204,9 +203,9 @@
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
                         @if (permission('material-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(14))' 
+                        columns: ':visible:not(:eq(0),:eq(13))' 
                         @else 
-                        columns: ':visible:not(:eq(13))' 
+                        columns: ':visible:not(:eq(12))' 
                         @endif
                     }
                 },
@@ -218,9 +217,9 @@
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
                         @if (permission('material-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(14))' 
+                        columns: ':visible:not(:eq(0),:eq(13))' 
                         @else 
-                        columns: ':visible:not(:eq(13))' 
+                        columns: ':visible:not(:eq(12))' 
                         @endif
                     }
                 },
@@ -234,9 +233,9 @@
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
                         @if (permission('material-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(14))' 
+                        columns: ':visible:not(:eq(0),:eq(13))' 
                         @else 
-                        columns: ':visible:not(:eq(13))' 
+                        columns: ':visible:not(:eq(12))' 
                         @endif
                     },
                     customize: function(doc) {
@@ -374,6 +373,7 @@
                             $('#store_or_update_form #material_name').val(data.material_name);
                             $('#store_or_update_form #material_code').val(data.material_code);
                             $('#store_or_update_form #category_id').val(data.category_id);
+                            $('#store_or_update_form #type').val(data.type);
                             $('#store_or_update_form #cost').val(parseFloat(data.cost).toFixed(2));
                             $('#store_or_update_form #unit_id').val(data.unit_id);
                             $('#store_or_update_form #alert_qty').val(data.alert_qty);

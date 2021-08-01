@@ -19,8 +19,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::group(['prefix' => 'product', 'as'=>'product.'], function () {
         Route::get('add', 'ProductController@create')->name('add');
         Route::post('datatable-data', 'ProductController@get_datatable_data')->name('datatable.data');
-        Route::post('store', 'ProductController@store')->name('store');
-        Route::post('update', 'ProductController@update')->name('update');
+        Route::post('store-or-update', 'ProductController@store_or_update')->name('store.or.update');
         Route::get('edit/{id}', 'ProductController@edit')->name('edit');
         Route::get('view/{id}', 'ProductController@show');
         Route::post('delete', 'ProductController@delete')->name('delete');
