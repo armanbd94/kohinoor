@@ -35,20 +35,16 @@
                     </td>
                     <td class="text-center">
                         {{ $item->qty }}
-                        <input type="hidden" class="form-control text-right stock_qty" value="{{ $item->qty }}" name="production[{{ $tab }}][materials][{{ $key+1 }}][stock_qty]" id="production_{{ $tab }}_materials_{{ $key+1 }}_stock_qty" onkeyup="calculateRowTotal('{{ $tab }}','{{ $key+1 }}')" data-id="{{ $key+1 }}">
+                        <input type="hidden" class="form-control text-right stock_qty" value="{{ $item->qty }}" name="production[{{ $tab }}][materials][{{ $key+1 }}][stock_qty]" id="production_{{ $tab }}_materials_{{ $key+1 }}_stock_qty" data-id="{{ $key+1 }}">
                     </td>
                     <td>
-                        <input type="text" class="form-control text-center qty" name="production[{{ $tab }}][materials][{{ $key+1 }}][qty]" id="production_{{ $tab }}_materials_{{ $key+1 }}_qty" data-id="{{ $key+1 }}">
+                        <input type="text" class="form-control text-center qty" name="production[{{ $tab }}][materials][{{ $key+1 }}][qty]" id="production_{{ $tab }}_materials_{{ $key+1 }}_qty"  onkeyup="calculateRowTotal('{{ $tab }}','{{ $key+1 }}')" data-id="{{ $key+1 }}">
                     </td>
                     <td>
                         <input type="text" class="form-control text-right total" name="production[{{ $tab }}][materials][{{ $key+1 }}][total]" id="production_{{ $tab }}_materials_{{ $key+1 }}_total" data-id="{{ $key+1 }}" readonly>
                     </td>
                 </tr>
                 @endforeach
-                <tr>
-                    <td class="text-right font-weight-bolder w-50" colspan="6">Total Cost</td>
-                    <td class="w-50"><input type="text" class="form-control text-right font-weight-bolder" name="production[{{ $tab }}][total_cost]" id="production_{{ $tab }}_total_cost" readonly /></td>
-                </tr>
             @endif
         </tbody>
     </table>

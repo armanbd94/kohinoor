@@ -97,23 +97,16 @@ define('ASSET_STATUS',([
 ]));
 
 define('PRODUCTION_STATUS',['1'=>'Pending', '2'=>'Finished']);
+define('TRANSFER_STATUS',['1'=>'Pending', '2'=>'Complete']);
 define('PRODUCTION_STATUS_LABEL',[
     '1'=>'<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Pending</span>',
     '2'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Finished</span>',
 ]);
+define('TRANSFER_STATUS_LABEL',[
+    '1'=>'<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Pending</span>',
+    '2'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Complete</span>',
+]);
 
-define('PRODUCTION_MATERIAL_DELIVERY_STATUS',['1'=>'Pending','2'=>'Full Delivered','3'=>'Partially Delivered']);
-define('PRODUCTION_MATERIAL_DELIVERY_LABEL',[
-    '1'=>'<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Pending</span>',
-    '2'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Delivered</span>',
-    '3'=>'<span class="label label-warning label-pill label-inline" style="min-width:70px !important;">Partially Delivered</span>'
-]);
-define('PRODUCTION_MATERIAL_RECEIVE_STATUS',['1'=>'Pending','2'=>'Received','3'=>'Partially Received']);
-define('PRODUCTION_MATERIAL_RECEIVE_LABEL',[
-    '1'=>'<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Pending</span>',
-    '2'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Received</span>',
-    '3'=>'<span class="label label-warning label-pill label-inline" style="min-width:70px !important;">Partially Received</span>'
-]);
 
 define('DAYS',['1'=>'Saturday','2'=>'Sunday','3'=>'Monday','4'=>'Tuesday','5'=>'Wednesday','6'=>'Thursday']);
 
@@ -191,6 +184,17 @@ if (!function_exists('row_checkbox')) {
                     class="custom-control-input select_data" onchange="select_single_item()" id="checkbox'.$id.'">
                     <label class="custom-control-label" for="checkbox'.$id.'"></label>
                 </div>';
+    }
+}
+
+if (!function_exists('read_more')) {
+
+    function read_more($text, $limit = 400){
+        $text = $text." ";
+        $text = substr($text, 0, $limit);
+        $text = substr($text, 0, strrpos($text, ' '));
+        $text = $text."...";
+        return $text;
     }
 }
 

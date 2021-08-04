@@ -28,23 +28,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('generate-code', 'ProductController@generateProductCode')->name('generate.code');
     });
 
-    Route::post('generate-product-variant','ProductController@generate_product_variant');
-    Route::get('product-variant-generate-code','ProductController@product_variant_generate_code')->name('product.variant.generate.code');
-
     Route::post('barcode/product-autocomplete-search', 'BarcodeController@autocomplete_search_product');
     Route::get('print-barcode', 'BarcodeController@index')->name('print.barcode');
     Route::post('generate-barcode', 'BarcodeController@generateBarcode')->name('generate.barcode');
 
-    //Attribute Routes
-    Route::get('attribute', 'AttributeController@index')->name('attribute');
-    Route::group(['prefix' => 'attribute', 'as'=>'attribute.'], function () {
-        Route::post('datatable-data', 'AttributeController@get_datatable_data')->name('datatable.data');
-        Route::post('store-or-update', 'AttributeController@store_or_update_data')->name('store.or.update');
-        Route::post('edit', 'AttributeController@edit')->name('edit');
-        Route::post('delete', 'AttributeController@delete')->name('delete');
-        Route::post('bulk-delete', 'AttributeController@bulk_delete')->name('bulk.delete');
-        Route::post('change-status', 'AttributeController@change_status')->name('change.status');
-    });
 
     //Adjustment Routes
     Route::get('adjustment', 'AdjustmentController@index')->name('adjustment');
@@ -57,6 +44,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('view/{id}', 'AdjustmentController@show')->name('view');
         Route::post('delete', 'AdjustmentController@delete')->name('delete');
         Route::post('bulk-delete', 'AdjustmentController@bulk_delete')->name('bulk.delete');
+        Route::post('product-search', 'AdjustmentController@product_search')->name('product.search');
     });
 
 });

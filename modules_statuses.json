@@ -6,5 +6,6 @@
     "SalesMen": true,
     "Material": true,
     "Product": true,
-    "Production": true
+    "Production": true,
+    "Stock":true
 }

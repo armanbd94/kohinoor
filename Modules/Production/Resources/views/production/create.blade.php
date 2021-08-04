@@ -51,7 +51,7 @@
                 <div class="card-body">
                     <div class="col-md-12">
                         <div class="row">
-                            <x-form.textbox labelName="Batch No." name="batch_no" required="required" col="col-md-4"/>
+                            <x-form.textbox labelName="Batch No." name="batch_no" value="{{ $batch_no }}" required="required" col="col-md-4"/>
                             <x-form.textbox labelName="Date" name="start_date" required="required" col="col-md-4" class="date" value="{{ date('Y-m-d') }}"/>
                             <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required"  col="col-md-4" class="selectpicker">
                                 @if (!$warehouses->isEmpty())
@@ -230,6 +230,7 @@ $(document).ready(function () {
                             </div>`
         $('.tab-content').append(tab_content_html);
         $('.selectpicker').selectpicker('refresh');
+        $('.date').datetimepicker({format: 'YYYY-MM-DD',ignoreReadonly: true});
     }
 
     $(document).on('click','#add-new-tab',function(){
@@ -276,17 +277,23 @@ function materialData(product_id,tab)
 }
 function calculateRowTotal(tab,row)
 {
-    var rate = $('#production_'+tab+'_packaging_materials_'+row+'_rate').val();
-    var qty = $('#production_'+tab+'_packaging_materials_'+row+'_qty').val();
+    var cost = parseFloat($('#production_'+tab+'_materials_'+row+'_cost').val());
+    var qty = parseFloat($('#production_'+tab+'_materials_'+row+'_qty').val());
+    var stock_qty = parseFloat($('#production_'+tab+'_materials_'+row+'_stock_qty').val());
     var total  = 0;
-    if(rate > 0 && qty > 0)
+    if(cost > 0 && qty > 0)
     {
-        total = parseFloat(rate * qty).toFixed(4);
-        $('#production_'+tab+'_packaging_materials_'+row+'_total').val(total);
+        if(qty > stock_qty){
+            $('#production_'+tab+'_materials_'+row+'_qty').val(1);
+            $('#production_'+tab+'_materials_'+row+'_total').val(parseFloat(cost).toFixed(2));
+            notification('error','Quantity must be less than or equal to stock quantity!');
+        }else{
+            total = parseFloat(cost * qty).toFixed(2);
+            $('#production_'+tab+'_materials_'+row+'_total').val(total);
+        }
     }else{
-        $('#production_'+tab+'_packaging_materials_'+row+'_total').val('');
+        $('#production_'+tab+'_materials_'+row+'_total').val('');
     }
-    totalCostCalculation(tab);
 }
 
 function generateDate(number,tab)
