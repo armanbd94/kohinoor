@@ -4,15 +4,20 @@ namespace Modules\Production\Entities;
 
 use App\Models\BaseModel;
 use Modules\Setting\Entities\Warehouse;
+use Modules\Production\Entities\ProductionProduct;
 
 class Production extends BaseModel
 {
-    protected $fillable = ['batch_no', 'warehouse_id', 'start_date', 'end_date', 'item', 'status', 'production_status', 
-    'transfer_status', 'transfer_date', 'carried_by', 'shipping_cost', 'labor_cost', 'created_by', 'modified_by'];
+    protected $fillable = ['batch_no', 'warehouse_id', 'start_date', 'end_date', 'item', 'status', 'production_status', 'chalan_no',
+    'transfer_status', 'transfer_date', 'received_by','carried_by', 'shipping_cost', 'labor_cost','remarks', 'created_by', 'modified_by'];
 
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class,'warehouse_id','id');
+    }
+    public function products()
+    {
+        return $this->hasMany(ProductionProduct::class,'production_id','id');
     }
 
     /******************************************
@@ -76,11 +81,8 @@ class Production extends BaseModel
         if (!empty($this->_batch_no)) {
             $query->where('batch_no', $this->_batch_no);
         }
-        if (!empty($this->_start_date)) {
-            $query->whereDate('start_date','>=', $this->_start_date);
-        }
-        if (!empty($this->_end_date)) {
-            $query->whereDate('end_date','<=', $this->_end_date);
+        if (!empty($this->_start_date) && !empty($this->_end_date)) {
+            $query->whereDate('start_date','>=', $this->_start_date)->whereDate('start_date','<=', $this->_end_date);
         }
         if (!empty($this->_warehouse_id)) {
             $query->where('warehouse_id', $this->_warehouse_id);

@@ -5,11 +5,15 @@ namespace Modules\Production\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Product\Entities\Product;
+use Modules\Material\Entities\Material;
 use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Production\Entities\Production;
+use Modules\Material\Entities\WarehouseMaterial;
 use Modules\Production\Entities\ProductionCoupon;
 use Modules\Production\Entities\ProductionProduct;
+use Modules\Production\Http\Requests\ProductionRequest;
+use Modules\Production\Entities\ProductionProductMaterial;
 
 class ProductionController extends BaseController
 {
@@ -63,14 +67,24 @@ class ProductionController extends BaseController
                 foreach ($list as $value) {
                     $no++;
                     $action = '';
+                    if(permission('production-approve')  && $value->status == 2){
+                        $action .= ' <a class="dropdown-item change_status"  data-id="' . $value->id . '" data-name="' . $value->batch_no . '" data-status="' . $value->status . '"><i class="fas fa-toggle-on text-info mr-2"></i> Approve Status</a>';
+                    }
                     if(permission('production-edit') && $value->status == 2){
                         $action .= ' <a class="dropdown-item" href="'.route("production.edit",$value->id).'">'.self::ACTION_BUTTON['Edit'].'</a>';
+                    }
+                    if(permission('production-operation') && $value->status == 1 && $value->production_status != 3 ){
+                        $action .= ' <a class="dropdown-item" href="'.url("production/operation/".$value->id).'"><i class="fas fa-toolbox text-success mr-2"></i> Operation</a>';
                     }
                     if(permission('production-view')){
                         $action .= ' <a class="dropdown-item" href="'.url("production/view/".$value->id).'">'.self::ACTION_BUTTON['View'].'</a>';
                     }
-                    if(permission('production-delete')  && $value->status == 2 && $value->production_status != 3 && $value->transfer_status == 1){
+                    if(permission('production-delete') && $value->production_status != 3 && $value->transfer_status == 1){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->name . '">'.self::ACTION_BUTTON['Delete'].'</a>';
+                    }
+
+                    if(permission('production-transfer') && $value->status == 1 && $value->production_status == 3 && $value->transfer_status == 1){
+                        $action .= ' <a class="dropdown-item" href="'.url("production/transfer/".$value->id).'"><i class="fas fa-dolly-flatbed text-dark mr-2"></i> Transfer</a>';
                     }
 
                     $row = [];
@@ -81,7 +95,7 @@ class ProductionController extends BaseController
                     $row[] = $value->end_date ? date('j-F-Y',strtotime($value->end_date)) : '-';
                     $row[] = $value->item;
                     $row[] = APPROVE_STATUS_LABEL[$value->status];
-                    $row[] = $value->status == 1 ? PRODUCTION_STATUS_LABEL[$value->production_status] : '-';
+                    $row[] = PRODUCTION_STATUS_LABEL[$value->production_status];
                     $row[] = $value->production_status == 3 ? TRANSFER_STATUS_LABEL[$value->transfer_status] : '-';
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
@@ -102,7 +116,7 @@ class ProductionController extends BaseController
             $data = [
                 'products'   => DB::table('products')->where('status', 1)->pluck('name','id'),
                 'warehouses' => Warehouse::activeWarehouses(),
-                'batch_no'   => $last_batch_no ? $last_batch_no + 1 : '1001'
+                'batch_no'   => $last_batch_no ? $last_batch_no->batch_no + 1 : '1001'
             ];
             return view('production::production.create',$data);
         }else{
@@ -110,10 +124,85 @@ class ProductionController extends BaseController
         }
     }
 
-    public function store(Request $request)
+    public function check_material_stock(ProductionRequest $request)
+    {
+        if($request->ajax())
+        {
+            $production_materials = [];
+            $below_qty = 0;
+            if($request->has('production')){
+                $materials = [];
+                foreach($request->production as $product)
+                {
+                    if (!empty($product['materials']) && count($product['materials']) > 0) {
+                        foreach ($product['materials'] as $value) {
+                            if(!empty($materials)){
+                                $key = array_search($value['material_id'], array_column($materials, 'material_id'));
+                                if($materials[$key]['material_id'] == $value['material_id'] )
+                                {
+                                    $materials[$key]['qty'] += $value['qty'];
+                                }else{
+                                    $materials[] = [
+                                        'material_id' => $value['material_id'],
+                                        'qty' => $value['qty'],
+                                    ];
+                                }
+                            }else{
+                                $materials[] = [
+                                    'material_id' => $value['material_id'],
+                                    'qty' => $value['qty'],
+                                ];
+                            }
+                            
+                        }
+
+                    }
+                }
+                if(!empty($materials)){
+                    foreach($materials as $item){
+                        $material = Material::with('unit')->find($item['material_id']);
+                        $material_stock = WarehouseMaterial::where([['material_id',$item['material_id']],['warehouse_id',1]])->first();
+                        $stock_qty = 0;
+                        $background = '';
+                        if($material_stock){
+                            $stock_qty = $material_stock->qty;
+                            if($stock_qty < $item['qty']){
+                                $background = 'bg-danger';
+                                $below_qty++;
+                            }
+                        }else{
+                            $background = 'bg-danger';
+                            $below_qty++;
+                        }
+                        $production_materials[] = [
+                            'material_name' => $material ? $material->material_name.' ('.$material->material_code.')' : '',
+                            'type'          => $material ? MATERIAL_TYPE[$material->type] : '',
+                            'unit_name'     => $material ? $material->unit->unit_name.' ('.$material->unit->unit_code.')' : '',
+                            'stock_qty'     => $stock_qty,
+                            'qty'           => $item['qty'],
+                            'background'    => $background,
+                        ];
+                    }
+                }
+                
+            }
+            if($below_qty > 0){
+                $data = [
+                    'materials'    =>  $production_materials,
+                    'below_qty'    => $below_qty
+                ];
+    
+                return view('production::production.view-data',$data)->render();
+            }else{
+                return ['status'=>'success'];
+            }
+           
+        }
+    }
+
+    public function store(ProductionRequest $request)
     {
         if ($request->ajax()) {
-            // dd($request->all());
             if (permission('production-add')) {
                 if($request->has('production')){
                     DB::beginTransaction();
@@ -179,6 +268,260 @@ class ProductionController extends BaseController
             }
         }
     }
+
+    public function show(int $id)
+    {
+        if(permission('production-view')){
+            $production = $this->model->with(['warehouse:id,name','products'])->find($id);
+            if($production)
+            {
+                $this->setPageData('Production Details','Production Details','fas fa-industry',[['name' => 'Production Details']]);
+                return view('production::production.view',compact('production'));
+            }else{
+                return redirect()->back();
+            }
+        }else{
+            return $this->access_blocked(); 
+        }
+    }
+
+    public function edit(int $id)
+    {
+        if(permission('production-view')){
+            $production = $this->model->with(['products'])->find($id);
+            if($production)
+            {
+                $this->setPageData('Production Edit','Production Edit','fas fa-industry',[['name' => 'Production Edit']]);
+                $warehouses = Warehouse::activeWarehouses();
+                return view('production::production.edit',compact('production','warehouses'));
+            }else{
+                return redirect()->back();
+            }
+        }else{
+            return $this->access_blocked(); 
+        }
+    }
+
+    public function update(ProductionRequest $request)
+    {
+        if ($request->ajax()) {
+            // dd($request->all());
+            if (permission('production-edit')) {
+                DB::beginTransaction();
+                try {
+                    if($request->has('production')){
+                        $production = $this->model->find($request->update_id)->update([
+                            'warehouse_id' => $request->warehouse_id,
+                            'start_date'   => $request->start_date,
+                            'modified_by'  => auth()->user()->name
+                        ]);
+                        if($production)
+                        {
+                            foreach($request->production as $product)
+                            {
+                                $production_product = ProductionProduct::find($product['production_product_id']);
+                                if($production_product)
+                                {
+                                    $has_coupon = $production_product->has_coupon;
+                                    $total_coupon = $production_product->total_coupon;
+                                    $production_product->update([
+                                        'product_id'      => $product['product_id'],
+                                        'year'            => $product['year'],
+                                        'mfg_date'        => $product['mfg_date'],
+                                        'exp_date'        => $product['exp_date'],
+                                        'has_coupon'      => $product['has_coupon'],
+                                        'total_coupon'    => $product['has_coupon'] == 1 ? $product['total_coupon'] : null,
+                                        'coupon_price'    => $product['has_coupon'] == 1 ? $product['coupon_price'] : null,
+                                        'coupon_exp_date' => $product['has_coupon'] == 1 ? $product['coupon_exp_date'] : null,
+                                    ]);
+
+                                    if($product['has_coupon'] == 1 && $has_coupon == 1)
+                                    {
+                                        if($total_coupon != $product['total_coupon']){
+                                            $delete_coupon = ProductionCoupon::where('production_product_id',$product['production_product_id'])->delete();
+                                            if($delete_coupon){
+                                                ProductionCoupon::insert($this->generateCouponCode($product['production_product_id'],$request->batch_no,$product['total_coupon']));
+                                            }
+                                        }
+                                    }elseif ($product['has_coupon'] == 1 && $has_coupon == 2) {
+                                        ProductionCoupon::insert($this->generateCouponCode($product['production_product_id'],$request->batch_no,$product['total_coupon']));
+                                    }
+
+                                    if (!empty($product['materials']) && count($product['materials']) > 0) {
+                                        foreach ($product['materials'] as $material) {
+                                            $production_material = ProductionProductMaterial::find($material['production_material_id']);
+                                            if($production_material)
+                                            {
+                                                $production_material->update([
+                                                    'qty'     => $material['qty'],
+                                                    'cost'    => $material['cost'],
+                                                    'total'   => $material['total'],
+                                                ]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            $output = ['status' => 'success','message' => 'Data Updated Successfully'];
+                        }else{
+                            $output = ['status' => 'error','message' => 'Failed to Update Data'];
+                        }
+                    }else{
+                        $output = ['status' => 'error','message' => 'Failed to Update Data'];
+                    }
+                    DB::commit();
+                } catch (\Throwable $th) {
+                    DB::rollback();
+                    $output = ['status' => 'error', 'message' => $th->getMessage()];
+                }
+                return response()->json($output);
+            } else {
+                return response()->json($this->unauthorized());
+            }
+        }
+    }
+
+    public function change_status(Request $request)
+    {
+        if ($request->ajax()) {
+            if (permission('production-approve')) {
+                if ($request->approve_status) {
+                    DB::beginTransaction();
+                    try {
+
+                        $productionData = $this->model->find($request->production_id);
+                        $productionData->status = $request->approve_status;
+                        if ($request->approve_status == 1) {
+                            $productionData->production_status = 2;
+                        }
+                        $productionData->modified_by = auth()->user()->id;
+                        $productionData->updated_at = date('Y-m-d');
+                        if ($productionData->update()) {
+                            if ($request->approve_status == 1) {
+                                $production_materials = DB::table('production_product_materials as ppm')
+                                                        ->join('production_products as pp','ppm.production_product_id','=','pp.id')
+                                                        ->join('productions as p','pp.production_id','=','p.id')
+                                                        ->where('p.id',$request->production_id)
+                                                        ->select('ppm.material_id','ppm.qty')
+                                                        ->get();
+                                
+                                if($production_materials){
+                                    foreach ($production_materials as $material) {
+                                        
+                                        $warehouse_material = WarehouseMaterial::where([
+                                            ['warehouse_id', 1],
+                                            ['material_id', $material->material_id],['qty','>',0]
+                                        ])->first();
+                                        if ($warehouse_material) {
+                                            $warehouse_material->qty -= $material->qty;
+                                            $warehouse_material->update();
+                                        }
+    
+                                        //Remove qty from material
+                                        $material_data = Material::find($material->material_id);
+                                        if ($material_data) {
+                                            $material_data->qty -= $material->qty;
+                                            $material_data->update();
+                                        }
+                                    }
+                                }
+                            }
+                            $output = ['status' => 'success', 'message' => 'Production Data Approved Successfully'];
+                        } else {
+                            $output = ['status' => 'error', 'message' => 'Failed To Approve Production Data'];
+                        }
+                        
+                        DB::commit();
+                    } catch (\Throwable $th) {
+                        DB::rollback();
+                        $output = ['status' => 'error', 'message' => $th->getMessage()];
+                    }
+                } else {
+                    $output = ['status' => 'error', 'message' => 'Please select status'];
+                }
+                return response()->json($output);
+            }
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        if ($request->ajax()) {
+            if (permission('production-delete')) {
+                DB::beginTransaction();
+                try {
+                    $productionData = $this->model->with('products')->find($request->id);
+                    if (!$productionData->products->isEmpty()) {
+                        foreach ($productionData->products as $item) {
+                            $product = ProductionProduct::with('materials','coupons')->find($item->id);
+                            if($product)
+                            {
+                                if(!$product->materials->isEmpty())
+                                {
+                                    if ($productionData->status == 1 && $productionData->production_status != 3) {
+                                        foreach ($product->materials as $value) {
+                                            $warehouse_material = WarehouseMaterial::where([
+                                                ['warehouse_id', 1],
+                                                ['material_id', $value->id],
+                                            ])->first();
+                                            if ($warehouse_material) {
+                                                $warehouse_material->qty += $value->pivot->qty;
+                                                $warehouse_material->update();
+                                            }
+            
+                                            //Remove qty from material
+                                            $material_data = Material::find($value->id);
+                                            if ($material_data) {
+                                                $material_data->qty += $value->pivot->qty;
+                                                $material_data->update();
+                                            }
+                                        }
+                                    }elseif ($productionData->status == 1 && $productionData->production_status == 3) {
+                                        foreach ($product->materials as $value) {
+                                            $used_qty = $value->pivot->used_qty + ($value->pivot->damaged_qty ? $value->pivot->damaged_qty : 0);
+                                            $warehouse_material = WarehouseMaterial::where([
+                                                ['warehouse_id', 1],
+                                                ['material_id', $value->id],
+                                            ])->first();
+                                            if ($warehouse_material) {
+                                                $warehouse_material->qty += $used_qty;
+                                                $warehouse_material->update();
+                                            }
+            
+                                            //Remove qty from material
+                                            $material_data = Material::find($value->id);
+                                            if ($material_data) {
+                                                $material_data->qty += $used_qty;
+                                                $material_data->update();
+                                            }
+                                        }
+                                    }
+                                    $product->materials()->detach();
+                                }
+                                
+                                if(!$product->coupons->isEmpty())
+                                {
+                                    $product->coupons()->delete();
+                                }
+                                $product->delete();
+                            }
+                        }
+                    }
+                    $result = $productionData->delete();
+                    $output = $this->delete_message($result);
+                    DB::commit();
+                } catch (\Throwable $th) {
+                    DB::rollback();
+                    $output = ['status' => 'error', 'message' => $th->getMessage()];
+                }
+                return response()->json($output);
+            } else {
+                return response()->json($this->unauthorized());
+            }
+        }
+    }
+
+    
 
     private function generateCouponCode(int $production_product_id,int $batch_no,int $total_coupon)
     {

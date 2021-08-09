@@ -108,6 +108,7 @@
         <!--end::Card-->
     </div>
 </div>
+@include('production::production.status-modal')
 @endsection
 
 @push('scripts')
@@ -161,20 +162,12 @@
                 }
             },
             "columnDefs": [{
-                    @if (permission('production-bulk-delete'))
-                    "targets": [0,9],
-                    @else 
-                    "targets": [8],
-                    @endif
+                    "targets": [9],
                     "orderable": false,
                     "className": "text-center"
                 },
                 {
-                    @if (permission('production-bulk-delete'))
-                    "targets": [1,2,3,4,5,6,7,8,9],
-                    @else 
                     "targets": [0,1,2,3,4,5,6,7,8],
-                    @endif
                     "className": "text-center"
                 }
 
@@ -196,11 +189,7 @@
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
-                        @if (permission('production-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(9))' 
-                        @else 
-                        columns: ':visible:not(:eq(8))' 
-                        @endif
+                        columns: ':visible:not(:eq(9))' 
                     },
                     customize: function (win) {
                         $(win.document.body).addClass('bg-white');
@@ -218,11 +207,7 @@
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
-                        @if (permission('production-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(9))' 
-                        @else 
-                        columns: ':visible:not(:eq(8))' 
-                        @endif
+                        columns: ':visible:not(:eq(9))' 
                     }
                 },
                 {
@@ -232,11 +217,7 @@
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
-                        @if (permission('production-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(9))' 
-                        @else 
-                        columns: ':visible:not(:eq(8))' 
-                        @endif
+                        columns: ':visible:not(:eq(9))' 
                     },
                 },
                 {
@@ -248,11 +229,7 @@
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
-                        @if (permission('production-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(9))' 
-                        @else 
-                        columns: ':visible:not(:eq(8))' 
-                        @endif
+                        columns: ':visible:not(:eq(9))' 
                     },
                     customize: function(doc) {
                         doc.defaultStyle.fontSize = 7; //<-- set fontsize to 16 instead of 10 
@@ -261,15 +238,6 @@
                     } 
                 },
                 @endif 
-                @if (permission('production-bulk-delete'))
-                {
-                    'className':'btn btn-danger btn-sm delete_btn d-none text-white',
-                    'text':'Delete',
-                    action:function(e,dt,node,config){
-                        multi_delete();
-                    }
-                }
-                @endif
             ],
         });
     
@@ -280,6 +248,8 @@
         $('#btn-reset').click(function () {
             $('#form-filter')[0].reset();
             $('#form-filter .selectpicker').selectpicker('refresh');
+            $('input[name="start_date"]').val('');
+                $('input[name="end_date"]').val('');
             table.ajax.reload();
         });
     
@@ -311,13 +281,50 @@
             }
         }
 
-        $(document).on('click', '.change_status', function () {
-            let id     = $(this).data('id');
-            let name   = $(this).data('name');
-            let status = $(this).data('status');
-            let row    = table.row($(this).parent('tr'));
-            let url    = "{{ route('production.change.status') }}";
-            change_status(id, url, table, row, name, status);
+         //Show Approve Status Change Modal
+        $(document).on('click','.change_status',function(){
+            $('#approve_status_form #production_id').val($(this).data('id'));
+            $('#approve_status_form #approve_status').val($(this).data('status'));
+            $('#approve_status_form #approve_status.selectpicker').selectpicker('refresh');
+            $('#approve_status_modal').modal({
+                keyboard: false,
+                backdrop: 'static',
+            });
+            $('#approve_status_modal .modal-title').html('<span>Change Approve Status</span>');
+            $('#approve_status_modal #status-btn').text('Change Status');
+                
+        });
+
+        $(document).on('click','#status-btn',function(){
+            var production_id     = $('#approve_status_form #production_id').val();
+            var approve_status =  $('#approve_status_form #approve_status option:selected').val();
+            if(production_id && approve_status)
+            {
+                $.ajax({
+                    url: "{{route('production.change.status')}}",
+                    type: "POST",
+                    data: {production_id:production_id,approve_status:approve_status,_token:_token},
+                    dataType: "JSON",
+                    beforeSend: function(){
+                        $('#status-btn').addClass('spinner spinner-white spinner-right');
+                    },
+                    complete: function(){
+                        $('#status-btn').removeClass('spinner spinner-white spinner-right');
+                    },
+                    success: function (data) {
+                        notification(data.status, data.message);
+                        if (data.status == 'success') {
+                            $('#approve_status_modal').modal('hide');
+                            table.ajax.reload(null, false);
+                        }
+                    },
+                    error: function (xhr, ajaxOption, thrownError) {
+                        console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+                    }
+                });
+            }else{
+                notification('error','Please select status');
+            }
         });
     
     

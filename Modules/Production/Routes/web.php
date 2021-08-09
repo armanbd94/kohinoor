@@ -18,6 +18,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::group(['prefix' => 'production', 'as'=>'production.'], function () {
         Route::get('add', 'ProductionController@create')->name('add');
         Route::post('datatable-data', 'ProductionController@get_datatable_data')->name('datatable.data');
+        Route::post('check-material-stock', 'ProductionController@check_material_stock')->name('check.material.stock');
         Route::post('store', 'ProductionController@store')->name('store');
         Route::post('update', 'ProductionController@update')->name('update');
         Route::get('edit/{id}', 'ProductionController@edit')->name('edit');
@@ -25,8 +26,15 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('delete', 'ProductionController@delete')->name('delete');
         Route::post('bulk-delete', 'ProductionController@bulk_delete')->name('bulk.delete');
         Route::post('change-status', 'ProductionController@change_status')->name('change.status');
-        Route::post('change-production-status', 'ProductionController@change_production_status')->name('change.production.status');
+        
         Route::post('product-materials', 'ProductionController@product_material_list')->name('product.materials');
-        Route::post('generate-coupon-qrcode', 'ProductionController@generateCouponQrcode')->name('generate.coupon.qrcode');
+
+        Route::get('operation/{id}', 'ProductionOperationController@index')->name('operation');
+        Route::post('store-operation', 'ProductionOperationController@store')->name('store.operation');
+        Route::post('generate-coupon-qrcode', 'ProductionOperationController@generateCouponQrcode')->name('generate.coupon.qrcode');
+        Route::post('change-production-status', 'ProductionOperationController@change_production_status')->name('change.production.status');
+
+        Route::get('transfer/{id}', 'TransferController@index')->name('transfer');
+        Route::get('transfer/store', 'TransferController@store')->name('transfer.store');
     });
 });

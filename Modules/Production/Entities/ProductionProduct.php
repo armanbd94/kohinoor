@@ -6,6 +6,7 @@ use Modules\Product\Entities\Product;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Material\Entities\Material;
 use Modules\Production\Entities\Production;
+use Modules\Production\Entities\ProductionCoupon;
 
 class ProductionProduct extends Model
 {
@@ -28,5 +29,10 @@ class ProductionProduct extends Model
         'material_id','id','id')
         ->withPivot('id', 'unit_id','qty','cost','total','used_qty', 'damaged_qty', 'odd_qty')
         ->withTimeStamps(); 
+    }
+
+    public function coupons()
+    {
+        return $this->hasMany(ProductionCoupon::class,'production_product_id','id');
     }
 }

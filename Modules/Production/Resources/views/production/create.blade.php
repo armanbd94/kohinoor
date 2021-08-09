@@ -36,7 +36,7 @@
                 </div>
                 <div class="card-toolbar">
                     <!--begin::Button-->
-                    <button type="button" class="btn btn-primary btn-sm mr-5" onclick="store_data()" id="save-btn"><i class="fas fa-save"></i> Save</button>
+                    <button type="button" class="btn btn-primary btn-sm mr-5" onclick="check_material_stock()" id="save-btn"><i class="fas fa-save"></i> Save</button>
                     <a href="{{ route('production') }}" class="btn btn-warning btn-sm font-weight-bolder"> 
                         <i class="fas fa-arrow-left"></i> Back</a>
                     <!--end::Button-->
@@ -148,6 +148,7 @@
         <!--end::Card-->
     </div>
 </div>
+@include('production::production.view-modal')
 @endsection
 
 @push('scripts')
@@ -307,16 +308,15 @@ function couponInputField(value,tab)
 {
     (value == 1) ? $('.coupon_'+tab).removeClass('d-none') : $('.coupon_'+tab).addClass('d-none');
 }
-
-function store_data(){
+function check_material_stock()
+{
     let form = document.getElementById('store_or_update_form');
     let formData = new FormData(form);
-    let url = "{{url('production/store')}}";
+    let url = "{{url('production/check-material-stock')}}";
     $.ajax({
         url: url,
         type: "POST",
         data: formData,
-        dataType: "JSON",
         contentType: false,
         processData: false,
         cache: false,
@@ -339,11 +339,60 @@ function store_data(){
                     '<small class="error text-danger">' + value + '</small>');
                 });
             } else {
+                console.log(data);
+                if (data.status == 'success') {
+                    store_data();
+                }else{
+                    $('#view_modal #view-data').empty().html(data);
+                    $('#view_modal').modal({
+                        keyboard: false,
+                        backdrop: 'static',
+                    });
+                    $('#view_modal .modal-title').html('<i class="fas fa-file-alt text-white"></i> <span> Material Stock Availibility Details</span>');
+                }
+            }
+        },
+        error: function (xhr, ajaxOption, thrownError) {
+            console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+        }
+    });
+}
+function store_data(){
+    let form = document.getElementById('store_or_update_form');
+    let formData = new FormData(form);
+    let url = "{{url('production/store')}}";
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        dataType: "JSON",
+        contentType: false,
+        processData: false,
+        cache: false,
+        beforeSend: function(){
+            $('#save-btn').addClass('spinner spinner-white spinner-right');
+        },
+        complete: function(){
+            $('#save-btn').removeClass('spinner spinner-white spinner-right');
+        },
+        success: function (data) {
+            $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
+            $('#store_or_update_form').find('.error').remove();
+            // if (data.status == false) {
+            //     $.each(data.errors, function (key, value){
+            //         var key = key.split('.').join('_');
+            //         $('#store_or_update_form input#' + key).addClass('is-invalid');
+            //         $('#store_or_update_form textarea#' + key).addClass('is-invalid');
+            //         $('#store_or_update_form select#' + key).parent().addClass('is-invalid');
+            //         $('#store_or_update_form #' + key).parent().append(
+            //         '<small class="error text-danger">' + value + '</small>');
+            //     });
+            // } else {
                 notification(data.status, data.message);
                 if (data.status == 'success') {
                     window.location.replace("{{ url('production') }}");
                 }
-            }
+            // }
         },
         error: function (xhr, ajaxOption, thrownError) {
             console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);

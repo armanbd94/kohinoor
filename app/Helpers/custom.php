@@ -21,7 +21,7 @@ define('GENDER_LABEL',[
 define('STATUS',['1' => 'Active', '2' => 'Inactive']);
 define('MATERIAL_TYPE',['1' => 'Raw', '2' => 'Packaging']);
 define('PRODUCT_TYPE',['1' => 'Can', '2' => 'Foil']);
-define('APPROVE_STATUS',['1' => 'Approved', '2' => 'Processing']);
+define('APPROVE_STATUS',['1' => 'Approved', '2' => 'Pending','3'=>'Cancelled']);
 define('EXPENSE_APPROVE_STATUS',['1' => 'Approved', '2' => 'Rejected','3'=>'Pending']);
 define('TAX_METHOD',['1' => 'Exclusive','2' => 'Inclusive']);
 define('TYPE',['1'=>'Standard','2'=>'Variant']);
@@ -70,7 +70,8 @@ define('SUPPLIER_TYPE_LABEL',[
 
 define('APPROVE_STATUS_LABEL',[
     '1' => '<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Approved</span>',
-    '2' => '<span class="label label-info label-pill label-inline" style="min-width:70px !important;">Processing</span>',
+    '2' => '<span class="label label-info label-pill label-inline" style="min-width:70px !important;">Pending</span>',
+    '3' => '<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Cancelled</span>',
 ]);
 define('STOCK_STATUS_LABEL',[
     '1' => '<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Available</span>',
@@ -96,11 +97,12 @@ define('ASSET_STATUS',([
     "5" => "Archived",
 ]));
 
-define('PRODUCTION_STATUS',['1'=>'Pending', '2'=>'Finished']);
+define('PRODUCTION_STATUS',['1'=>'Pending', '2'=>'Processing','3'=>'Finished']);
 define('TRANSFER_STATUS',['1'=>'Pending', '2'=>'Complete']);
 define('PRODUCTION_STATUS_LABEL',[
     '1'=>'<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Pending</span>',
-    '2'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Finished</span>',
+    '2'=>'<span class="label label-primary label-pill label-inline" style="min-width:70px !important;">Processing</span>',
+    '3'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Finished</span>',
 ]);
 define('TRANSFER_STATUS_LABEL',[
     '1'=>'<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Pending</span>',
