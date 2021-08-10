@@ -17,6 +17,8 @@ class CreateTransactionsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('chart_of_account_id')->nullable();
             $table->foreign('chart_of_account_id')->references('id')->on('chart_of_accounts');
+            $table->unsignedBigInteger('warehouse_id')->nullable();
+            $table->foreign('warehouse_id')->references('id')->on('warehouses');
             $table->string('voucher_no');
             $table->string('voucher_type');
             $table->string('voucher_date');

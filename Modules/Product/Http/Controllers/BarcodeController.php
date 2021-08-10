@@ -75,5 +75,23 @@ class BarcodeController extends BaseController
         }
     }
 
+    public function search_product(Request $request)
+    {
+        $product_data =Product::with(['tax','unit','base_unit'])->where('code',$request['data'])->first();
+        if($product_data)
+        {
+            $product['id']             = $product_data->id;
+            $product['name']           = $product_data->name;
+            $product['code']           = $product_data->code;
+            $product['price']          = $product_data->base_unit_price;
+            $product['base_unit_id']   = $product_data->base_unit_id;
+            $product['base_unit_name'] = $product_data->base_unit->unit_name.' ('.$product_data->base_unit->unit_code.')';
+            $product['tax_rate']       = $product_data->tax->rate ? $product_data->tax->rate : 0;
+            $product['tax_name']       = $product_data->tax->name;
+            $product['tax_method']     = $product_data->tax_method;
+            return $product;
+        }
+    }
+
 
 }

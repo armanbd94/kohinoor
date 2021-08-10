@@ -5,6 +5,7 @@
 @section('title', $page_title)
 
 @push('styles')
+<link href="plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
 <link href="css/daterangepicker.min.css" rel="stylesheet" type="text/css" />
 @endpush
 
@@ -42,8 +43,15 @@
                                 <input type="hidden" id="to_date" name="to_date" >
                             </div>
                         </div>
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                                @foreach ($warehouses as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            @endif
+                        </x-form.selectbox>
 
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div style="margin-top:28px;">       
                                     <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Reset">
@@ -75,8 +83,12 @@
                                         @endif
                                         <th>Sl</th>
                                         <th>Adjustment No.</th>
+                                        <th>Warehouse</th>
                                         <th>Total Item</th>
+                                        <th>Products</th>
                                         <th>Total Quantity</th>
+                                        <th>Grand Total</th>
+                                        <th>Created By</th>
                                         <th>Date</th>
                                         <th>Action</th>
                                     </tr>
@@ -94,6 +106,8 @@
 @endsection
 
 @push('scripts')
+<script src="plugins/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+<script src="js/moment.js"></script>
 <script src="js/knockout-3.4.2.js"></script>
 <script src="js/daterangepicker.min.js"></script>
 <script>
@@ -132,6 +146,7 @@
                 "type": "POST",
                 "data": function (data) {
                     data.adjustment_no   = $("#form-filter #adjustment_no").val();
+                    data.warehouse_id    = $("#form-filter #warehouse_id").val();
                     data.from_date       = $("#form-filter #from_date").val();
                     data.to_date         = $("#form-filter #to_date").val();
                     data._token          = _token;
@@ -139,20 +154,28 @@
             },
             "columnDefs": [{
                     @if (permission('adjustment-bulk-delete'))
-                    "targets": [0,6],
+                    "targets": [0,10],
                     @else
-                    "targets": [5],
+                    "targets": [9],
                     @endif
                     "orderable": false,
                     "className": "text-center"
                 },
                 {
                     @if (permission('adjustment-bulk-delete'))
-                    "targets": [1,3,4,5],
+                    "targets": [1,2,3,4,5,6,8,9],
                     @else
-                    "targets": [0,2,3,4],
+                    "targets": [0,1,2,3,4,5,7,8],
                     @endif
                     "className": "text-center"
+                },
+                {
+                    @if (permission('adjustment-bulk-delete'))
+                    "targets": [7],
+                    @else
+                    "targets": [6],
+                    @endif
+                    "className": "text-right"
                 },
             ],
             "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6' <'float-right'B>>>" +
@@ -173,9 +196,9 @@
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
                         @if (permission('adjustment-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(6))' 
+                        columns: ':visible:not(:eq(0),:eq(10))' 
                         @else
-                        columns: ':visible:not(:eq(5))' 
+                        columns: ':visible:not(:eq(9))' 
                         @endif
                     },
                     customize: function (win) {
@@ -195,9 +218,9 @@
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
                         @if (permission('adjustment-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(6))' 
+                        columns: ':visible:not(:eq(0),:eq(10))' 
                         @else
-                        columns: ':visible:not(:eq(5))' 
+                        columns: ':visible:not(:eq(9))' 
                         @endif
                     }
                 },
@@ -209,9 +232,9 @@
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
                         @if (permission('adjustment-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(6))' 
+                        columns: ':visible:not(:eq(0),:eq(10))' 
                         @else
-                        columns: ':visible:not(:eq(5))' 
+                        columns: ':visible:not(:eq(9))' 
                         @endif
                     }
                 },
@@ -225,9 +248,9 @@
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
                         @if (permission('adjustment-bulk-delete'))
-                        columns: ':visible:not(:eq(0),:eq(6))' 
+                        columns: ':visible:not(:eq(0),:eq(10))' 
                         @else
-                        columns: ':visible:not(:eq(5))' 
+                        columns: ':visible:not(:eq(9))' 
                         @endif
                     },
                     customize: function(doc) {

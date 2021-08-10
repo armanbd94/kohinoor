@@ -32,7 +32,7 @@
                 <div id="kt_datatable_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
                     <form action="" id="store_form" method="post" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="purchase_id">
+                        <input type="hidden" name="update_id">
                         <div class="row">
                             <div class="form-group col-md-4 required">
                                 <label for="adjustment_no">Adjustment No.</label>
@@ -59,21 +59,23 @@
                             <div class="col-md-12">
                                 <table class="table table-bordered" id="product_table">
                                     <thead class="bg-primary">
-                                        <th width="25%">Name</th>
-                                        <th width="10%" class="text-center">Unit</th>
+                                        <th width="35%">Name</th>
+                                        <th width="10%" class="text-center">Batch No.</th>
                                         <th width="10%" class="text-center">Base Unit</th>
-                                        <th width="10%" class="text-center">Qty Unit</th>
                                         <th width="10%" class="text-center">Qty Base Unit</th>
-                                        <th width="10%" class="text-right">Unit Cost</th>
                                         <th width="10%" class="text-right">Base Unit Cost</th>
-                                        <th width="10%" class="text-right">Sub Total</th>
-                                        <th width="5%"></th>
+                                        <th width="10%" class="text-right">Tax</th>
+                                        <th width="15%" class="text-right">Sub Total</th>
+                                        <th class="text-center"><i class="fas fa-trash text-white"></i></th>
                                     </thead>
                                     <tbody>
                                     </tbody>
                                     <tfoot class="bg-primary">
-                                        <th colspan="7" class="font-weight-bolder">Total</th>
-                                        <th id="total-qty" class="text-center font-weight-bolder">0.00</th>
+                                        <th colspan="3" class="font-weight-bolder">Total</th>
+                                        <th id="total-qty" class="text-center font-weight-bolder">0</th>
+                                        <th></th>
+                                        <th id="total-tax" class="text-right font-weight-bolder">0.00</th>
+                                        <th id="total" class="text-right font-weight-bolder">0.00</th>
                                         <th></th>
                                     </tfoot>
                                 </table>
@@ -86,7 +88,19 @@
                             </div>
 
                             <div class="col-md-12">
+                                <table class="table table-bordered">
+                                    <thead class="bg-primary">
+                                        <th><strong>Items</strong><span class="float-right" id="item">0.00</span></th>
+                                        <th><strong>Grand Total</strong><span class="float-right" id="grand_total">0.00</span></th>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="col-md-12">
+                                <input type="hidden" name="total_qty">
+                                <input type="hidden" name="total_tax">
+                                <input type="hidden" name="total_price">
                                 <input type="hidden" name="item">
+                                <input type="hidden" name="grand_total">
                             </div>
                             <div class="form-grou col-md-12 text-center pt-5">
                                 <button type="button" class="btn btn-danger btn-sm mr-3"><i class="fas fa-sync-alt"></i> Reset</button>
@@ -114,9 +128,13 @@ $(document).ready(function () {
     var product_code  = [];
     var product_name  = [];
     var product_qty   = [];
+    var product_price = [];
+    var tax_rate             = [];
+    var tax_name             = [];
+    var tax_method           = [];
 
     var rowindex;
-
+    var row_product_price;
     $('#product_code_name').autocomplete({
         // source: "{{url('product-autocomplete-search')}}",
         source: function( request, response ) {
@@ -157,28 +175,25 @@ $(document).ready(function () {
 
 
 
-    $('#product_table').on('keyup','.qty',function(){
+    $('#product_table').on('keyup','.base_unit_qty',function(){
         rowindex = $(this).closest('tr').index();
         if($(this).val() < 1 && $(this).val() != ''){
             $('#product_table tbody tr:nth-child('+(rowindex + 1)+') .qty').val(1);
             notification('error','Qunatity can\'t be less than 1');
+            calculateProductData(1);
+        }else{
+            calculateProductData($(this).val());
         }
-        let unit_cost = $('#product_table tbody tr:nth-child('+(rowindex + 1)+') .unit_cost').val();
-        calculateRowTotal($(this).val(),unit_cost ? unit_cost : 0);
-    });
-
-    $('#product_table').on('keyup','.unit_cost',function(){
-        rowindex = $(this).closest('tr').index();
-        if($(this).val() < 1 && $(this).val() != ''){
-            $('#product_table tbody tr:nth-child('+(rowindex + 1)+') .unit_cost').val(1);
-            notification('error','Qunatity can\'t be less than 1');
-        }
-        let unit_qty = $('#product_table tbody tr:nth-child('+(rowindex + 1)+') .qty').val();
-        calculateRowTotal(unit_qty ? unit_qty : 0,$(this).val());
+        
     });
 
     $('#product_table').on('click','.remove-product',function(){
         $(this).closest('tr').remove();
+        rowindex = $(this).closest('tr').index();
+        product_price.splice(rowindex,1);
+        tax_rate.splice(rowindex,1);
+        tax_name.splice(rowindex,1);
+        tax_method.splice(rowindex,1);
         calculateTotal();
     });
 
@@ -186,7 +201,7 @@ $(document).ready(function () {
 
     function productSearch(data) {
         $.ajax({
-            url: '{{ route("adjustment.product.search") }}',
+            url: '{{ route("barcode.search.product") }}',
             type: 'POST',
             data: {
                 data: data,_token:_token
@@ -205,25 +220,28 @@ $(document).ready(function () {
                     var newRow = $('<tr>');
                     var cols = '';
                     cols += `<td>`+data.name+` (`+data.code+`)</td>`;
-                    
-                    cols += `<td class="text-center">`+data.unit_name+`</td>`;
+                    cols += `<td><input type="text" class="form-control batch_no text-center" name="products[`+count+`][batch_no]" id="products_`+count+`_batch_no" data="${count}"></td>`;
                     cols += `<td class="text-center">${data.base_unit_name}</td>`;
-                    cols += `<td><input type="text" class="form-control unit_qty text-center" name="products[`+count+`][unit_qty]" id="products_`+count+`_unit_qty" data="${count}"></td>`;
-                    cols += `<td><input type="text" class="form-control base_unit_qty text-center" name="products[`+count+`][base_unit_qty]" id="products_`+count+`_base_unit_qty" data="${count}"></td>`;
-
+                     cols += `<td><input type="text" class="form-control base_unit_qty text-center" value="1" name="products[`+count+`][base_unit_qty]" id="products_`+count+`_base_unit_qty" data="${count}"></td>`;
+                    cols += `<td class="net_unit_price text-right">${data.price}</td>`;
+                    cols += `<td class="tax text-right"></td>`;
+                    cols += `<td class="sub-total text-right"></td>`;
                     cols += `<td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-product small-btn"><i class="fas fa-trash"></i></button></td>`;
                     
                     cols += `<input type="hidden" class="product-id" name="products[`+count+`][id]"  value="`+data.id+`">`;
-                    cols += `<input type="hidden" class="product-variant-id" name="products[`+count+`][variant_id]"  value="`+data.variant_id+`">`;
                     cols += `<input type="hidden"  name="products[`+count+`][name]" value="`+data.name+`">`;
                     cols += `<input type="hidden" class="product-code" name="products[`+count+`][code]" value="`+data.code+`">`;
-                    cols += `<input type="hidden" class="product-unit" name="products[`+count+`][unit]" value="`+temp_unit_name[0]+`">`;
-
-
+                    cols += `<input type="hidden" class="product-unit" name="products[`+count+`][base_unit_id]" value="`+data.base_unit_id+`">`;
+                    cols += `<input type="hidden" class="product-price" name="products[`+count+`][base_unit_price]" value="`+data.price+`">`;
+                    cols += `<input type="hidden" class="tax-rate" name="products[`+count+`][tax_rate]" value="`+data.tax_rate+`">`;
+                    cols += `<input type="hidden" class="tax-value" name="products[`+count+`][tax]">`;
+                    cols += `<input type="hidden" class="subtotal-value" name="products[`+count+`][subtotal]">`;
                     newRow.append(cols);
                     $('#product_table tbody').append(newRow);
-                    unit_name.push(data.unit_name);
-
+                    product_price.push(parseFloat(data.price));
+                    tax_rate.push(parseFloat(data.tax_rate));
+                    tax_name.push(data.tax_name);
+                    tax_method.push(data.tax_method);
                     rowindex = newRow.index();
                     calculateProductData(1);
                     count++;
@@ -233,24 +251,47 @@ $(document).ready(function () {
         });
     }
 
-    function checkQuantity(purchase_qty,flag)
-    {
-        var row_product_code = $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('td:nth-child(2)').text();
-        var pos = product_code.indexOf(row_product_code);
-        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('.qty').val(purchase_qty);
-        calculateProductData(purchase_qty);
-
-    }
-
     function calculateProductData(quantity){ 
+        unitConversion();
 
-        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('.unit-name').text(unit_name[rowindex].slice(0,unit_name[rowindex].indexOf(",")));
+        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('.tax-rate').val(tax_rate[rowindex].toFixed(2));
+
+        if(tax_method[rowindex] == 1)
+        {
+            var tax = row_product_price * quantity * (tax_rate[rowindex]/100);
+            var sub_total = (row_product_price * quantity) + tax;
+        }else{
+            var net_unit_price = (100 / (100 + tax_rate[rowindex])) * row_product_price;
+            var tax = (row_product_price - net_unit_price) * quantity;
+            var sub_total = row_product_price * quantity;
+        }
+
+        // $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('td:nth-child(5)').text(net_unit_price.toFixed(2));
+        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('td:nth-child(6)').text(tax.toFixed(2));
+        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('.tax-value').val(tax.toFixed(2));
+        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('td:nth-child(7)').text(sub_total.toFixed(2));
+        $('#product_table tbody tr:nth-child('+(rowindex + 1)+')').find('.subtotal-value').val(sub_total.toFixed(2));
+
         calculateTotal();
     }
 
-    function calculateTotal(){
+    function unitConversion()
+    {
+        var row_unit_operator = '*';
+        var row_unit_operation_value =  parseFloat(1);
+        if(row_unit_operator == '*')
+        {
+            row_product_price = product_price[rowindex] * row_unit_operation_value;
+        }else{
+            row_product_price = product_price[rowindex] / row_unit_operation_value;
+        }
+    }
+
+    function calculateTotal()
+    {
+        //sum of qty
         var total_qty = 0;
-        $('.qty').each(function() {
+        $('.base_unit_qty').each(function() {
             if($(this).val() == ''){
                 total_qty += 0;
             }else{
@@ -259,8 +300,38 @@ $(document).ready(function () {
         });
         $('#total-qty').text(total_qty);
         $('input[name="total_qty"]').val(total_qty);
-        $('input[name="item"]').val($('#product_table tbody tr:last').index() + 1);
+
+        //sum of tax
+        var total_tax = 0;
+        $('.tax').each(function() {
+            total_tax += parseFloat($(this).text());
+        });
+        $('#total-tax').text(total_tax.toFixed(2));
+        $('input[name="total_tax"]').val(total_tax.toFixed(2));
+
+        //sum of subtotal
+        var total = 0;
+        $('.sub-total').each(function() {
+            total += parseFloat($(this).text());
+        });
+        $('#total').text(total.toFixed(2));
+        $('input[name="total_price"]').val(total.toFixed(2));
+
+        calculateGrandTotal();
     }
+
+    function calculateGrandTotal()
+    {
+        var item           = $('#product_table tbody tr:last').index();
+        var total_qty      = parseFloat($('#total-qty').text());
+        var subtotal       = parseFloat($('#total').text());
+        item = ++item + '(' + total_qty + ')';
+        $('#item').text(item);
+        $('input[name="item"]').val($('#product_table tbody tr:last').index() + 1);
+        $('#subtotal,#grand_total').text(subtotal.toFixed(2));
+        $('input[name="grand_total"]').val(subtotal.toFixed(2));
+    }
+
 
 });
 

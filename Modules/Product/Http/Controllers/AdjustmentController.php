@@ -9,6 +9,7 @@ use Modules\Product\Entities\Product;
 use App\Http\Controllers\BaseController;
 use Modules\Product\Entities\Adjustment;
 use Modules\Product\Entities\AdjustmentProduct;
+use Modules\Product\Entities\WarehouseProduct;
 use Modules\Product\Http\Requests\AdjustmentFormRequest;
 
 
@@ -24,7 +25,8 @@ class AdjustmentController extends BaseController
     {
         if(permission('adjustment-access')){
             $this->setPageData('Manage Adjustment','Manage Adjustment','fas fa-shopping-cart',[['name' => 'Manage Adjustment']]);
-            return view('product::adjustment.index');
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('product::adjustment.index',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -37,6 +39,9 @@ class AdjustmentController extends BaseController
 
                 if (!empty($request->adjustment_no)) {
                     $this->model->setAdjustmentNo($request->adjustment_no);
+                }
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
                 }
                 if (!empty($request->from_date)) {
                     $this->model->setFromDate($request->from_date);
@@ -68,10 +73,23 @@ class AdjustmentController extends BaseController
                     if(permission('adjustment-bulk-delete')){
                         $row[] = row_checkbox($value->id);//custom helper function to show the table each row checkbox
                     }
+                    $products = '';
+                    if(!$value->products->isEmpty())
+                    {
+                        $products .= '<ul style="list-style:none;margin:0;padding:0;">';
+                        foreach ($value->products as $product) {
+                            $products .= "<li class='text-left mb-3'>$product->name <span class='badge badge-primary float-right'>". $product->pivot->base_unit_qty." </span></li>";
+                        }
+                        $products .= '</ul>';
+                    }
                     $row[] = $no;
                     $row[] = $value->adjustment_no;
+                    $row[] = $value->warehouse->name;
                     $row[] = $value->item;
-                    $row[] = number_format($value->total_qty,2);
+                    $row[] = $products;
+                    $row[] = number_format($value->total_qty,2,'.','');
+                    $row[] = number_format($value->grand_total,2,'.','');
+                    $row[] = $value->created_by;
                     $row[] = date(config('settings.date_format'),strtotime($value->created_at));
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
@@ -107,39 +125,51 @@ class AdjustmentController extends BaseController
                 DB::beginTransaction();
                 try {
                     $adjustment_data = [
-                        'adjustment_no'    => $request->adjustment_no,
-                        'item'             => $request->item,
-                        'total_qty'        => $request->total_qty,
-                        'note'             => $request->note,
-                        'created_by'       => auth()->user()->name
+                        'adjustment_no' => $request->adjustment_no,
+                        'warehouse_id'  => $request->warehouse_id,
+                        'item'          => $request->item,
+                        'total_qty'     => $request->total_qty,
+                        'total_tax'     => $request->total_tax,
+                        'grand_total'   => $request->grand_total,
+                        'note'          => $request->note,
+                        'created_by'    => auth()->user()->name
                     ];
                     $adjustment  = $this->model->create($adjustment_data);
-                    //purchase products
+
                     $products = [];
                     if($request->has('products'))
                     {
-                        foreach ($request->products as $key => $value) {
-
-                            $product = Product::find($value['id']);
-                            ($value['action'] == '+') ? $product->qty += $value['qty'] : $product->qty -= $value['qty'];
-                            $product->save();
-
-                            if($product->type == 2)
-                            {
-                                $variant = ProductVariant::findExactProductWithCode($value['id'],$value['code'])->first();
-                                if($variant){
-                                    ($value['action'] == '+') ? $variant->item_qty += $value['qty'] : $variant->item_qty -= $value['qty'];
-                                    $variant->save();
-                                }
-                            } 
-
+                        foreach ($request->products as $value) {
                             $products[] = [
-                                'adjustment_id'        => $adjustment->id,
-                                'product_id'         => $value['id'],
-                                'product_variant_id' => $value['variant_id'],
-                                'qty'                => $value['qty'],
-                                'action'           => $value['action'],
+                                'adjustment_id'   => $adjustment->id,
+                                'product_id'      => $value['id'],
+                                'batch_no'        => $value['batch_no'],
+                                'base_unit_id'    => $value['base_unit_id'],
+                                'base_unit_qty'   => $value['base_unit_qty'],
+                                'base_unit_price' => $value['base_unit_price'],
+                                'tax_rate'        => $value['tax_rate'],
+                                'tax'             => $value['tax'],
+                                'total'           => $value['subtotal'],
+                                'created_at'      => date('Y-m-d')
                             ];
+
+                            $warehouse_product = WarehouseProduct::where([
+                                ['warehouse_id', $request->warehouse_id],
+                                ['batch_no', $value['batch_no']],
+                                ['product_id', $value['id']],
+                            ])->first();
+                            if ($warehouse_product) {
+                                $warehouse_product->qty += $value['base_unit_qty'];
+                                $warehouse_product->update();
+                            } else {
+                                WarehouseProduct::create([
+                                    'batch_no'     => $value['batch_no'],
+                                    'warehouse_id' => $request->warehouse_id,
+                                    'product_id'   => $value['id'],
+                                    'qty'          => $value['base_unit_qty'],
+                                ]);
+                            }
+
                         }
                         if(count($products) > 0)
                         {
@@ -166,8 +196,8 @@ class AdjustmentController extends BaseController
     public function show(int $id)
     {
         if(permission('adjustment-view')){
-            $this->setPageData('Adjustment Details','Adjustment Details','fas fa-file',[['name'=>'Adjustment','link' => route('purchase')],['name' => 'Adjustment Details']]);
-            $adjustment = $this->model->with('products')->find($id);
+            $this->setPageData('Adjustment Details','Adjustment Details','fas fa-file',[['name'=>'Adjustment','link' => route('adjustment')],['name' => 'Adjustment Details']]);
+            $adjustment = $this->model->with(['warehouse:id,name','products'])->find($id);
             return view('product::adjustment.details',compact('adjustment'));
         }else{
             return $this->access_blocked();
@@ -180,6 +210,7 @@ class AdjustmentController extends BaseController
             $this->setPageData('Edit Adjustment','Edit Adjustment','fas fa-edit',[['name'=>'Adjustment','link' => route('adjustment')],['name' => 'Edit Adjustment']]);
             $data = [
                 'adjustment'   => $this->model->with('products')->find($id),
+                'warehouses'    => DB::table('warehouses')->where('status',1)->pluck('name','id')
             ];
             return view('product::adjustment.edit',$data);
         }else{
@@ -194,30 +225,30 @@ class AdjustmentController extends BaseController
                 // dd($request->all());
                 DB::beginTransaction();
                 try {
-                    $adjustmentData = $this->model->with('products')->find($request->adjustment_id);
+                    $adjustmentData = $this->model->with('products')->find($request->update_id);
 
                     $adjustment_data = [
-                        'item'             => $request->item,
-                        'total_qty'        => $request->total_qty,
-                        'note'             => $request->note,
-                        'updated_by'       => auth()->user()->name
+                        'warehouse_id' => $request->warehouse_id,
+                        'item'         => $request->item,
+                        'total_qty'    => $request->total_qty,
+                        'total_tax'    => $request->total_tax,
+                        'grand_total'  => $request->grand_total,
+                        'note'         => $request->note,
+                        'updated_at'   => date('Y-m-d'),
+                        'modified_by'  => auth()->user()->name
                     ];
 
                     if(!$adjustmentData->products->isEmpty())
                     {
                         foreach ($adjustmentData->products as  $adjustment_product) {
-                            $old_qty = $adjustment_product->qty ? $adjustment_product->qty : 0;
-                            $product_data = Product::find($adjustment_product->product_id);
-                            if($product_data){
-                                ($adjustment_product->action == '+') ? $product_data->qty -= $old_qty : $product_data->qty += $old_qty;
-                                $product_data->update();
-                            }
-                            if(!empty($adjustment_product->product_variant_id)){
-                                $product_variant = ProductVariant::find($adjustment_product->product_variant_id);
-                                if($product_variant){
-                                    ($adjustment_product->action == '+') ? $product_variant->item_qty -= $old_qty : $product_variant->item_qty += $old_qty;
-                                    $product_variant->update();
-                                }
+                            $warehouse_product = WarehouseProduct::where([
+                                ['warehouse_id', $adjustmentData->warehouse_id],
+                                ['batch_no', $adjustment_product->pivot->batch_no],
+                                ['product_id', $adjustment_product->id],
+                            ])->first();
+                            if ($warehouse_product) {
+                                $warehouse_product->qty -= $adjustment_product->pivot->base_unit_qty;
+                                $warehouse_product->update();
                             }
                         }
                     }
@@ -226,36 +257,41 @@ class AdjustmentController extends BaseController
                     if($request->has('products'))
                     {
                         foreach ($request->products as $key => $value) {
-
-                            $product = Product::find($value['id']);
-                            ($value['action'] == '+') ? $product->qty += $value['qty'] : $product->qty -= $value['qty'];
-                            $product->save();
-
-                            if($product->type == 2)
-                            {
-                                $variant = ProductVariant::findExactProductWithCode($value['id'],$value['code'])->first();
-                                if($variant){
-                                    ($value['action'] == '+') ? $variant->item_qty += $value['qty'] : $variant->item_qty -= $value['qty'];
-                                    $variant->save();
-                                }
-                            } 
-
-                            $products[] = [
-                                'adjustment_id'      => $request->adjustment_id,
-                                'product_id'         => $value['id'],
-                                'product_variant_id' => $value['variant_id'],
-                                'qty'                => $value['qty'],
-                                'action'             => $value['action'],
+                            $products[$value['id']] = [
+                                'batch_no'        => $value['batch_no'],
+                                'base_unit_id'    => $value['base_unit_id'],
+                                'base_unit_qty'   => $value['base_unit_qty'],
+                                'base_unit_price' => $value['base_unit_price'],
+                                'tax_rate'        => $value['tax_rate'],
+                                'tax'             => $value['tax'],
+                                'total'           => $value['subtotal']
                             ];
+
+                            $warehouse_product = WarehouseProduct::where([
+                                ['warehouse_id', $request->warehouse_id],
+                                ['batch_no', $value['batch_no']],
+                                ['product_id', $value['id']],
+                            ])->first();
+                            if ($warehouse_product) {
+                                $warehouse_product->qty += $value['base_unit_qty'];
+                                $warehouse_product->update();
+                            } else {
+                                WarehouseProduct::create([
+                                    'batch_no'     => $value['batch_no'],
+                                    'warehouse_id' => $request->warehouse_id,
+                                    'product_id'   => $value['id'],
+                                    'qty'          => $value['base_unit_qty'],
+                                ]);
+                            }
+                            
                         }
                         if(count($products) > 0)
                         {
-                            AdjustmentProduct::where('adjustment_id',$adjustmentData->id)->delete();
-                            AdjustmentProduct::insert($products);
+                            $adjustmentData->products()->sync($products);
                         }
                     }
                     $adjustment = $adjustmentData->update($adjustment_data);
-                    $output  = $this->store_message($adjustment, $request->adjustment_id);
+                    $output  = $this->store_message($adjustment, $request->update_id);
                     DB::commit();
                 } catch (Exception $e) {
                     DB::rollback();
@@ -280,21 +316,17 @@ class AdjustmentController extends BaseController
                     if(!$adjustmentData->products->isEmpty())
                     {
                         foreach ($adjustmentData->products as  $adjustment_product) {
-                            $old_qty = $adjustment_product->qty ? $adjustment_product->qty : 0;
-                            $product_data = Product::find($adjustment_product->product_id);
-                            if($product_data){
-                                ($adjustment_product->action == '+') ? $product_data->qty -= $old_qty : $product_data->qty += $old_qty;
-                                $product_data->update();
-                            }
-                            if(!empty($adjustment_product->product_variant_id)){
-                                $product_variant = ProductVariant::find($adjustment_product->product_variant_id);
-                                if($product_variant){
-                                    ($adjustment_product->action == '+') ? $product_variant->item_qty -= $old_qty : $product_variant->item_qty += $old_qty;
-                                    $product_variant->update();
-                                }
+                            $warehouse_product = WarehouseProduct::where([
+                                ['warehouse_id', $adjustmentData->warehouse_id],
+                                ['batch_no', $adjustment_product->pivot->batch_no],
+                                ['product_id', $adjustment_product->id],
+                            ])->first();
+                            if ($warehouse_product) {
+                                $warehouse_product->qty -= $adjustment_product->pivot->base_unit_qty;
+                                $warehouse_product->update();
                             }
                         }
-                        $adjustmentData->products()->delete();
+                        $adjustmentData->products()->detach();
                     }
                     $adjustment = $adjustmentData->delete();
                     $output = $adjustment ? ['status' => 'success','message' => 'Data has been deleted successfully'] : ['status' => 'error','message' => 'failed to delete data'];
@@ -317,37 +349,32 @@ class AdjustmentController extends BaseController
     {
         if($request->ajax()){
             if(permission('adjustment-bulk-delete')){
-                foreach ($request->ids as $id) {
-                    DB::beginTransaction();
-                    try {
+                DB::beginTransaction();
+                try {
+                    foreach ($request->ids as $id) {
                         $adjustmentData = $this->model->with('products')->find($id);
                         if(!$adjustmentData->products->isEmpty())
                         {
                             foreach ($adjustmentData->products as  $adjustment_product) {
-                                $old_qty = $adjustment_product->qty ? $adjustment_product->qty : 0;
-                                $product_data = Product::find($adjustment_product->product_id);
-                                if($product_data){
-                                    ($adjustment_product->action == '+') ? $product_data->qty -= $old_qty : $product_data->qty += $old_qty;
-                                    $product_data->update();
-                                }
-                                if(!empty($adjustment_product->product_variant_id)){
-                                    $product_variant = ProductVariant::find($adjustment_product->product_variant_id);
-                                    if($product_variant){
-                                        ($adjustment_product->action == '+') ? $product_variant->item_qty -= $old_qty : $product_variant->item_qty += $old_qty;
-                                        $product_variant->update();
-                                    }
+                                $warehouse_product = WarehouseProduct::where([
+                                    ['warehouse_id', $adjustmentData->warehouse_id],
+                                    ['batch_no', $adjustment_product->pivot->batch_no],
+                                    ['product_id', $adjustment_product->id],
+                                ])->first();
+                                if ($warehouse_product) {
+                                    $warehouse_product->qty -= $adjustment_product->pivot->base_unit_qty;
+                                    $warehouse_product->update();
                                 }
                             }
-                            $adjustmentData->products()->delete();
+                            $adjustmentData->products()->detach();
                         }
-                        $adjustment = $adjustmentData->delete();
-                        $output = $adjustment ? ['status' => 'success','message' => 'Data has been deleted successfully'] : ['status' => 'error','message' => 'failed to delete data'];
-                        DB::commit();
-                    } catch (Exception $e) {
-                        DB::rollBack();
-                        $output = ['status'=>'error','message'=>$e->getMessage()];
                     }
-                    return response()->json($output);
+                    $adjustment = $this->model->destroy($request->ids);
+                    $output = $adjustment ? ['status' => 'success','message' => 'Data has been deleted successfully'] : ['status' => 'error','message' => 'failed to delete data'];
+                    DB::commit();
+                } catch (Exception $e) {
+                    DB::rollBack();
+                    $output = ['status'=>'error','message'=>$e->getMessage()];
                 }
             }else{
                 $output = $this->access_blocked();

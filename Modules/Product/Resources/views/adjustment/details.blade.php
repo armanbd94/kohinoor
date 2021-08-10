@@ -26,43 +26,48 @@
                 <!--begin: Datatable-->
                 <div id="kt_datatable_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
                     <div class="row">
-                        <input type="hidden" name="adjustment_id" value="{{ $adjustment->id }}">
-
                         <div class="col-md-12 text-center">
                             <h6>Adjustment No.: {{ $adjustment->adjustment_no }}</h6>
+                            <h6>Warehouse: {{ $adjustment->warehouse->name }}</h6>
+                            <h6>Date: {{ date('d-M-Y',strtotime($adjustment->created_at)) }}</h6>
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-12 pt-5">
                             <table class="table table-bordered" id="product_table">
                                 <thead class="bg-primary">
-                                    <th width="40%">Name</th>
-                                    <th  width="15%" class="text-center">Code</th>
-                                    <th width="10%" class="text-center">Unit</th>
-                                    <th width="10%" class="text-center">Quantity</th>
-                                    <th width="15%" class="text-center">Action</th>
+                                    <th width="35%">Name</th>
+                                    <th width="10%" class="text-center">Batch No.</th>
+                                    <th width="10%" class="text-center">Base Unit</th>
+                                    <th width="10%" class="text-center">Qty Base Unit</th>
+                                    <th width="10%" class="text-right">Base Unit Cost</th>
+                                    <th width="10%" class="text-right">Tax</th>
+                                    <th width="15%" class="text-right">Sub Total</th>
                                 </thead>
                                 <tbody>
-                                    @php
-                                        $temp_unit_name = [];
-                                    @endphp
                                     @if (!$adjustment->products->isEmpty())
                                         @foreach ($adjustment->products as $key => $adjustment_product)
+                                            @php
+                                                $base_unit = DB::table('units')->find($adjustment_product->pivot->base_unit_id);
+                                                $unit_name = $base_unit ? $base_unit->unit_name.' ('.$base_unit->unit_code.')' : '';
+                                            @endphp
                                             <tr>
-                                                <td>{{ !empty($adjustment_product->product_variant_id) ? $adjustment_product->product->name.' - ('.$adjustment_product->product_variant->item_name.')' : $adjustment_product->product->name }}</td>
-                
-                                                <td class="text-center">{{ !empty($adjustment_product->product_variant_id) ? $adjustment_product->product_variant->item_code :  $adjustment_product->product->code }}</td>
-                                                <td class="unit-name text-center">{{ $adjustment_product->product->unit->unit_name }}</td>
-                                                <td class="text-center">{{ $adjustment_product->qty }}</td>
-
-                                                <td class="text-center"> {{ $adjustment_product->action == '+' ? 'Addition' : 'Subtraction' }}</td>
+                                                <td>{{  $adjustment_product->name.' - ('.$adjustment_product->code.')' }}</td>
+                                                <td class="text-center">{{ $adjustment_product->pivot->batch_no }}</td>
+                                                <td class="text-center">{{ $unit_name }}</td>
+                                                <td class="text-center">{{ $adjustment_product->pivot->base_unit_qty }}</td>
+                                                <td class="text-right">{{ $adjustment_product->pivot->base_unit_price }}</td>
+                                                <td class="text-right">{{ number_format($adjustment_product->pivot->tax,2,'.','') }}</td>
+                                                <td class="text-right">{{ number_format($adjustment_product->pivot->total,2,'.','') }}</td>
                                             </tr>
                                         @endforeach
                                     @endif
                                 </tbody>
                                 <tfoot class="bg-primary">
                                     <th colspan="3" class="font-weight-bolder">Total</th>
-                                    <th id="total-qty" class="text-center font-weight-bolder">{{ $adjustment->total_qty }}</th>
+                                    <th id="total-qty" class="text-center font-weight-bolder">{{ number_format($adjustment->total_qty,2,'.','') }}</th>
                                     <th></th>
+                                    <th id="total-tax" class="text-right font-weight-bolder">{{ number_format($adjustment->total_tax,2,'.','') }}</th>
+                                    <th id="total" class="text-right font-weight-bolder">{{ number_format($adjustment->grand_total,2,'.','') }}</th>
                                 </tfoot>
                             </table>
                         </div>
@@ -70,6 +75,14 @@
                         <div class="form-group col-md-12">
                             <label for="shipping_cost">Note</label>
                             <p>{{ $adjustment->note }}</p>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <thead class="bg-primary">
+                                    <th><strong>Items</strong><span class="float-right" id="item">{{ $adjustment->item.'('.$adjustment->total_qty.')' }}</span></th>
+                                    <th><strong>Grand Total</strong><span class="float-right" id="grand_total">{{ number_format($adjustment->grand_total,2,'.','') }}</span></th>
+                                </thead>
+                            </table>
                         </div>
                     </div>
                 </div>

@@ -15,6 +15,8 @@ class CreateDailyClosingsTable extends Migration
     {
         Schema::create('daily_closings', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('warehouse_id')->nullable();
+            $table->foreign('warehouse_id')->references('id')->on('warehouses');
             $table->double('last_day_closing')->nullable();
             $table->double('cash_in')->nullable();
             $table->double('cash_out')->nullable();

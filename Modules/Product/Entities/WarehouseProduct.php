@@ -8,6 +8,7 @@ use Modules\Setting\Entities\Warehouse;
 
 class WarehouseProduct extends Model
 {
+    protected $table = 'warehouse_product';
     protected $fillable = ['batch_no', 'warehouse_id', 'product_id', 'qty'];
     
     public function warehouse()
