@@ -6,7 +6,10 @@ use App\Models\BaseModel;
 use Modules\ASM\Entities\ASM;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Modules\Product\Entities\Product;
 use Modules\Location\Entities\District;
+use Modules\Material\Entities\Material;
+use Modules\Product\Entities\WarehouseProduct;
 
 class Warehouse extends BaseModel
 {
@@ -14,9 +17,22 @@ class Warehouse extends BaseModel
 
     public function materials()
     {
-        return $this->hasMany(\Modules\Material\Entities\Material::class,'warehouse_materials',
+        return $this->hasMany(Material::class,'warehouse_materials',
         'warehouse_id','material_id','id','id')->withTimeStamps()->withPivot('qty');
     }
+    public function warehouse_products()
+    {
+        return $this->hasMany(WarehouseProduct::class,'warehouse-id','id');
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class,'warehouse_product','warehouse_id','product_id','id','id')
+        ->withPivot('id','batch_no','qty')
+        ->withTimestamps();
+    }
+
+
 
     public function district()
     {

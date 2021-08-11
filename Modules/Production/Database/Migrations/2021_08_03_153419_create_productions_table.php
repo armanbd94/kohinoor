@@ -23,6 +23,8 @@ class CreateProductionsTable extends Migration
             $table->string('item')->nullable();
             $table->enum('status',['1','2'])->default('1')->comment = "1=Approved, 2=Not Approved";
             $table->enum('production_status',['1','2','3'])->default('1')->comment = "1=Pending,2=Processing,3=Finished";
+            $table->enum('transfer_status',['1','2'])->default('1')->comment = "1=Pending,2=Complete";
+            $table->date('transfer_date')->nullable();
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->timestamps();

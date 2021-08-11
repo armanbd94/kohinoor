@@ -19,11 +19,10 @@ class ProductStockController extends BaseController
     }
     public function index()
     {
-        if(permission('finish-goods-stock-access')){
-            $this->setPageData('Finish Goods Stock','Finish Goods Stock','fas fa-boxes',[['name' => 'Finish Goods Stock']]);
+        if(permission('product-stock-report-access')){
+            $this->setPageData('Product Stock Report','Product Stock Report','fas fa-boxes',[['name' => 'Product Stock Report']]);
             $data = [
-                'categories' => Category::with('warehouse_products')->whereHas('warehouse_products')->where([['type',2],['status',1]])->get(),
-                'warehouses' => DB::table('warehouses')->select('id','name')->where('status',1)->get()
+                'warehouses' => DB::table('warehouses')->where('status',1)->pluck('name','id')
             ];
             return view('stock::product.index',$data);
         }else{
@@ -36,21 +35,18 @@ class ProductStockController extends BaseController
         if($request->ajax())
         {
             $warehouse_id = $request->warehouse_id;
-            $product_id = $request->product_id;
-            $category_id = $request->category_id;
-            $categories = Category::with('warehouse_products')
-            ->when($category_id, function($q) use ($category_id){
-                $q->where('id',$category_id);
-            })
-            ->whereHas('warehouse_products',function($query) use ($product_id,$warehouse_id){
-                $query->where('warehouse_id',$warehouse_id)
-                ->when($product_id, function($q,$product_id){
-                    $q->where('product_id',$product_id);
-                });
-            });
+            $product_id   = $request->product_id;
 
-            $categories = $categories->where([['type',2],['status',1]])->get();
-            return view('stock::product.product-list',compact('categories','product_id','category_id'))->render();
+            $warehouses = Warehouse::with('products')
+            ->whereHas('products',function($q) use ($product_id){
+                $q->where([['product_id',$product_id],['qty','>',0]]);
+            })
+            ->when($warehouse_id, function($q) use ($warehouse_id){
+                $q->where('id',$warehouse_id);
+            })
+            ->where('status',1)->get();
+
+            return view('stock::product.product-list',compact('warehouses','product_id'))->render();
         }
     }
 
@@ -58,7 +54,7 @@ class ProductStockController extends BaseController
     {
         if ($request->ajax()) {
             if(!empty($request->search)){
-                $data = Product::where('name', 'like','%'.$request->search.'%')->get();
+                $data = Product::toBase()->where('name', 'like','%'.$request->search.'%')->orWhere('code', 'like','%'.$request->search.'%')->get();
                 $output = array();
                 if(!empty($data) && count($data) > 0)
                 {

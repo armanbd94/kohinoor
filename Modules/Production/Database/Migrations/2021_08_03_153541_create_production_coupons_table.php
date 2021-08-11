@@ -20,9 +20,6 @@ class CreateProductionCouponsTable extends Migration
             $table->string('batch_no',20);
             $table->string('coupon_code',15)->unique();
             $table->enum('status',['1','2'])->default('2')->comment = "1=Used, 2=Not Used";
-            $table->unsignedBigInteger('salesmen_id')->nullable();
-            $table->foreign('salesmen_id')->references('id')->on('salesmen');
-            $table->date('receive_date')->nullable();
             $table->timestamps();
         });
     }

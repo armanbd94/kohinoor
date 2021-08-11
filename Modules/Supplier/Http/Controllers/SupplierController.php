@@ -126,14 +126,6 @@ class SupplierController extends BaseController
                         {
                             $supplier_coa_id = $supplier_coa->id;
                             $supplier_coa->update(['name'=>$new_head_name]);
-                            // if(!empty($request->previous_balance) && !empty($request->old_previous_balance))
-                            // {
-                            //     if($request->previous_balance != $request->old_previous_balance){
-                            //         $this->previous_balance_update($request->previous_balance,$supplier_coa_id,$request->name);
-                            //     }
-                            // }else{
-                            //     $this->previous_balance_add($request->previous_balance,$supplier_coa_id,$request->name);
-                            // }
                         }
                     }
                     DB::commit();
@@ -176,11 +168,12 @@ class SupplierController extends BaseController
             $transaction_id = generator(10);
             // supplier debit for previous balance
             $cosdr = array(
+                'warehouse_id'        => 1,
                 'chart_of_account_id' => $supplier_coa_id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'PR Balance',
                 'voucher_date'        => date("Y-m-d"),
-                'description'         => 'Supplier debit For '.$supplier_name,
+                'description'         => 'Supplier debit For previous balance '.$supplier_name,
                 'debit'               => $balance,
                 'credit'              => 0,
                 'posted'              => 1,
@@ -189,11 +182,12 @@ class SupplierController extends BaseController
                 'created_at'          => date('Y-m-d H:i:s')
             );
             $inventory = array(
+                'warehouse_id'        => 1,
                 'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('inventory'))->value('id'),
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'PR Balance',
                 'voucher_date'        => date("Y-m-d"),
-                'description'         => 'Inventory credit For Old sale For '.$supplier_name,
+                'description'         => 'Inventory credit for old sale for '.$supplier_name,
                 'debit'               => 0,
                 'credit'              => $balance,
                 'posted'              => 1,
@@ -205,37 +199,6 @@ class SupplierController extends BaseController
             Transaction::insert([
                 $cosdr,$inventory
             ]);
-        }
-    }
-
-    private function previous_balance_update($balance, int $supplier_coa_id, string $supplier_name) {
-        if(!empty($balance) && !empty($supplier_coa_id) && !empty($supplier_name)){
-
-            $supplier_pr_balance_data = Transaction::where(['chart_of_account_id' => $supplier_coa_id, 'voucher_type'=> 'PR Balance',])->first();
-
-            $voucher_no = $supplier_pr_balance_data->voucher_no;
-
-            $updated = $supplier_pr_balance_data->update([
-                'description'         => 'Supplier debit For '.$supplier_name,
-                'debit'               => $balance,
-                'modified_by'         => auth()->user()->name,
-                'updated_at'          => date('Y-m-d H:i:s')
-            ]);
-            if($updated)
-            {
-                Transaction::where([
-                    'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('inventory'))->value('id'), 
-                    'voucher_no'=> $voucher_no])
-                    ->update([
-                        'description'         => 'Inventory credit For Old sale For '.$supplier_name,
-                        'credit'              => $balance,
-                        'modified_by'         => auth()->user()->name,
-                        'updated_at'          => date('Y-m-d H:i:s')
-                    ]);
-                return true;
-            }else{
-                return false;
-            }
         }
     }
 

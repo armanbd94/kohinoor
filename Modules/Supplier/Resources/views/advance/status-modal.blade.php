@@ -23,8 +23,8 @@
                         <select class="form-control" name="status" id="approval_status" required>
                             <option value="">Select Please</option>
                             <option value="1">Approve</option>
-                            <option value="2">Reject</option>
-                            <option value="3">Pending</option>
+                            <option value="2">Pending</option>
+                            <option value="3">Cancelled</option>
                         </select>
                     </div>
                 </div>

@@ -24,7 +24,27 @@
                 </thead>
                 <tbody>
                     @php $total = 0; @endphp
-                    @foreach ($category->warehouse_materials as $key => $item)
+                    
+                    @if($material_id)
+                        @foreach ($category->warehouse_materials as $key => $item)
+                            @if($material_id == $item->id)
+                            <tr>
+                                <td>{{ $key+1 }}</td>
+                                <td>{{ $item->material->material_name }}</td>
+                                <td class="text-center">{{ $item->material_code }}</td>
+                                <td class="text-center">{{ MATERIAL_TYPE[$item->material->type] }}</td>
+                                <td class="text-center">{{ $item->material->unit->unit_name }}</td>
+                                <td class="text-right">{{ number_format($item->material->cost,4,'.','') }}</td>
+                                <td class="text-center">{{ $item->qty }}</td>
+                                <td class="text-right">{{ number_format(($item->qty * $item->material->cost),4,'.','') }}</td>
+                                @php
+                                    $total += ($item->qty * $item->material->cost);
+                                @endphp
+                            </tr>
+                            @endif
+                        @endforeach
+                    @else   
+                        @foreach ($category->warehouse_materials as $key => $item)
                         <tr>
                             <td>{{ $key+1 }}</td>
                             <td>{{ $item->material->material_name }}</td>
@@ -38,7 +58,9 @@
                                 $total += ($item->qty * $item->material->cost);
                             @endphp
                         </tr>
-                    @endforeach
+                        @endforeach
+                    @endif
+                    
                 </tbody>
                 <tfoot>
                     <tr class="bg-primary">

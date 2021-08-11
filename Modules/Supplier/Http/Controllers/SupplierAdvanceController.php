@@ -54,11 +54,11 @@ class SupplierAdvanceController extends BaseController
                     if(permission('supplier-advance-delete')){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->name . ' advance ">'.self::ACTION_BUTTON['Delete'].'</a>';
                     }
-                    // if(permission('supplier-advance-approve')){
-                    //     if($value->approve != 1){
-                    //         $action .= ' <a class="dropdown-item change_status"  data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '" data-status="'.$value->approve.'"><i class="fas fa-check-circle text-success mr-2"></i> Change Status</a>';
-                    //     }
-                    // }
+                    if(permission('supplier-advance-approve')){
+                        if($value->approve != 1){
+                            $action .= ' <a class="dropdown-item change_status"  data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '" data-status="'.$value->approve.'"><i class="fas fa-check-circle text-success mr-2"></i> Change Status</a>';
+                        }
+                    }
                     $account = $this->account_data($value->voucher_no);
 
                     if($account->coa->parent_name == 'Cash & Cash Equivalent'){
@@ -76,7 +76,7 @@ class SupplierAdvanceController extends BaseController
                     $row[] = $value->name.' - '.$value->mobile;
                     $row[] = ($value->debit != 0) ? 'Payment' : 'Receive' ;
                     $row[] = ($value->debit != 0) ? $value->debit : $value->credit;
-                    // $row[] = APPROVE_STATUS_LABEL[$value->approve];
+                    $row[] = APPROVE_STATUS_LABEL[$value->approve];
                     $row[] = date(config('settings.date_format'),strtotime($value->created_at));
                     $row[] = $payment_method;
                     $row[] = $account->coa->name;
@@ -130,6 +130,7 @@ class SupplierAdvanceController extends BaseController
             $transaction_id = generator(10);
 
             $supplier_accledger = array(
+                'warehouse_id'        => 1,
                 'chart_of_account_id' => $supplier_coa_id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'Advance',
@@ -138,7 +139,7 @@ class SupplierAdvanceController extends BaseController
                 'debit'               => ($type == 'debit') ? $amount : 0,
                 'credit'              => ($type == 'credit') ? $amount : 0,
                 'posted'              => 1,
-                'approve'             => 1,
+                'approve'             => 2,
                 'created_by'          => auth()->user()->name,
                 'created_at'          => date('Y-m-d H:i:s')
             );
@@ -151,6 +152,7 @@ class SupplierAdvanceController extends BaseController
             }
             
             $cc = array(
+                'warehouse_id'        => 1,
                 'chart_of_account_id' => $account_id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'Advance',
@@ -159,7 +161,7 @@ class SupplierAdvanceController extends BaseController
                 'debit'               => ($type == 'debit') ? $amount : 0,
                 'credit'              => ($type == 'credit') ? $amount : 0,
                 'posted'              => 1,
-                'approve'             => 1,
+                'approve'             => 2,
                 'created_by'          => auth()->user()->name,
                 'created_at'          => date('Y-m-d H:i:s')
             ); 

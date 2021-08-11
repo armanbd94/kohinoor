@@ -23,24 +23,16 @@
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
                     <div class="row justify-content-center">
-                        <x-form.textbox labelName="FG Name" name="product_name" col="col-md-3" />
+                        <x-form.textbox labelName="Product Name" name="product_name" col="col-md-3" />
                         <input type="hidden" class="form-control bg-brand" name="product_id" id="product_id">
-                        <x-form.selectbox labelName="Category" name="category_id" col="col-md-3" class="selectpicker">
-                            <option value="0" selected>All Category</option>
-                            @if (!$categories->isEmpty())
-                            @foreach ($categories as $item)
-                                <option value="{{ $item->id }}">{{ $item->name }}</option>
-                            @endforeach
-                            @endif
-                        </x-form.selectbox>
                         <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" required="required" class="selectpicker">
                             @if (!$warehouses->isEmpty())
-                            @foreach ($warehouses as $item)
-                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                             @endif
                         </x-form.selectbox>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div style="margin-top:28px;">      
                                     <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Reset">
@@ -122,6 +114,10 @@ $(document).ready(function(){
             .append(item.label)
             .appendTo(ul);
     };
+
+    $('#product_name').on('keyup',function(){
+        if($(this).val() == ''){ $('#product_id').val(''); }
+    });
     
 
     $('#btn-reset').click(function () {
@@ -147,12 +143,13 @@ $(document).ready(function(){
 function load_data()
 {
     var warehouse_id = $('#warehouse_id option:selected').val();
-    if(warehouse_id)
+    var product_id   = $('#product_id').val();
+    if(product_id)
     {
         $.ajax({
             url: "{{ route('product.stock.datatable.data') }}",
             type: "POST",
-            data: {product_id:$('#product_id').val(),category_id:$('#category_id option:selected').val(),warehouse_id:warehouse_id,_token:_token},
+            data: {product_id:product_id,warehouse_id:warehouse_id,_token:_token},
             beforeSend: function(){
                 $('#table-loader').removeClass('d-none');
             },
@@ -160,8 +157,7 @@ function load_data()
                 $('#table-loader').addClass('d-none');
             },
             success: function (data) {
-                $('#product_list').html('');
-                $('#product_list').html(data);
+                $('#product_list').empty().html(data);
             },
             error: function (xhr, ajaxOption, thrownError) {
                 console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);

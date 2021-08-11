@@ -125,6 +125,9 @@ $(document).ready(function(){
             .appendTo(ul);
     };
     
+    $('#material_name').on('keyup',function(){
+        if($(this).val() == ''){ $('#material_id').val(''); }
+    });
 
     $('#btn-reset').click(function () {
         $('#form-filter')[0].reset();

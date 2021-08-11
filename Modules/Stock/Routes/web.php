@@ -15,11 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['auth']], function () {
     //Product Routes
-    // Route::get('finish-goods-stock', 'ProductStockController@index')->name('finish.goods.stock');
-    // Route::group(['prefix' => 'product-stock', 'as'=>'product.stock.'], function () {
-    //     Route::post('datatable-data', 'ProductStockController@get_product_stock_data')->name('datatable.data');
-    // });
-    // Route::post('stock/product-search', 'ProductStockController@product_search')->name('stock.product.search');
+    Route::get('product-stock-report', 'ProductStockController@index')->name('product.stock.report');
+    Route::group(['prefix' => 'product-stock', 'as'=>'product.stock.'], function () {
+        Route::post('datatable-data', 'ProductStockController@get_product_stock_data')->name('datatable.data');
+    });
+    Route::post('stock/product-search', 'ProductStockController@product_search')->name('stock.product.search');
+    
     //Material Routes
     Route::get('material-stock-report', 'MaterialStockController@index')->name('material.stock');
     Route::group(['prefix' => 'material-stock-report', 'as'=>'material.stock.report.'], function () {

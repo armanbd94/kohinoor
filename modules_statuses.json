@@ -1,5 +1,5 @@
 {
-    "Account":true,
+    "Account": true,
     "Supplier": true,
     "Customer": true,
     "Location": true,
@@ -9,5 +9,9 @@
     "Material": true,
     "Product": true,
     "Production": true,
-    "Stock":true
+    "Stock": true,
+    "Purchase": true,
+    "Bank": true,
+    "MobileBank": true,
+    "Transfer": true
 }

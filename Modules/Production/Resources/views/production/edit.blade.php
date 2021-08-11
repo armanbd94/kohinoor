@@ -52,8 +52,8 @@
                 <div class="card-body">
                     <div class="col-md-12">
                         <div class="row">
-                            <x-form.textbox labelName="Batch No." name="batch_no" value="{{ $production->batch_no }}" required="required" col="col-md-4" readonly />
-                            <x-form.textbox labelName="Date" name="start_date" required="required" col="col-md-4" class="date" value="{{ $production->start_date }}"/>
+                            <x-form.textbox labelName="Batch No." name="batch_no" value="{{ $production->batch_no }}" property="readonly" required="required" col="col-md-4" />
+                            <x-form.textbox labelName="Date" name="start_date" required="required" col="col-md-4" property="readonly" class="date" value="{{ $production->start_date }}"/>
                             <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required"  col="col-md-4" class="selectpicker">
                                 @if (!$warehouses->isEmpty())
                                     @foreach ($warehouses as $warehouse)
