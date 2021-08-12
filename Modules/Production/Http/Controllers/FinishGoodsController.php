@@ -4,30 +4,22 @@ namespace Modules\Production\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Modules\Product\Entities\Product;
-use Modules\Material\Entities\Material;
-use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
-use Modules\Production\Entities\Production;
-use Modules\Material\Entities\WarehouseMaterial;
-use Modules\Production\Entities\ProductionCoupon;
 use Modules\Production\Entities\ProductionProduct;
-use Modules\Production\Http\Requests\ProductionRequest;
-use Modules\Production\Entities\ProductionProductMaterial;
 
 class ProductionController extends BaseController
 {
-    public function __construct(Production $model)
+    public function __construct(ProductionProduct $model)
     {
         $this->model = $model;
     }
 
     public function index()
     {
-        if(permission('production-access')){
-            $this->setPageData('Manage Production','Manage Production','fas fa-industry',[['name' => 'Manage Production']]);
+        if(permission('finish-goods-access')){
+            $this->setPageData('Production Finish Goods','Production Finish Goods','fas fa-industry',[['name' => 'Production Finish Goods']]);
             $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('production::production.index',compact('warehouses'));
+            return view('production::finish-goods.index',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }

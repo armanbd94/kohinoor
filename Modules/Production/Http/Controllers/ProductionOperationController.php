@@ -123,7 +123,7 @@ class ProductionOperationController extends BaseController
                         {
                             $productionData->end_date = date('Y-m-d'); 
                         }
-                        $productionData->modified_by = auth()->user()->id;
+                        $productionData->modified_by = auth()->user()->name;
                         $productionData->updated_at = date('Y-m-d');
                         if ($productionData->update()) {
                             if ($approve_status == 1 && $request->production_status == 3) {

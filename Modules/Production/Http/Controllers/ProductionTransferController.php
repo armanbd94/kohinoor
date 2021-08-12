@@ -15,7 +15,7 @@ use Modules\Production\Entities\ProductionProduct;
 use Modules\Production\Http\Requests\ProductionRequest;
 use Modules\Production\Entities\ProductionProductMaterial;
 
-class TransferController extends BaseController
+class ProductionTransferController extends BaseController
 {
     public function __construct(Production $model)
     {

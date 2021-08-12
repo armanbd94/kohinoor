@@ -34,7 +34,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('generate-coupon-qrcode', 'ProductionOperationController@generateCouponQrcode')->name('generate.coupon.qrcode');
         Route::post('change-production-status', 'ProductionOperationController@change_production_status')->name('change.production.status');
 
-        Route::get('transfer/{id}', 'TransferController@index')->name('transfer');
-        Route::get('transfer/store', 'TransferController@store')->name('transfer.store');
+        Route::get('transfer/{id}', 'ProductionTransferController@index')->name('transfer');
     });
 });
