@@ -66,12 +66,9 @@
                                         <th>Name</th>
                                         <th>Mfg. Date</th>
                                         <th>Exp. Date</th>
-                                        <th>Unit</th>
                                         <th>Base Unit</th>
-                                        <th>FG Unit Qty</th>
                                         <th>FG Base Unit Qty</th>
                                         <th>Per Unit Cost</th>
-                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -85,7 +82,6 @@
         <!--end::Card-->
     </div>
 </div>
-@include('production::production.status-modal')
 @endsection
 
 @push('scripts')
@@ -125,27 +121,24 @@
                 zeroRecords: '<strong class="text-danger">No Data Found</strong>'
             },
             "ajax": {
-                "url": "{{route('production.datatable.data')}}",
+                "url": "{{route('finish.goods.datatable.data')}}",
                 "type": "POST",
                 "data": function (data) {
                     data.batch_no          = $("#form-filter #batch_no").val();
                     data.start_date        = $("#form-filter #start_date").val();
                     data.end_date          = $("#form-filter #end_date").val();
                     data.warehouse_id      = $("#form-filter #warehouse_id").val();
-                    data.status            = $("#form-filter #status").val();
-                    data.production_status = $("#form-filter #production_status").val();
-                    data.transfer_status   = $("#form-filter #transfer_status").val();
                     data._token            = _token;
                 }
             },
-            "columnDefs": [{
-                    "targets": [9],
-                    "orderable": false,
+            "columnDefs": [
+                {
+                    "targets": [0,1,2,4,5,6,7],
                     "className": "text-center"
                 },
                 {
-                    "targets": [0,1,2,3,4,5,6,7,8],
-                    "className": "text-center"
+                    "targets": [8],
+                    "className": "text-right"
                 }
 
             ],
@@ -163,10 +156,10 @@
                     'text':'Print',
                     'className':'btn btn-secondary btn-sm text-white',
                     "title": "{{ $page_title }} List",
-                    "orientation": "landscape", //portrait
+                    "orientation": "portrait", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
-                        columns: ':visible:not(:eq(9))' 
+                        columns: [0,1,2,3,4,5,6,7,8]
                     },
                     customize: function (win) {
                         $(win.document.body).addClass('bg-white');
@@ -184,7 +177,7 @@
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
-                        columns: ':visible:not(:eq(9))' 
+                        columns: [0,1,2,3,4,5,6,7,8] 
                     }
                 },
                 {
@@ -194,7 +187,7 @@
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
-                        columns: ':visible:not(:eq(9))' 
+                        columns: [0,1,2,3,4,5,6,7,8] 
                     },
                 },
                 {
@@ -203,10 +196,10 @@
                     'className':'btn btn-secondary btn-sm text-white',
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
-                    "orientation": "landscape", //portrait
+                    "orientation": "portrait", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
-                        columns: ':visible:not(:eq(9))' 
+                        columns: [0,1,2,3,4,5,6,7,8] 
                     },
                     customize: function(doc) {
                         doc.defaultStyle.fontSize = 7; //<-- set fontsize to 16 instead of 10 
@@ -226,87 +219,9 @@
             $('#form-filter')[0].reset();
             $('#form-filter .selectpicker').selectpicker('refresh');
             $('input[name="start_date"]').val('');
-                $('input[name="end_date"]').val('');
+            $('input[name="end_date"]').val('');
             table.ajax.reload();
         });
-    
-        $(document).on('click', '.delete_data', function () {
-            let id    = $(this).data('id');
-            let name  = $(this).data('name');
-            let row   = table.row($(this).parent('tr'));
-            let url   = "{{ route('production.delete') }}";
-            delete_data(id, url, table, row, name);
-        });
-    
-        function multi_delete(){
-            let ids = [];
-            let rows;
-            $('.select_data:checked').each(function(){
-                ids.push($(this).val());
-                rows = table.rows($('.select_data:checked').parents('tr'));
-            });
-            if(ids.length == 0){
-                Swal.fire({
-                    type:'error',
-                    title:'Error',
-                    text:'Please checked at least one row of table!',
-                    icon: 'warning',
-                });
-            }else{
-                let url = "{{route('production.bulk.delete')}}";
-                bulk_delete(ids,url,table,rows);
-            }
-        }
-
-         //Show Approve Status Change Modal
-        $(document).on('click','.change_status',function(){
-            $('#approve_status_form #production_id').val($(this).data('id'));
-            $('#approve_status_form #approve_status').val($(this).data('status'));
-            $('#approve_status_form #approve_status.selectpicker').selectpicker('refresh');
-            $('#approve_status_modal').modal({
-                keyboard: false,
-                backdrop: 'static',
-            });
-            $('#approve_status_modal .modal-title').html('<span>Change Approve Status</span>');
-            $('#approve_status_modal #status-btn').text('Change Status');
-                
-        });
-
-        $(document).on('click','#status-btn',function(){
-            var production_id     = $('#approve_status_form #production_id').val();
-            var approve_status =  $('#approve_status_form #approve_status option:selected').val();
-            if(production_id && approve_status)
-            {
-                $.ajax({
-                    url: "{{route('production.change.status')}}",
-                    type: "POST",
-                    data: {production_id:production_id,approve_status:approve_status,_token:_token},
-                    dataType: "JSON",
-                    beforeSend: function(){
-                        $('#status-btn').addClass('spinner spinner-white spinner-right');
-                    },
-                    complete: function(){
-                        $('#status-btn').removeClass('spinner spinner-white spinner-right');
-                    },
-                    success: function (data) {
-                        notification(data.status, data.message);
-                        if (data.status == 'success') {
-                            $('#approve_status_modal').modal('hide');
-                            table.ajax.reload(null, false);
-                        }
-                    },
-                    error: function (xhr, ajaxOption, thrownError) {
-                        console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
-                    }
-                });
-            }else{
-                notification('error','Please select status');
-            }
-        });
-    
-    
     });
-
-
     </script>
 @endpush

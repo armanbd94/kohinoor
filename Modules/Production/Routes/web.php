@@ -36,4 +36,6 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('transfer/{id}', 'ProductionTransferController@index')->name('transfer');
     });
+    Route::get('finish-goods', 'FinishGoodsController@index')->name('finish.goods');
+    Route::post('finish-goods/datatable-data', 'FinishGoodsController@get_datatable_data')->name('finish.goods.datatable.data');
 });

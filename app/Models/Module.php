@@ -75,6 +75,7 @@ class Module extends Model
                 ->select('id','type','divider_title','module_name','order','icon_class')
                 ->orderBy('order','asc')
                 ->with('permission:id,module_id,name','submenu:id,parent_id,module_name,icon_class')
+                ->where('menu_id',1)
                 ->get();
     }
 }
