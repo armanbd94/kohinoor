@@ -59,6 +59,16 @@ Route::group(['middleware' => ['auth']], function () {
         });
     });
 
+    Route::get('asm-permission', 'ASMPermissionController@index')->name('asm.permission');
+    Route::group(['prefix' => 'asm-permission', 'as'=>'asm.permission.'], function () {
+        Route::post('datatable-data', 'ASMPermissionController@get_datatable_data')->name('datatable.data');
+        Route::post('store', 'ASMPermissionController@store')->name('store');
+        Route::post('edit', 'ASMPermissionController@edit')->name('edit');
+        Route::post('update', 'ASMPermissionController@update')->name('update');
+        Route::post('delete', 'ASMPermissionController@delete')->name('delete');
+        Route::post('bulk-delete', 'ASMPermissionController@bulk_delete')->name('bulk.delete');
+    });
+
     //Role Routes
     Route::get('role', 'RoleController@index')->name('role');
     Route::group(['prefix' => 'role', 'as'=>'role.'], function () {

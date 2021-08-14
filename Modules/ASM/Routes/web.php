@@ -23,6 +23,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('delete', 'ASMController@delete')->name('delete');
         Route::post('bulk-delete', 'ASMController@bulk_delete')->name('bulk.delete');
         Route::post('change-status', 'ASMController@change_status')->name('change.status');
+        Route::get('permission/{id}', 'ASMController@permission')->name('permission');
+        Route::post('permission/store', 'ASMController@permission_store')->name('permission.store');
     });
     Route::get('district-id-wise-asm-list/{id}','ASMController@district_id_wise_asm_list');
 });

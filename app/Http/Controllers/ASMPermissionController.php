@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Session;
 use App\Http\Requests\PermissionStoreFormRequest;
 use App\Http\Requests\PermissionUpdateFormRequest;
 
-class PermissionController extends BaseController
+class ASMPermissionController extends BaseController
 {
-    private $erp_menu_id = 1;
+    private $erp_menu_id = 2;
     public function __construct(Permission $model)
     {
         $this->model = $model;
@@ -20,10 +20,10 @@ class PermissionController extends BaseController
 
     public function index()
     {
-        if(permission('permission-access')){
-            $this->setPageData('Permission','Permission','fas fa-tasks',[['name'=>'Permission']]);
+        if(permission('asm-permission-access')){
+            $this->setPageData('ASM Permission','ASM Permission','fas fa-tasks',[['name'=>'ASM Permission']]);
             $modules = Module::module_list($this->erp_menu_id);
-            return view('permission.index',compact('modules'));
+            return view('asm-permission.index',compact('modules'));
         }else{
             return $this->access_blocked();
         }
@@ -32,7 +32,9 @@ class PermissionController extends BaseController
     public function get_datatable_data(Request $request)
     {
         if($request->ajax()){
+
             $this->model->setType($this->erp_menu_id);
+            
             if (!empty($request->name)) {
                 $this->model->setName($request->name);
             }
@@ -47,15 +49,15 @@ class PermissionController extends BaseController
             foreach ($list as $value) {
                 $no++;
                 $action = '';
-                if(permission('permission-edit')){
+                if(permission('asm-permission-edit')){
                 $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '">'.self::ACTION_BUTTON['Edit'].'</a>';
                 }
-                if(permission('permission-delete')){
+                if(permission('asm-permission-delete')){
                 $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->name . '">'.self::ACTION_BUTTON['Delete'].'</a>';
                 }
 
                 $row = [];
-                if(permission('permission-bulk-delete')){
+                if(permission('asm-permission-bulk-delete')){
                 $row[] = row_checkbox($value->id);
                 }
                 $row[] = $no;
@@ -78,7 +80,7 @@ class PermissionController extends BaseController
     public function store(PermissionStoreFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('permission-add')){
+            if(permission('asm-permission-add')){
                 $permission_data = [];
                 foreach ($request->permission as $value) {
                     $permission_data[] = [
@@ -90,9 +92,6 @@ class PermissionController extends BaseController
                 }
                 $result = $this->model->insert($permission_data);
                 $output = $this->store_message($result);
-                if(auth()->user()->role_id == 1){
-                    $this->restore_session_permission_list();
-                }
             }else{
                 $output       = $this->unauthorized();
             }
@@ -105,7 +104,7 @@ class PermissionController extends BaseController
     public function edit(Request $request)
     {
         if($request->ajax()){
-            if(permission('permission-edit')){
+            if(permission('asm-permission-edit')){
                 $data   = $this->model->findOrFail($request->id);
                 $output = $this->data_message($data); //if data found then it will return data otherwise return error message
             }else{
@@ -120,15 +119,12 @@ class PermissionController extends BaseController
     public function update(PermissionUpdateFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('permission-edit')){
+            if(permission('asm-permission-edit')){
                 $collection = collect($request->validated());
                 $updated_at = Carbon::now();
                 $collection = $collection->merge(compact('updated_at'));
                 $result     = $this->model->find($request->update_id)->update($collection->all());
                 $output     = $this->store_message($result, $request->update_id);
-                if(auth()->user()->role_id == 1){
-                    $this->restore_session_permission_list();
-                }
             }else{
                 $output       = $this->unauthorized();
             }
@@ -141,12 +137,9 @@ class PermissionController extends BaseController
     public function delete(Request $request)
     {
         if($request->ajax()){
-            if(permission('permission-delete')){
+            if(permission('asm-permission-delete')){
                 $result   = $this->model->find($request->id)->delete();
                 $output   = $this->delete_message($result);
-                if(auth()->user()->role_id == 1){
-                    $this->restore_session_permission_list();
-                }
             }else{
                 $output       = $this->unauthorized();
             }
@@ -159,12 +152,9 @@ class PermissionController extends BaseController
     public function bulk_delete(Request $request)
     {
         if($request->ajax()){
-            if(permission('permission-bulk-delete')){
+            if(permission('asm-permission-bulk-delete')){
                 $result   = $this->model->destroy($request->ids);
                 $output   = $this->bulk_delete_message($result);
-                if(auth()->user()->role_id == 1){
-                    $this->restore_session_permission_list();
-                }
             }else{
                 $output       = $this->unauthorized();
             }
@@ -174,15 +164,4 @@ class PermissionController extends BaseController
         }
     }
 
-    private function restore_session_permission_list(){
-        $permissions = $this->model->join('modules','permissions.module_id','=','modules.id')->where('modules.menu_id',1)->select('slug')->get();
-        $permission_list = [];
-        if(!$permissions->isEmpty()){
-            foreach ($permissions as $value) {
-                array_push($permission_list,$value->slug);
-            }
-            Session::forget('user_permission');
-            Session::put('user_permission',$permission_list); //permitted methods putted into session
-        }
-    }
 }

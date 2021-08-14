@@ -70,12 +70,12 @@ class Module extends Model
     }
 
 
-    public static function permission_module_list(){
+    public static function permission_module_list(int $menu_id){
        return self::doesntHave('parent')
                 ->select('id','type','divider_title','module_name','order','icon_class')
                 ->orderBy('order','asc')
                 ->with('permission:id,module_id,name','submenu:id,parent_id,module_name,icon_class')
-                ->where('menu_id',1)
+                ->where('menu_id',$menu_id)
                 ->get();
     }
 }

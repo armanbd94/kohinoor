@@ -2,12 +2,13 @@
 
 namespace Modules\ASM\Http\Controllers;
 
-use Modules\ASM\Entities\ASM;
+use App\Models\Module;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
+use Modules\ASM\Entities\ASM;
+use Modules\Location\Entities\District;
 use App\Http\Controllers\BaseController;
 use Modules\ASM\Http\Requests\ASMFormRequest;
-use Modules\Location\Entities\District;
 
 class ASMController extends BaseController
 {
@@ -64,6 +65,9 @@ class ASMController extends BaseController
                 }
                 if(permission('asm-view')){
                 $action .= ' <a class="dropdown-item view_data" data-id="' . $value->id . '" data-name="' . $value->name . '">'.self::ACTION_BUTTON['View'].'</a>';
+                }
+                if(permission('asm-permission')){
+                $action .= ' <a class="dropdown-item" href="'.route('asm.permission',['id'=>$value->id]).'"><i class="fas fa-tasks text-success mr-2"></i> Permission</a>';
                 }
                 if(permission('asm-delete')){
                     $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->id . '" data-name="' . $value->name . '">'.self::ACTION_BUTTON['Delete'].'</a>';
@@ -199,5 +203,57 @@ class ASMController extends BaseController
     {
         $asms = $this->model->district_id_wise_asm_list($id);
         return json_encode($asms);
+    }
+
+    public function permission(int $id)
+    {
+        if(permission('asm-permission')){
+            $this->setPageData('ASM Permission','ASM Permission','fas fa-tasks',[['name' => 'ASM Permission']]);
+            $asm = $this->model->with('module_asm','permission_asm')->find($id);
+            $asm_module = [];
+            if(!$asm->module_asm->isEmpty())
+            {
+                foreach ($asm->module_asm as $value) {
+                    array_push($asm_module,$value->id);
+                }
+            }
+            $asm_permission = [];
+            if(!$asm->permission_asm->isEmpty())
+            {
+                foreach ($asm->permission_asm as $value) {
+                    array_push($asm_permission,$value->id);
+                }
+            }
+
+            $data = [
+                'asm'                => $asm,
+                'asm_module'         => $asm_module,
+                'asm_permission'     => $asm_permission,
+                'permission_modules' => Module::permission_module_list(2)
+            ];
+            
+            return view('asm::permission',$data);
+        }else{
+            return $this->access_blocked();
+        }
+    }
+
+    public function permission_store(Request $request)
+    {
+        if($request->ajax()){
+            if(permission('asm-permission')){
+                $asm = $this->model->with('module_asm','permission_asm')->find($request->asm_id);
+                if($asm){
+                    $asm->module_asm()->sync($request->module);
+                    $asm->permission_asm()->sync($request->permission);
+                }
+                $output = $this->store_message($asm, $request->asm_id);
+            }else{
+                $output = $this->unauthorized();
+            }
+            return response()->json($output);
+        }else{
+            return response()->json($this->unauthorized());
+        }
     }
 }

@@ -75,7 +75,7 @@ class RoleController extends BaseController
     {
         if(permission('role-add')){
             $this->setPageData('Role Create','Role Create','fas fa-bars',[['name' => 'Role','link' => route('role')],['name' => 'Role Create']]);
-            $permission_modules = Module::permission_module_list();
+            $permission_modules = Module::permission_module_list(1);
             return view('role.form',compact('permission_modules'));
         }else{
             return $this->access_blocked();
@@ -126,7 +126,7 @@ class RoleController extends BaseController
                 'role'            => $role,
                 'role_module'     => $role_module,
                 'role_permission' => $role_permission,
-                'permission_modules' => Module::permission_module_list()
+                'permission_modules' => Module::permission_module_list(1)
             ];
             
             return view('role.form',$data);
@@ -159,7 +159,7 @@ class RoleController extends BaseController
                 'role'            => $role,
                 'role_module'     => $role_module,
                 'role_permission' => $role_permission,
-                'permission_modules' => Module::permission_module_list()
+                'permission_modules' => Module::permission_module_list(1)
             ];
             return view('role.view',$data);
         }else{

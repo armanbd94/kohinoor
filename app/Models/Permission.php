@@ -15,7 +15,8 @@ class Permission extends BaseModel
     *******************************************/
     //custom search column property
     protected $moduleID;
-    protected $name;
+    protected $_name;
+    protected $_type; //1=Admin Permission,2=ASM Permission
 
     //methods to set custom search property value
     public function setModuleID($moduleID)
@@ -24,7 +25,11 @@ class Permission extends BaseModel
     }
     public function setName($name)
     {
-        $this->name = $name;
+        $this->_name = $name;
+    }
+    public function setType($type)
+    {
+        $this->_type = $type;
     }
 
     private function get_datatable_query()
@@ -37,14 +42,19 @@ class Permission extends BaseModel
         }
         
 
-        $query = self::with('module:id,module_name');
+        $query = self::with('module:id,module_name,menu_id');
+        if(!empty($this->_type)){
+            $query->whereHas('module',function($q){
+                $q->where('menu_id',$this->_type);
+            });
+        }
 
         //search query
         if (!empty($this->moduleID)) {
             $query->where('module_id', $this->moduleID);
         }
-        if (!empty($this->name)) {
-            $query->where('name', 'like', '%' . $this->name . '%');
+        if (!empty($this->_name)) {
+            $query->where('name', 'like', '%' . $this->_name . '%');
         }
 
         //order by data fetching code
@@ -73,7 +83,14 @@ class Permission extends BaseModel
 
     public function count_all()
     {
-        return self::toBase()->get()->count();
+        
+        $query = self::with('module:id,module_name,menu_id');
+        if(!empty($this->_type)){
+            $query->whereHas('module',function($q){
+                $q->where('menu_id',$this->_type);
+            });
+        }
+        return $query->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *
