@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('salesmen/login', 'API\SalesmenLoginController@login');
+
+Route::group(['prefix' => 'salesmen','middleware' => ['auth:salesmen-api']],function ()
+{
+    Route::post('coupon-validation-check', 'API\CouponValidationController@index');
+    Route::get('daily-route-list/{salesmen_id}', 'API\SalesmenController@daily_route_list');
+    Route::get('area-list/{route_id}', 'API\SalesmenController@route_area_list');
+    Route::get('customer-list/{area_id}', 'API\SalesmenController@area_customer_list');
+    Route::post('store/coupon', 'API\CouponReceivedController@store_received_coupon');
+    Route::post('change-password', 'API\SalesmenPasswordChangeController@change_password');
 });

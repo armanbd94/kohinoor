@@ -59,5 +59,5 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('bulk-delete', 'AreaController@bulk_delete')->name('bulk.delete');
         Route::post('change-status', 'AreaController@change_status')->name('change.status');
     });
-    Route::get('route-id-wise-area-list/{id}','AreaController@upazila_id_wise_route_list');
+    Route::get('route-id-wise-area-list/{id}','AreaController@route_id_area_route_list');
 });

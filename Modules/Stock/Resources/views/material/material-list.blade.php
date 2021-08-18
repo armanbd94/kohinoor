@@ -34,9 +34,9 @@
                                 <td class="text-center">{{ $item->material_code }}</td>
                                 <td class="text-center">{{ MATERIAL_TYPE[$item->material->type] }}</td>
                                 <td class="text-center">{{ $item->material->unit->unit_name }}</td>
-                                <td class="text-right">{{ number_format($item->material->cost,4,'.','') }}</td>
+                                <td class="text-right">{{ number_format($item->material->cost,2,'.','') }}</td>
                                 <td class="text-center">{{ $item->qty }}</td>
-                                <td class="text-right">{{ number_format(($item->qty * $item->material->cost),4,'.','') }}</td>
+                                <td class="text-right">{{ number_format(($item->qty * $item->material->cost),2,'.','') }}</td>
                                 @php
                                     $total += ($item->qty * $item->material->cost);
                                 @endphp
@@ -51,9 +51,9 @@
                             <td class="text-center">{{ $item->material_code }}</td>
                             <td class="text-center">{{ MATERIAL_TYPE[$item->material->type] }}</td>
                             <td class="text-center">{{ $item->material->unit->unit_name }}</td>
-                            <td class="text-right">{{ number_format($item->material->cost,4,'.','') }}</td>
+                            <td class="text-right">{{ number_format($item->material->cost,2,'.','') }}</td>
                             <td class="text-center">{{ $item->qty }}</td>
-                            <td class="text-right">{{ number_format(($item->qty * $item->material->cost),4,'.','') }}</td>
+                            <td class="text-right">{{ number_format(($item->qty * $item->material->cost),2,'.','') }}</td>
                             @php
                                 $total += ($item->qty * $item->material->cost);
                             @endphp
@@ -71,7 +71,7 @@
                         <th></th>
                         <th></th>
                         <th style="text-align: right !important;font-weight:bold;color:white;">Total</th>
-                        <th style="text-align: right !important;font-weight:bold;color:white;">{{ number_format($total,4,'.','') }}</th>
+                        <th style="text-align: right !important;font-weight:bold;color:white;">{{ number_format($total,2,'.','') }}</th>
                         @php $total_stock_value += $total; @endphp
                     </tr>
                 </tfoot>
@@ -82,7 +82,7 @@
             @endphp
         @endif
     @endforeach
-    <h3 class="bg-dark text-white font-weight-bolder p-3 text-right">Grand Total = {{ number_format($grand_total,4,'.','') }}</h3>
+    <h3 class="bg-dark text-white font-weight-bolder p-3 text-right">Grand Total = {{ number_format($grand_total,2,'.','') }}</h3>
 @else 
     <div class="col-md-12 text-center"><h3 class="py-3 bg-danger text-white">Stock Data is Empty</h3></div>
 @endif 

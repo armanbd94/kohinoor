@@ -115,7 +115,7 @@ $(document).ready(function(){
             zeroRecords: '<strong class="text-danger">No Data Found</strong>'
         },
         "ajax": {
-            "url": "{{route('asm.permission.datatable.data')}}",
+            "url": "{{url('asm-permission/datatable-data')}}",
             "type": "POST",
             "data": function (data) {
                 data.name      = $("#form-filter #name").val();
@@ -239,7 +239,7 @@ $(document).ready(function(){
     $(document).on('click', '#save-btn', function () {
         let form = document.getElementById('store_or_update_form');
         let formData = new FormData(form);
-        let url = "{{route('asm.permission.store')}}";
+        let url = "{{url('asm-permission/store')}}";
         let id = $('#update_id').val();
         let method;
         if (id) {
@@ -295,7 +295,7 @@ $(document).ready(function(){
         let id = $(this).data('id');
         if (id) {
             $.ajax({
-                url: "{{route('asm.permission.edit')}}",
+                url: "{{url('asm-permission/edit')}}",
                 type: "POST",
                 data: { id: id,_token: _token},
                 dataType: "JSON",
@@ -323,7 +323,7 @@ $(document).ready(function(){
     $(document).on('click', '#update-btn', function () {
         let form = document.getElementById('update_form');
         let formData = new FormData(form);
-        let url = "{{route('asm.permission.update')}}";
+        let url = "{{url('asm-permission/update')}}";
         let id = $('#update_id').val();
         let method = 'update';
         $.ajax({
@@ -367,7 +367,7 @@ $(document).ready(function(){
         let id    = $(this).data('id');
         let name  = $(this).data('name');
         let row   = table.row($(this).parent('tr'));
-        let url   = "{{ route('asm.permission.delete') }}";
+        let url   = "{{ url('asm-permission/delete') }}";
         delete_data(id, url, table, row, name);
     });
 
@@ -386,7 +386,7 @@ $(document).ready(function(){
                 icon: 'warning',
             });
         }else{
-            let url = "{{route('asm.permission.bulk.delete')}}";
+            let url = "{{url('asm-permission/bulk.delete')}}";
             bulk_delete(ids,url,table,rows);
         }
     }

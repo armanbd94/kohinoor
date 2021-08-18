@@ -46,6 +46,11 @@ return [
             'provider' => 'users',
             'hash' => false,
         ],
+        'salesmen-api' => [
+            'driver' => 'jwt',
+            'provider' => 'salesmen',
+            'hash' => false,
+        ],
     ],
 
     /*
@@ -69,6 +74,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+
+        'salesmen' => [
+            'driver' => 'eloquent',
+            'model' => Modules\SalesMen\Entities\Salesmen::class,
         ],
 
         // 'users' => [
@@ -95,6 +105,12 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'salesmen' => [
+            'provider' => 'salesmen',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,

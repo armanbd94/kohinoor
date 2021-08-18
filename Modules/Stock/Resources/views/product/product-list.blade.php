@@ -4,7 +4,7 @@
 @if (!$warehouses->isEmpty())
     @foreach ($warehouses as $index => $warehouse)
         @if (!$warehouse->products->isEmpty())
-            <div class="col-md-12 text-center"><h3 class="py-3 bg-warning text-white" style="max-width:300px;margin: 50px auto 10px auto;">{{ ($index+1).' : '.$warehouse->name }}</h3></div>
+            <div class="col-md-12 text-center"><h3 class="py-3 bg-warning text-white" style="max-width:500px;margin: 50px auto 10px auto;">{{ $product->name }}</h3></div>
             @php 
             $total_stock_value = 0; 
             @endphp
@@ -93,9 +93,9 @@
                 <tfoot>
                     <tr class="bg-primary">
                         <th colspan="5" style="text-align: right !important;font-weight:bold;color:white;">Total</th>
-                        <th style="text-align: right !important;font-weight:bold;color:white;">{{ number_format($total_unit_qty,4,'.','') }}</th>
-                        <th style="text-align: right !important;font-weight:bold;color:white;">{{ number_format($total_base_unit_qty,4,'.','') }}</th>
-                        <th style="text-align: right !important;font-weight:bold;color:white;">{{ number_format($total,4,'.','') }}</th>
+                        <th style="text-align: center !important;font-weight:bold;color:white;">{{ number_format($total_unit_qty,2,'.','') }}</th>
+                        <th style="text-align: center !important;font-weight:bold;color:white;">{{ number_format($total_base_unit_qty,2,'.','') }}</th>
+                        <th style="text-align: right !important;font-weight:bold;color:white;">{{ number_format($total,2,'.','') }}</th>
                         @php
                         $total_stock_value += $total;
                     @endphp
@@ -107,7 +107,7 @@
             @endphp
         @endif
     @endforeach
-    <h3 class="bg-dark text-white font-weight-bolder p-3 text-right">Grand Total = {{ number_format($grand_total,4,'.','') }}</h3>
+    <h3 class="bg-dark text-white font-weight-bolder p-3 text-right">Total Stock Value = {{ number_format($grand_total,2,'.','') }}</h3>
 @else 
     <div class="col-md-12 text-center"><h3 class="py-3 bg-danger text-white">Stock Data is Empty</h3></div>
 @endif

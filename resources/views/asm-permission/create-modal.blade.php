@@ -25,7 +25,7 @@
                       @endif
                     </x-form.selectbox>
                     <div class="col-md-12">
-                      <table class="table table-borderless" id="permission-table">
+                      <table class="table table-borderless" id="asm-permission-table">
                         <thead class="bg-primary">
                           <tr>
                             <th width="45%">Permission Name</th>

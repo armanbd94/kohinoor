@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use App\Models\Module;
 use App\Models\Permission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use App\Http\Requests\PermissionStoreFormRequest;
 use App\Http\Requests\PermissionUpdateFormRequest;
 
@@ -81,6 +80,7 @@ class ASMPermissionController extends BaseController
     {
         if($request->ajax()){
             if(permission('asm-permission-add')){
+                
                 $permission_data = [];
                 foreach ($request->permission as $value) {
                     $permission_data[] = [
@@ -91,7 +91,7 @@ class ASMPermissionController extends BaseController
                     ];
                 }
                 $result = $this->model->insert($permission_data);
-                $output = $this->store_message($result);
+                $output = $this->store_message($result,null);
             }else{
                 $output       = $this->unauthorized();
             }

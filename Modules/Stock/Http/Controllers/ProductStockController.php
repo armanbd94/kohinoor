@@ -46,7 +46,9 @@ class ProductStockController extends BaseController
             })
             ->where('status',1)->get();
 
-            return view('stock::product.product-list',compact('warehouses','product_id'))->render();
+            $product = Product::select('id','name')->find($request->product_id);
+
+            return view('stock::product.product-list',compact('warehouses','product_id','product'))->render();
         }
     }
 
