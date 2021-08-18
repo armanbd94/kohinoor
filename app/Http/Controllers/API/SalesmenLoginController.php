@@ -8,15 +8,12 @@ use JWTAuthException;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\API\APIController;
 
 class SalesmenLoginController extends APIController
 {
-    public function __construct()
-    {
-        Auth::shouldUse('salesmen-api');
-    }
+    
 
     public function login(Request $request)
     {
