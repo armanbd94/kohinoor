@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['auth','xss']], function () {
+Route::group(['middleware' => ['auth']], function () {
     Route::get('purchase', 'PurchaseController@index')->name('purchase');
     Route::group(['prefix' => 'purchase', 'as'=>'purchase.'], function () {
-        Route::get('create', 'PurchaseController@create')->name('create');
+        Route::get('add', 'PurchaseController@create')->name('create');
         Route::post('datatable-data', 'PurchaseController@get_datatable_data')->name('datatable.data');
         Route::post('store', 'PurchaseController@store')->name('store');
         Route::post('update', 'PurchaseController@update')->name('update');

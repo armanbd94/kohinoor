@@ -360,7 +360,6 @@ class MaterialController extends BaseController
             $material['name']       = $material_data->material_name;
             $material['code']       = $material_data->material_code;
             $material['cost']       = $material_data->cost;
-            $material['old_cost']   = $material_data->old_cost;
             $material['tax_rate']   = $material_data->tax->rate ? $material_data->tax->rate : 0;
             $material['tax_name']   = $material_data->tax->name;
             $material['tax_method'] = $material_data->tax_method;

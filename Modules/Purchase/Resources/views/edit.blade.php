@@ -35,7 +35,7 @@
                         <div class="row">
                             <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
                             <input type="hidden" name="warehouse_id_hidden" value="{{ $purchase->warehouse_id }}">
-                            <input type="hidden" name="supplier_id_hidden" value="{{ $purchase->supplier_id }}">
+                            <input type="hidden" name="supplier_id" value="{{ $purchase->supplier_id }}">
                             <input type="hidden" name="purchase_status_hidden" value="{{ $purchase->purchase_status }}">
                             <input type="hidden" name="order_tax_rate_hidden" value="{{ $purchase->order_tax_rate }}">
 
@@ -45,21 +45,10 @@
                             </div>
                             <x-form.textbox labelName="Purchase Date" name="purchase_date" value="{{ $purchase->purchase_date }}" required="required" class="date" col="col-md-4"/>
 
-                            <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required" col="col-md-4" class="selectpicker">
-                                @if (!$warehouses->isEmpty())
-                                @foreach ($warehouses as $warehouse)
-                                    <option value="{{ $warehouse->id }}" {{ ($warehouse->id == 1) ? '' : 'disabled' }}>{{ $warehouse->name }}</option>
-                                @endforeach 
-                                @endif
-                            </x-form.selectbox>
-
-                            <x-form.selectbox labelName="Supplier" name="supplier_id" required="required" col="col-md-4" class="selectpicker">
-                                @if (!$suppliers->isEmpty())
-                                    @foreach ($suppliers as $supplier)
-                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                                    @endforeach 
-                                @endif
-                            </x-form.selectbox>
+                            <div class="form-group col-md-4 required">
+                                <label for="chalan_no">Supplier</label>
+                                <input type="text" class="form-control" value="{{ $purchase->supplier->company_name.' ('.$purchase->supplier->name.')' }}" readonly />
+                            </div>
 
                             <x-form.selectbox labelName="Purchase Status" name="purchase_status" required="required" col="col-md-4" class="selectpicker" onchange="received_qty(this.value)">
                                 @foreach (PURCHASE_STATUS as $key => $value)
@@ -324,6 +313,7 @@
 
 @push('scripts')
 <script src="js/jquery-ui.js"></script>
+<script src="js/moment.js"></script>
 <script src="js/bootstrap-datetimepicker.min.js"></script>
 <script>
 $(document).ready(function () {

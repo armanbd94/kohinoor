@@ -15,7 +15,6 @@ class PurchaseFormRequest extends FormRequest
      */
     public function rules()
     {
-        $this->rules['warehouse_id']    = ['required'];
         $this->rules['supplier_id']     = ['required'];
         $this->rules['purchase_status'] = ['required'];
         $this->rules['order_discount']  = ['nullable','numeric','gte:0'];
@@ -41,6 +40,8 @@ class PurchaseFormRequest extends FormRequest
                 {
                     $this->rules['paid_amount'][2] = 'min:'.request()->grand_total;
                     $this->rules['paid_amount'][3] = 'max:'.request()->grand_total;
+                }elseif (request()->payment_status == 2) {
+                    $this->rules['paid_amount'][3] = 'lt:'.request()->grand_total;
                 }
                 $this->rules['payment_method'] = ['required'];
                 $this->rules['account_id'] = ['required'];

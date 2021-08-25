@@ -88,7 +88,6 @@ class Tax extends BaseModel
         });
     }
 
-
     public static function flushCache(){
         Cache::forget(self::ALL_TAXES);
         Cache::forget(self::ACTIVE_TAXES);

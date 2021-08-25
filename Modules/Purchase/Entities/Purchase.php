@@ -8,8 +8,9 @@ class Purchase extends BaseModel
 {
     protected $fillable = [
         'memo_no', 'warehouse_id', 'supplier_id', 'item', 'total_qty', 'total_discount', 'total_tax', 'total_labor_cost',
-        'total_cost', 'order_tax_rate', 'order_tax', 'order_discount', 'shipping_cost', 'grand_total', 'paid_amount',
-        'purchase_status', 'payment_status', 'document', 'note', 'purchase_date', 'created_by', 'modified_by'
+         'total_cost', 'order_tax_rate', 'order_tax', 'order_discount', 'shipping_cost', 'grand_total', 'paid_amount', 
+         'due_amount', 'purchase_status', 'payment_status', 'payment_method', 'document', 'note', 'purchase_date', 
+         'created_by', 'modified_by'
     ];
 
     public function supplier()

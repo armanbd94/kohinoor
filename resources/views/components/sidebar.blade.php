@@ -39,6 +39,7 @@
 
         <div id="kt_aside_menu" class="aside-menu my-4 " data-menu-vertical="1" data-menu-scroll="1" data-menu-dropdown-timeout="500">
             <ul class="menu-nav ">
+                @if(Session::get('user_menu'))
                 @foreach (Session::get('user_menu') as $menu)
                     @if($menu->children->isEmpty())
                         @if ($menu->type == 1)
@@ -115,6 +116,7 @@
                         </li>
                     @endif
                 @endforeach
+                @endif
             </ul>
         </div>
     </div>

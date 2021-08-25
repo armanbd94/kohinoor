@@ -39,14 +39,6 @@
                             </div>
                             <x-form.textbox labelName="Purchase Date" name="purchase_date" value="{{ date('Y-m-d') }}" required="required" class="date" col="col-md-4"/>
 
-                            <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required" col="col-md-4" class="selectpicker">
-                                @if (!$warehouses->isEmpty())
-                                @foreach ($warehouses as $warehouse)
-                                    <option value="{{ $warehouse->id }}" {{ ($warehouse->id == 1) ? 'selected' : 'disabled' }}>{{ $warehouse->name }}</option>
-                                @endforeach 
-                                @endif
-                            </x-form.selectbox>
-
                             <x-form.selectbox labelName="Supplier" name="supplier_id" required="required" col="col-md-4" class="selectpicker">
                                 @if (!$suppliers->isEmpty())
                                     @foreach ($suppliers as $supplier)
@@ -128,30 +120,7 @@
                                 <option value="{{ $key }}">{{ $value }}</option>
                                 @endforeach
                             </x-form.selectbox>
-                            <div class="payment col-md-12 d-none">
-                                <div class="row">
-                                    <div class="form-group col-md-3 required">
-                                        <label for="paid_amount">Paid Amount</label>
-                                        <input type="text" class="form-control" name="paid_amount" id="paid_amount">
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="due_amount">Due Amount</label>
-                                        <input type="text" class="form-control" id="due_amount" readonly>
-                                    </div>
-                                    <x-form.selectbox labelName="Payment Method" name="payment_method" required="required"  col="col-md-3" class="selectpicker">
-                                        @foreach (PAYMENT_METHOD as $key => $value)
-                                        <option value="{{ $key }}">{{ $value }}</option>
-                                        @endforeach
-                                    </x-form.selectbox>
-                                    <x-form.selectbox labelName="Account" name="account_id" required="required"  col="col-md-3" class="selectpicker"/>
-                                    <div class="form-group col-md-3 d-none cheque_number required">
-                                        <label for="cheque_number">Cheque No.</label>
-                                        <input type="text" class="form-control" name="cheque_number" id="cheque_number">
-                                    </div>
-                                </div>
                             
-                            </div>
-                           
                             <div class="form-group col-md-12">
                                 <label for="shipping_cost">Note</label>
                                 <textarea  class="form-control" name="note" id="note" cols="30" rows="3"></textarea>
@@ -178,6 +147,30 @@
                                 <input type="hidden" name="order_tax">
                                 <input type="hidden" name="grand_total">
                             </div>
+                            <div class="payment col-md-12 d-none">
+                                <div class="row">
+                                    <div class="form-group col-md-3 required">
+                                        <label for="paid_amount">Paid Amount</label>
+                                        <input type="text" class="form-control" name="paid_amount" id="paid_amount">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="due_amount">Due Amount</label>
+                                        <input type="text" class="form-control" id="due_amount" readonly>
+                                    </div>
+                                    <x-form.selectbox labelName="Payment Method" name="payment_method" required="required"  col="col-md-3" class="selectpicker">
+                                        @foreach (PAYMENT_METHOD as $key => $value)
+                                        <option value="{{ $key }}">{{ $value }}</option>
+                                        @endforeach
+                                    </x-form.selectbox>
+                                    <x-form.selectbox labelName="Account" name="account_id" required="required"  col="col-md-3" class="selectpicker"/>
+                                    <div class="form-group col-md-3 d-none cheque_number required">
+                                        <label for="cheque_number">Cheque No.</label>
+                                        <input type="text" class="form-control" name="cheque_number" id="cheque_number">
+                                    </div>
+                                </div>
+                            
+                            </div>
+                           
                             <div class="form-grou col-md-12 text-center pt-5">
                                 <button type="button" class="btn btn-danger btn-sm mr-3"><i class="fas fa-sync-alt"></i> Reset</button>
                                 <button type="button" class="btn btn-primary btn-sm mr-3" id="save-btn" onclick="store_data()"><i class="fas fa-save"></i> Save</button>
@@ -256,6 +249,7 @@
 
 @push('scripts')
 <script src="js/jquery-ui.js"></script>
+<script src="js/moment.js"></script>
 <script src="js/bootstrap-datetimepicker.min.js"></script>
 <script>
 $(document).ready(function () {
@@ -288,7 +282,6 @@ $(document).ready(function () {
 
 
     $('#material_code_name').autocomplete({
-        source: "{{url('material-autocomplete-search')}}",
         source: function( request, response ) {
           // Fetch data
           $.ajax({
@@ -307,7 +300,7 @@ $(document).ready(function () {
         minLength: 1,
         response: function(event, ui) {
             if (ui.content.length == 1) {
-                var data = ui.content[0].value;
+                var data = ui.content[0].code;
                 $(this).autocomplete( "close" );
                 materialSearch(data);
             };
@@ -315,7 +308,8 @@ $(document).ready(function () {
         select: function (event, ui) {
             // $('.material_search').val(ui.item.value);
             // $('.material_id').val(ui.item.id);
-            var data = ui.item.value;
+            var data = ui.item.code;
+            $(this).autocomplete( "close" );
             materialSearch(data);
         },
     }).data('ui-autocomplete')._renderItem = function (ul, item) {
@@ -393,6 +387,8 @@ $(document).ready(function () {
             material_cost[rowindex] = $('#edit_unit_cost').val() * row_unit_operation_value;
         }
 
+        console.log(material_cost);
+
         material_labor_cost[rowindex] = $('#edit_labor_cost').val();
         material_discount[rowindex] = $('#edit_discount').val();
         var position = $('#edit_unit').val();
@@ -460,6 +456,7 @@ $(document).ready(function () {
                 $('#material_code_name').val('');
                 if(flag)
                 {
+        
                     temp_unit_name = data.unit_name.split(',');
                     var newRow = $('<tr>');
                     var cols = '';
@@ -489,9 +486,10 @@ $(document).ready(function () {
                     cols += `<td class="tax text-right"></td>`;
                     cols += `<td class="labor_cost text-right"></td>`;
                     cols += `<td class="sub-total text-right"></td>`;
-                    cols += `<td class="text-center"><button type="button" class="edit-material btn btn-sm btn-primary mr-2" data-toggle="modal"
-                        data-target="#editModal"><i class="fas fa-edit"></i></button>
-                        <button type="button" class="btn btn-danger btn-sm remove-material"><i class="fas fa-trash"></i></button></td>`;
+                    cols += `<td class="text-center">
+                                <button type="button" class="edit-material btn btn-sm btn-primary mr-2 small-btn" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i></button>
+                                <button type="button" class="btn btn-danger btn-sm remove-material"><i class="fas fa-trash"></i></button>
+                            </td>`;
                     cols += `<input type="hidden" class="material-id" name="materials[`+count+`][id]"  value="`+data.id+`">`;
                     cols += `<input type="hidden" class="material-code" name="materials[`+count+`][code]" value="`+data.code+`">`;
                     cols += `<input type="hidden" class="material-unit" name="materials[`+count+`][unit]" value="`+temp_unit_name[0]+`">`;
@@ -569,6 +567,8 @@ $(document).ready(function () {
             var sub_total = (sub_total_unit * quantity) + parseFloat(material_labor_cost[rowindex]);
         }
 
+        console.log(`net_unit_cost = ${net_unit_cost}`);
+
         $('#material_table tbody tr:nth-child('+(rowindex + 1)+')').find('td:nth-child(6)').text(net_unit_cost.toFixed(2));
         $('#material_table tbody tr:nth-child('+(rowindex + 1)+')').find('.net_unit_cost').val(net_unit_cost.toFixed(2));
         $('#material_table tbody tr:nth-child('+(rowindex + 1)+')').find('td:nth-child(8)').text(tax.toFixed(2));
@@ -592,6 +592,11 @@ $(document).ready(function () {
         }else{
             row_material_cost = material_cost[rowindex] / row_unit_operation_value;
         }
+
+        console.log(`rowindex = ${rowindex}`);
+        console.log(`material_cost = ${material_cost[rowindex]}`);
+        console.log(`row_unit_operation_value = ${row_unit_operation_value}`);
+        console.log(`row_material_cost = ${row_material_cost}`);
     }
 
     function calculateTotal()
@@ -676,9 +681,14 @@ $(document).ready(function () {
         {
             $('#paid_amount').val(grand_total.toFixed(2));
         }else if($('#payment_status option:selected').val() == 2){
+            $('#paid_amount').val(grand_total.toFixed(2));
             var paid_amount = $('#paid_amount').val();
             $('#due_amount').val(parseFloat(grand_total-paid_amount).toFixed(2));
+        }else{
+            $('#paid_amount').val('0');
+            $('#due_amount').val(parseFloat(grand_total).toFixed(2));
         }
+
     }
 
     $('input[name="order_discount"]').on('input',function(){
@@ -698,6 +708,7 @@ $(document).ready(function () {
             $('#due_amount').val(parseFloat(0).toFixed(2));
         }else{
             $('#paid_amount').val(0);
+            $('#due_amount').val(parseFloat($('input[name="grand_total"]').val()).toFixed(2));
             $('.payment').addClass('d-none');
         }
     });

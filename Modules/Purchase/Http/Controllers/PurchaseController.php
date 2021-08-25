@@ -6,19 +6,18 @@ use DB;
 use Exception;
 use App\Models\Tax;
 use App\Models\Unit;
-use App\Models\Warehouse;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
-use Modules\Bank\Entities\Bank;
+use Modules\Material\Entities\Material;
 use Modules\Purchase\Entities\Purchase;
+use Modules\Setting\Entities\Warehouse;
 use Modules\Supplier\Entities\Supplier;
 use App\Http\Controllers\BaseController;
-use Modules\Account\Entities\ChartOfAccount;
 use Modules\Account\Entities\Transaction;
-use Modules\Material\Entities\Material;
-use Modules\Material\Entities\WarehouseMaterial;
 use Modules\Purchase\Entities\PurchasePayment;
+use Modules\Material\Entities\WarehouseMaterial;
 use Modules\Purchase\Http\Requests\PurchaseFormRequest;
+
 
 class PurchaseController extends BaseController
 {
@@ -26,7 +25,7 @@ class PurchaseController extends BaseController
     private const MEMO_NO = 1001;
     public function __construct(Purchase $model)
     {
-        parent::__construct($model);
+        $this->model = $model;
     }
     
     public function index()
@@ -98,7 +97,7 @@ class PurchaseController extends BaseController
                     $row[] = $no;
                     $row[] = $value->memo_no;
                     $row[] = $value->supplier->name.($value->supplier->mobile ? ' - '.$value->supplier->mobile : '');
-                    $row[] = $value->item;
+                    $row[] = $value->item.'('.$value->total_qty.')';
                     $row[] = number_format($value->total_cost,2);
                     $row[] = $value->order_discount ? number_format($value->order_discount,2) : 0;
                     $row[] = $value->total_labor_cost ? number_format($value->total_labor_cost,2) : 0;
@@ -128,11 +127,11 @@ class PurchaseController extends BaseController
             $this->setPageData('Add Purchase','Add Purchase','fas fa-shopping-cart',[['name' => 'Add Purchase']]);
             $purchase = $this->model->select('memo_no')->orderBy('memo_no','desc')->first();
             $data = [
-                'warehouses' => Warehouse::activeWarehouses(),
-                'suppliers'  => Supplier::activeSuppliers(),
+                'suppliers'  => Supplier::allSuppliers(),
                 'taxes'      => Tax::activeTaxes(),
                 'memo_no'   => 'PINV-'.($purchase ? explode('PINV-',$purchase->memo_no)[1] + 1 : self::MEMO_NO)
             ];
+            
             return view('purchase::create',$data);
         }else{
             return $this->access_blocked();
@@ -147,10 +146,11 @@ class PurchaseController extends BaseController
                 // dd($request->all());
                 DB::beginTransaction();
                 try {
+                    $warehouse_id = 1;
                     $purchase_data = [
                         'memo_no'          => $request->memo_no,
                         'supplier_id'      => $request->supplier_id,
-                        'warehouse_id'     => $request->warehouse_id,
+                        'warehouse_id'     => $warehouse_id,
                         'item'             => $request->item,
                         'total_qty'        => $request->total_qty,
                         'total_discount'   => $request->total_discount,
@@ -163,6 +163,7 @@ class PurchaseController extends BaseController
                         'shipping_cost'    => $request->shipping_cost ? $request->shipping_cost : null,
                         'grand_total'      => $request->grand_total,
                         'paid_amount'      => $request->paid_amount,
+                        'due_amount'       =>($request->grand_total - ($request->paid_amount ? $request->paid_amount : 0)),
                         'purchase_status'  => $request->purchase_status,
                         'payment_status'   => $request->payment_status,
                         'note'             => $request->note,
@@ -185,6 +186,7 @@ class PurchaseController extends BaseController
                     $materials = [];
                     if($request->has('materials'))
                     {
+                        
                         foreach ($request->materials as $key => $value) {
                             $unit = Unit::where('unit_name',$value['unit'])->first();
                             // dd($unit);
@@ -194,17 +196,21 @@ class PurchaseController extends BaseController
                                 $qty = $value['received'] / $unit->operation_value;
                             }
                             $material = Material::find($value['id']);
+                            $labor_cost = $value['labor_cost'] ? floatval($value['labor_cost']) : 0;
+                            $shipping_cost = $request->shipping_cost ? floatval($request->shipping_cost) : 0;
+
                             if($material->tax_method == 1){
+
                                 if($unit->operator == '*'){
-                                    $material_cost = ($value['net_unit_cost'] + ($value['discount'] / $value['qty'])) / $unit->operation_value;
+                                    $material_cost = (floatval($value['net_unit_cost'] + ($value['discount'] / $value['qty'])) / $unit->operation_value) + (($labor_cost / $value['qty'])  / $unit->operation_value) + $shipping_cost;
                                 }elseif ($unit->operator == '/') {
-                                    $material_cost = ($value['net_unit_cost'] + ($value['discount'] / $value['qty'])) * $unit->operation_value;
+                                    $material_cost = (floatval($value['net_unit_cost'] + ($value['discount'] / $value['qty'])) * $unit->operation_value ) + (($labor_cost / $value['qty'])  * $unit->operation_value) + $shipping_cost;
                                 }
                             }else{
                                 if($unit->operator == '*'){
-                                    $material_cost = (($value['subtotal'] + ($value['discount'] / $value['qty'])) / $value['qty']) / $unit->operation_value;
+                                    $material_cost = ((floatval($value['subtotal'] + ($value['discount'] / $value['qty'])) / $value['qty']) / $unit->operation_value) + $shipping_cost;
                                 }elseif ($unit->operator == '/') {
-                                    $material_cost = (($value['subtotal'] + ($value['discount'] / $value['qty'])) / $value['qty']) * $unit->operation_value;
+                                    $material_cost = ((floatval($value['subtotal'] + ($value['discount'] / $value['qty'])) / $value['qty']) * $unit->operation_value) + $shipping_cost;
                                 }
                                 
                             }
@@ -214,7 +220,7 @@ class PurchaseController extends BaseController
                                 'received'         => $value['received'],
                                 'purchase_unit_id' => $unit ? $unit->id : null,
                                 'net_unit_cost'    => $value['net_unit_cost'],
-                                'old_cost'         => $material->purchase_price ?? 0,
+                                'old_cost'         => $material->cost,
                                 'discount'         => $value['discount'],
                                 'tax_rate'         => $value['tax_rate'],
                                 'tax'              => $value['tax'],
@@ -225,11 +231,11 @@ class PurchaseController extends BaseController
                             
                             if($material){
                                 $material->qty += $qty;
-                                $material->purchase_price = $material_cost;
+                                $material->cost = $material_cost;
                                 $material->save();    
                             }
                             
-                            $warehouse_material = WarehouseMaterial::where(['warehouse_id'=>$request->warehouse_id,'material_id'=>$value['id']])->first();
+                            $warehouse_material = WarehouseMaterial::where(['warehouse_id'=>$warehouse_id,'material_id'=>$value['id']])->first();
                             if($warehouse_material){
                                 $warehouse_material->qty += $qty;
                                 $warehouse_material->save();
@@ -279,7 +285,7 @@ class PurchaseController extends BaseController
             // supplier Credit
             $purchase_coa_transaction = array(
                 'chart_of_account_id' => $supplier_coa_id,
-                'warehouse_id'        =>1,
+                'warehouse_id'        => 1,
                 'voucher_no'          => $purchase_id,
                 'voucher_type'        => 'Purchase',
                 'voucher_date'        => $purchase_date,
@@ -418,9 +424,7 @@ class PurchaseController extends BaseController
         if(permission('purchase-edit')){
             $this->setPageData('Edit Purchase','Edit Purchase','fas fa-edit',[['name'=>'Purchase','link' => route('purchase')],['name' => 'Edit Purchase']]);
             $data = [
-                'purchase'   => $this->model->with('purchase_materials')->find($id),
-                'warehouses' => Warehouse::activeWarehouses(),
-                'suppliers'  => Supplier::activeSuppliers(),
+                'purchase'   => $this->model->with('purchase_materials','supplier')->find($id),
                 'taxes'      => Tax::activeTaxes(),
             ];
             return view('purchase::edit',$data);
