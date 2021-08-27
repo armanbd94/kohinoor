@@ -4,11 +4,16 @@ namespace Modules\MobileBank\Entities;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Facades\Cache;
+use Modules\Setting\Entities\Warehouse;
 
 class MobileBank extends BaseModel
 {
-    protected $fillable = [ 'bank_name', 'account_name', 'account_number', 'status', 'created_by', 'modified_by'];
+    protected $fillable = [ 'bank_name', 'account_name', 'account_number','warehouse_id', 'status', 'created_by', 'modified_by'];
     
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class,'warehouse_id','id');
+    }
     /******************************************
      * * * Begin :: Custom Datatable Code * * *
     *******************************************/
@@ -16,7 +21,7 @@ class MobileBank extends BaseModel
     protected $_bank_name; 
     protected $_account_name; 
     protected $_account_number; 
-
+    protected $_warehouse_id;
     //methods to set custom search property value
     public function setBankName($bank_name)
     {
@@ -30,18 +35,21 @@ class MobileBank extends BaseModel
     {
         $this->_account_number = $account_number;
     }
-
+    public function setWarehouseID($warehouse_id)
+    {
+        $this->_warehouse_id = $warehouse_id;
+    }
 
     private function get_datatable_query()
     {
         //set column sorting index table column name wise (should match with frontend table header)
         if (permission('mobile-bank-bulk-delete')){
-            $this->column_order = [null,'id','bank_name','account_name','account_number','status',null];
+            $this->column_order = [null,'id','bank_name','account_name','account_number','warehouse_id',null,'status',null];
         }else{
-            $this->column_order = ['id','bank_name','account_name','account_number','status',null];
+            $this->column_order = ['id','bank_name','account_name','account_number','warehouse_id',null,'status',null];
         }
         
-        $query = self::toBase()->select('id','bank_name','account_name','account_number','status');
+        $query = self::with('warehouse:id,name');
 
         //search query
         if (!empty($this->_bank_name)) {
@@ -52,6 +60,10 @@ class MobileBank extends BaseModel
         }
         if (!empty($this->_account_number)) {
             $query->where('account_number', 'like', '%' . $this->_account_number . '%');
+        }
+
+        if (!empty($this->_warehouse_id)) {
+            $query->where('warehouse_id', $this->_warehouse_id);
         }
 
         //order by data fetching code

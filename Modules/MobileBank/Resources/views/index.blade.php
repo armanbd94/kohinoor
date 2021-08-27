@@ -34,10 +34,15 @@
                         <x-form.textbox labelName="Mobile Bank Name" name="bank_name" col="col-md-3" />
                         <x-form.textbox labelName="Account Name" name="account_name" col="col-md-3" />
                         <x-form.textbox labelName="Account Number" name="account_number" col="col-md-3" />
-
-                        <div class="col-md-3">
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required"  col="col-md-3" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                                @foreach ($warehouses as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            @endif
+                          </x-form.selectbox>
+                        <div class="col-md-12">
                             <div style="margin-top:28px;">    
-                                <div style="margin-top:28px;">    
                                     <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Reset">
                                     <i class="fas fa-undo-alt"></i></button>
@@ -45,7 +50,6 @@
                                     <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-right" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Search">
                                     <i class="fas fa-search"></i></button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -63,6 +67,7 @@
                                         <th>Bank Name</th>
                                         <th>Account Name</th>
                                         <th>Account Number</th>
+                                        <th>Warehouse</th>
                                         <th>Balance</th>
                                         <th>Status</th>
                                         <th>Action</th>
@@ -113,22 +118,23 @@
                     data.bank_name      = $("#form-filter #bank_name").val();
                     data.account_name   = $("#form-filter #account_name").val();
                     data.account_number = $("#form-filter #account_number").val();
+                    data.warehouse_id   = $("#form-filter #warehouse_id").val();
                     data._token         = _token;
                 }
             },
             "columnDefs": [
                 {
-                    "targets": [6],
+                    "targets": [7],
                     "orderable": false,
                     "className": "text-center"
                 },
                 {
-                    "targets": [4],
+                    "targets": [5],
                     "orderable": false,
                     "className": "text-right"
                 },
                 {
-                    "targets": [0,5],
+                    "targets": [0,6],
                     "className": "text-center"
                 },
             ],
@@ -137,7 +143,7 @@
                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'<'float-right'p>>>",
     
             "buttons": [
-                @if (permission('material-report'))
+                @if (permission('mobile-bank-report'))
                 {
                     'extend':'colvis','className':'btn btn-secondary btn-sm text-white','text':'Column','columns': ':gt(0)'
                 },
@@ -149,7 +155,7 @@
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
-                        columns: ':visible:not(:eq(6))' 
+                        columns: ':visible:not(:eq(7))' 
                     },
                     customize: function (win) {
                         $(win.document.body).addClass('bg-white');
@@ -167,7 +173,7 @@
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
-                        columns: ':visible:not(:eq(6))' 
+                        columns: ':visible:not(:eq(7))' 
                     }
                 },
                 {
@@ -177,7 +183,7 @@
                     "title": "{{ $page_title }} List",
                     "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                     "exportOptions": {
-                        columns: ':visible:not(:eq(6))' 
+                        columns: ':visible:not(:eq(7))' 
                     }
                 },
                 {
@@ -189,7 +195,7 @@
                     "orientation": "portrait", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
-                        columns: ':visible:not(:eq(6))' 
+                        columns: ':visible:not(:eq(7))' 
                     },
                     customize: function(doc) {
                         doc.defaultStyle.fontSize = 7; //<-- set fontsize to 16 instead of 10 
@@ -198,7 +204,7 @@
                     } 
                 },
                 @endif 
-                @if (permission('material-bulk-delete'))
+                @if (permission('mobile-bank-bulk-delete'))
                 {
                     'className':'btn btn-danger btn-sm delete_btn d-none text-white',
                     'text':'Delete',
@@ -254,6 +260,8 @@
                             $('#store_or_update_form #bank_name').val(data.bank_name);
                             $('#store_or_update_form #account_name').val(data.account_name);
                             $('#store_or_update_form #account_number').val(data.account_number);
+                            $('#store_or_update_form #warehouse_id').val(data.warehouse_id);
+                            $('#store_or_update_form .selectpicker').selectpicker('refresh');
 
                             $('#store_or_update_modal').modal({
                                 keyboard: false,

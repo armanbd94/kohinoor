@@ -18,6 +18,8 @@ class CreateMobileBanksTable extends Migration
             $table->string('bank_name');
             $table->string('account_name');
             $table->string('account_number');
+            $table->unsignedBigInteger('warehouse_id');
+            $table->foreign('warehouse_id')->references('id')->on('warehouses');
             $table->enum('status',['1','2'])->default('1')->comment = "1=Active, 2=Inactive";
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();

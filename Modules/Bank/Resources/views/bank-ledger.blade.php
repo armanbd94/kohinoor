@@ -123,7 +123,6 @@
         <!--end::Card-->
     </div>
 </div>
-@include('bank::bank-modal')
 @endsection
 
 @push('scripts')

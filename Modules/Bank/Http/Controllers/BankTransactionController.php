@@ -22,9 +22,8 @@ class BankTransactionController extends BaseController
     {
         if(permission('bank-transaction-access')){
             $this->setPageData('Bank Transaction','Bank Transaction','far fa-money-bill-alt',[['name' => 'Bank Transaction']]);
-            $banks = Bank::activeBankList();
             $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('bank::bank-transaction',compact('banks','warehouses'));
+            return view('bank::bank-transaction',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }

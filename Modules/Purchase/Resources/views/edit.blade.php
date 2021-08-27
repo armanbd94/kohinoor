@@ -40,7 +40,7 @@
                             <input type="hidden" name="order_tax_rate_hidden" value="{{ $purchase->order_tax_rate }}">
 
                             <div class="form-group col-md-4 required">
-                                <label for="chalan_no">Memo No.</label>
+                                <label for="memo_no">Memo No.</label>
                                 <input type="text" class="form-control" name="memo_no" id="memo_no" value="{{ $purchase->memo_no }}" readonly />
                             </div>
                             <x-form.textbox labelName="Purchase Date" name="purchase_date" value="{{ $purchase->purchase_date }}" required="required" class="date" col="col-md-4"/>
@@ -127,9 +127,9 @@
                                                                 }
                                                             }else{
                                                                 if($unit_operator[0] == '*'){
-                                                                    $material_cost = (($purchase_material->pivot->total + ($purchase_material->pivot->discount / $purchase_material->pivot->qty)) / $purchase_material->pivot->qty) / $unit_operation_value[0];
+                                                                    $material_cost = ((($purchase_material->pivot->total - $purchase_material->pivot->labor_cost) + ($purchase_material->pivot->discount / $purchase_material->pivot->qty)) / $purchase_material->pivot->qty) / $unit_operation_value[0];
                                                                 }elseif ($unit_operator[0] == '/') {
-                                                                    $material_cost = (($purchase_material->pivot->total + ($purchase_material->pivot->discount / $purchase_material->pivot->qty)) / $purchase_material->pivot->qty) * $unit_operation_value[0];
+                                                                    $material_cost = ((($purchase_material->pivot->total - $purchase_material->pivot->labor_cost) + ($purchase_material->pivot->discount / $purchase_material->pivot->qty)) / $purchase_material->pivot->qty) * $unit_operation_value[0];
                                                                 }
                                                             }
                                                             
@@ -161,7 +161,7 @@
                                                     <input type="hidden" class="purchase-unit material-unit" name="materials[{{ $key+1 }}][unit]" value="{{ $unit_name }}">
                                                     <input type="hidden" class="purchase-unit-operator"  value="{{ $unit_operator }}">
                                                     <input type="hidden" class="purchase-unit-operation-value"  value="{{ $unit_operation_value }}">
-                                                    <input type="hidden" class="net_unit_cost" name="materials[{{ $key+1 }}][net_unit_cost]" value="{{ $purchase_material->pivot->net_unit_cost }}">
+                                                    <input type="hidden" class="net-unit-cost" name="materials[{{ $key+1 }}][net_unit_cost]" value="{{ $purchase_material->pivot->net_unit_cost }}">
                                                     <input type="hidden" class="discount-value" name="materials[{{ $key+1 }}][discount]" value="{{ $purchase_material->pivot->discount }}">
                                                     <input type="hidden" class="tax-rate" name="materials[{{ $key+1 }}][tax_rate]" value="{{ $purchase_material->pivot->tax_rate }}">
                                                     @if ($tax)
@@ -793,25 +793,23 @@ $(document).ready(function () {
     });
 
 });
-received_qty($('#purchase_status option:selected').val());
+received_qty("{{ $purchase->purchase_status }}");
 function received_qty(purchase_status)
 {
     if(purchase_status == 2){
-        $(".recieved-material-qty").removeClass("d-none");
+        $(".received-material-qty").removeClass("d-none");
         $(".qty").each(function() {
             rowindex = $(this).closest('tr').index();
             $('table#material_table tbody tr:nth-child(' + (rowindex + 1) + ')').find('.recieved').val($(this).val());
         });
 
-    }
-    else if((purchase_status == 3) || (purchase_status == 4)){
-        $(".recieved-material-qty").addClass("d-none");
+    }else if((purchase_status == 3) || (purchase_status == 4)){
+        $(".received-material-qty").addClass("d-none");
         $(".recieved").each(function() {
             $(this).val(0);
         });
-    }
-    else {
-        $(".recieved-material-qty").addClass("d-none");
+    }else {
+        $(".received-material-qty").addClass("d-none");
         $(".qty").each(function() {
             rowindex = $(this).closest('tr').index();
             $('table#material_table tbody tr:nth-child(' + (rowindex + 1) + ')').find('.recieved').val($(this).val());

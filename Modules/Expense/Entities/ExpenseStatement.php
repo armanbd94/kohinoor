@@ -13,14 +13,17 @@ class ExpenseStatement extends BaseModel
     protected $table = 'expenses';
     protected $fillable = ['expense_item_id', 'voucher_no', 'amount', 'date', 'payment_type', 'account_id', 'remarks',
     'status','status_change_by','status_change_date', 'created_by', 'modified_by'];
+
     public function expense_item()
     {
         return $this->belongsTo(ExpenseItem::class);
     }
+
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
     }
+    
     public function coa()
     {
         return $this->belongsTo(ChartOfAccount::class,'account_id','id');

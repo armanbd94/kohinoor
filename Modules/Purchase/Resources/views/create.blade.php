@@ -752,7 +752,7 @@ $(document).ready(function () {
 function received_qty(purchase_status)
 {
     if(purchase_status == 2){
-        $(".recieved-material-qty").removeClass("d-none");
+        $(".received-material-qty").removeClass("d-none");
         $(".qty").each(function() {
             rowindex = $(this).closest('tr').index();
             $('table#material_table tbody tr:nth-child(' + (rowindex + 1) + ')').find('.recieved').val($(this).val());
@@ -760,13 +760,13 @@ function received_qty(purchase_status)
 
     }
     else if((purchase_status == 3) || (purchase_status == 4)){
-        $(".recieved-material-qty").addClass("d-none");
+        $(".received-material-qty").addClass("d-none");
         $(".recieved").each(function() {
             $(this).val(0);
         });
     }
     else {
-        $(".recieved-material-qty").addClass("d-none");
+        $(".received-material-qty").addClass("d-none");
         $(".qty").each(function() {
             rowindex = $(this).closest('tr').index();
             $('table#material_table tbody tr:nth-child(' + (rowindex + 1) + ')').find('.recieved').val($(this).val());

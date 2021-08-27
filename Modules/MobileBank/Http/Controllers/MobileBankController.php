@@ -24,7 +24,8 @@ class MobileBankController extends BaseController
     {
         if(permission('mobile-bank-access')){
             $this->setPageData('Mobile Bank List','Mobile Bank List','fas fa-mobile-alt',[['name' => 'Mobile Bank List']]);
-            return view('mobilebank::index');
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('mobilebank::index',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -44,7 +45,9 @@ class MobileBankController extends BaseController
                 if (!empty($request->account_number)) {
                     $this->model->setAccountNumber($request->account_number);
                 }
-
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
+                }
                 $this->set_datatable_default_properties($request);//set datatable default properties
                 $list = $this->model->getDatatableList();//get table data
                 $data = [];
@@ -63,6 +66,7 @@ class MobileBankController extends BaseController
                     $row[] = $value->bank_name;
                     $row[] = $value->account_name;
                     $row[] = $value->account_number;
+                    $row[] = $value->warehouse->name;
                     $row[] = config('settings.currency_position') == '1' ? config('settings.currency_symbol').number_format($this->bank_balance($value->bank_name),2)
                                 : number_format($this->bank_balance($value->bank_name),2).config('settings.currency_symbol');
                     $row[] = permission('mobile-bank-edit') ? change_status($value->id,$value->status, $value->bank_name) : STATUS_LABEL[$value->status];
@@ -266,5 +270,11 @@ class MobileBankController extends BaseController
 
             return view('mobilebank::ledger-data',$data)->render();
         }
+    }
+
+    public function warehouse_wise_mobile_bank_list(int $warehouse_id)
+    {
+        $banks = $this->model->where('warehouse_id',$warehouse_id)->pluck('bank_name','id');
+        return json_encode($banks);
     }
 }

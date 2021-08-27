@@ -15,10 +15,16 @@ class PurchaseFormRequest extends FormRequest
      */
     public function rules()
     {
+        $this->rules['memo_no']         = ['required','unique:purchases,memo_no'];
+        $this->rules['purchase_date']   = ['required','date_format:Y-m-d'];
         $this->rules['supplier_id']     = ['required'];
         $this->rules['purchase_status'] = ['required'];
         $this->rules['order_discount']  = ['nullable','numeric','gte:0'];
         $this->rules['shipping_cost']   = ['nullable','numeric','gte:0'];
+        if(request()->has('purchase_id'))
+        {
+            $this->rules['memo_no'][1] = 'unique:purchases,memo_no,'.request()->purchase_id;
+        }
 
         if(request()->has('materials'))
         {

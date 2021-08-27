@@ -21,9 +21,8 @@ class MobileBankTransactionController extends BaseController
     {
         if(permission('mobile-bank-transaction-access')){
             $this->setPageData('Mobile Bank Transaction','Mobile Bank Transaction','far fa-money-bill-alt',[['name' => 'Bank Transaction']]);
-            $banks = MobileBank::activeMobileBankList();
             $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('mobilebank::transaction',compact('banks','warehouses'));
+            return view('mobilebank::transaction',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
