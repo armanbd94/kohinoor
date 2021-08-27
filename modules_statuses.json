@@ -13,5 +13,6 @@
     "Purchase": true,
     "Bank": true,
     "MobileBank": true,
-    "Transfer": true
+    "Transfer": true,
+    "Expense": true
 }

@@ -26,6 +26,13 @@
                     
                         <form id="bank_transaction_form" method="post">
                             @csrf
+                            <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required" col="col-md-6" class="selectpicker">
+                                @if (!$warehouses->isEmpty())
+                                    @foreach ($warehouses as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
+                            </x-form.selectbox>
                             <x-form.textbox labelName="Date" name="voucher_date" required="required" class="date" value="{{ date('Y-m-d') }}" col="col-md-6"/>
                             <x-form.selectbox labelName="Account Type" name="account_type" required="required" col="col-md-6" class="selectpicker">
                                 <option value="Debit(+)">Debit (+)</option>
@@ -58,6 +65,7 @@
 @endsection
 
 @push('scripts')
+<script src="js/moment.js"></script>
 <script src="js/bootstrap-datetimepicker.min.js"></script>
 <script>
 $(document).ready(function () {

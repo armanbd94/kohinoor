@@ -2,6 +2,7 @@
 
 namespace Modules\Bank\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use Modules\Bank\Entities\Bank;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,8 @@ class BankTransactionController extends BaseController
         if(permission('bank-transaction-access')){
             $this->setPageData('Bank Transaction','Bank Transaction','far fa-money-bill-alt',[['name' => 'Bank Transaction']]);
             $banks = Bank::activeBankList();
-            return view('bank::bank-transaction',compact('banks'));
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('bank::bank-transaction',compact('banks','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -46,6 +48,7 @@ class BankTransactionController extends BaseController
                     }
                     $coa_bank_transaction = $collection->merge([
                         'chart_of_account_id' => ChartOfAccount::account_id_by_name($request->bank_name),//get chart of account(coa) id
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_type'        => 'Bank Transaction',
                         'debit'               => $debit,
                         'credit'              => $credit,
@@ -55,6 +58,7 @@ class BankTransactionController extends BaseController
                     $bank_transaction = $this->model->create($coa_bank_transaction->all());
                     $coa_cash_transaction = $collection->merge([
                         'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('cash_in_hand'))->value('id'),//get chart of account(coa) id
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_type'        => 'Bank Transaction',
                         'debit'               => $credit,
                         'credit'              => $debit,

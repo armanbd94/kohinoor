@@ -22,7 +22,8 @@ class MobileBankTransactionController extends BaseController
         if(permission('mobile-bank-transaction-access')){
             $this->setPageData('Mobile Bank Transaction','Mobile Bank Transaction','far fa-money-bill-alt',[['name' => 'Bank Transaction']]);
             $banks = MobileBank::activeMobileBankList();
-            return view('mobilebank::transaction',compact('banks'));
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('mobilebank::transaction',compact('banks','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -46,6 +47,7 @@ class MobileBankTransactionController extends BaseController
                     }
                     $coa_mobile_bank_transaction = $collection->merge([
                         'chart_of_account_id' => ChartOfAccount::account_id_by_name($request->bank_name),//get chart of account(coa) id
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_type'        => 'Mobile Bank Transaction',
                         'debit'               => $debit,
                         'credit'              => $credit,
@@ -55,6 +57,7 @@ class MobileBankTransactionController extends BaseController
                     $bank_transaction = $this->model->create($coa_mobile_bank_transaction->all());
                     $coa_cash_transaction = $collection->merge([
                         'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('cash_in_hand'))->value('id'),//get chart of account(coa) id
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_type'        => 'Mobile Bank Transaction',
                         'debit'               => $credit,
                         'credit'              => $debit,
@@ -69,7 +72,7 @@ class MobileBankTransactionController extends BaseController
                         $output = ['status'=>'error','message'=>'Failed to data'];
                     } 
                     DB::commit();
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     DB::rollback();
                     $output = ['status' => 'error','message' => $e->getMessage()];
                 }
