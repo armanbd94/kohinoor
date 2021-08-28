@@ -8,27 +8,41 @@ use Illuminate\Support\Facades\DB;
 use Modules\Customer\Entities\Customer;
 use App\Http\Controllers\BaseController;
 use Modules\Customer\Entities\CustomerAdvance;
-use Modules\ASM\Http\Requests\CustomerAdvanceFormRequest;
+use Modules\Customer\Http\Requests\CustomerAdvanceFormRequest;
 
 class CustomerAdvanceController extends BaseController
 {
     public function __construct(CustomerAdvance $model)
     {
-        parent::__construct($model);
+        $this->model = $model;
     }
-
 
     public function index()
     {
-        $this->setPageData('Customer Advance','Customer Advance','fas fa-hand-holding-usd',[['name'=>'Customer','link'=>route('customer')],['name'=>'Customer Advance']]);
-        $customers  = Customer::with('coa')->where(['status'=>1])->orderBy('name','asc')->get();
-        return view('customer::advance.index',compact('customers'));
+        if(permission('customer-advance-access')){
+            $this->setPageData('Customer Advance','Customer Advance','fas fa-hand-holding-usd',[['name'=>'Customer','link'=>route('customer')],['name'=>'Customer Advance']]);
+            $locations = DB::table('locations')->where('status', 1)->get();
+            return view('customer::advance.index',compact('locations'));
+        }else{
+            return $this->access_blocked();
+        }
     }
 
     public function get_datatable_data(Request $request)
     {
         if($request->ajax()){
-
+            if (!empty($request->district_id)) {
+                $this->model->setDistrictID($request->district_id);
+            }
+            if (!empty($request->upazila_id)) {
+                $this->model->setUpazilaID($request->upazila_id);
+            }
+            if (!empty($request->route_id)) {
+                $this->model->setRouteID($request->route_id);
+            }
+            if (!empty($request->area_id)) {
+                $this->model->setAreaID($request->area_id);
+            }
             if (!empty($request->customer_id)) {
                 $this->model->setCustomerID($request->customer_id);
             }
@@ -49,19 +63,36 @@ class CustomerAdvanceController extends BaseController
             foreach ($list as $value) {
                 $no++;
                 $action = '';
+                if(permission('credit-advance-edit')){
                 $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '">'.self::ACTION_BUTTON['Edit'].'</a>';
+                }
+                if(permission('credit-advance-delete')){
                 $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->name . ' advance ">'.self::ACTION_BUTTON['Delete'].'</a>';
+                }
+                $account = $this->account_data($value->voucher_no);
 
+                if($account->coa->parent_name == 'Cash & Cash Equivalent'){
+                    $payment_method = 'Cash';
+                }elseif ($account->coa->parent_name == 'Cash At Bank') {
+                    $payment_method = 'Cheque';
+                }elseif ($account->coa->parent_name == 'Cash At Mobile Bank') {
+                    $payment_method = 'Mobile Bank';
+                }
                 $row = [];
                 $row[] = row_checkbox($value->voucher_no);
                 $row[] = $no;
-                $row[] = $value->customer_name.' - '.$value->mobile.' ('.$value->shop_name.')';
+                $row[] = $value->customer_name;
+                $row[] = $value->shop_name;
+                $row[] = $value->mobile;
                 $row[] = $value->district_name;
                 $row[] = $value->upazila_name;
                 $row[] = $value->route_name;
+                $row[] = $value->area_name;
                 $row[] = ($value->debit != 0) ? 'Payment' : 'Receive' ;
                 $row[] = ($value->debit != 0) ? number_format($value->debit,2,'.',',') : number_format($value->credit,2,'.',',');
                 $row[] = date(config('settings.date_format'),strtotime($value->created_at));
+                $row[] = $payment_method;
+                $row[] = $account->coa->name;
                 $row[] = action_button($action);//custom helper function for action button
                 $data[] = $row;
             }
@@ -73,24 +104,32 @@ class CustomerAdvanceController extends BaseController
         }
     }
 
+    private function account_data(string $voucher_no) : object
+    {
+        return $this->model->with('coa')->where('voucher_no',$voucher_no)->orderBy('id','desc')->first();
+
+    }
+
     public function store_or_update_data(CustomerAdvanceFormRequest $request)
     {
         if($request->ajax()){
-            DB::beginTransaction();
-            try {
-                $customer = Customer::find($request->customer);
-                $warehouse_id = DB::table('asms')->where('district_id',$customer->district_id)->value('warehouse_id');
-                if(empty($request->id)){
-                    $result = $this->advance_add($request->type,$request->amount,$request->customer_coaid,$request->customer_name,$warehouse_id);
-                    $output = $this->store_message($result, $request->id);
-                }else{
-                    $result = $this->advance_update($request->id,$request->type,$request->amount,$request->customer_coaid,$request->customer_name,$warehouse_id);
-                    $output = $this->store_message($result, $request->id);
+            if(permission('customer-advance-add') || permission('customer-advance-edit')){
+                DB::beginTransaction();
+                try {
+                    if(empty($request->id)){
+                        $result = $this->advance_add($request->type,$request->amount,$request->customer_coaid,$request->customer_name,$request->payment_method,$request->account_id,$request->cheque_number);
+                        $output = $this->store_message($result, $request->id);
+                    }else{
+                        $result = $this->advance_update($request->id,$request->type,$request->amount,$request->customer_coaid,$request->customer_name,$request->payment_method,$request->account_id,$request->cheque_number);
+                        $output = $this->store_message($result, $request->id);
+                    }
+                    DB::commit();
+                } catch (Exception $e) {
+                    DB::rollBack();
+                    $output = ['status' => 'error','message' => $e->getMessage()];
                 }
-                DB::commit();
-            } catch (Exception $e) {
-                DB::rollBack();
-                $output = ['status' => 'error','message' => $e->getMessage()];
+            }else{
+                $output = $this->unauthorized();
             }
             return response()->json($output);
         }else{
@@ -98,13 +137,13 @@ class CustomerAdvanceController extends BaseController
         }
     }
 
-    private function advance_add(string $type, $amount, int $customer_coa_id, string $customer_name, int $warehouse_id) {
+    private function advance_add(string $type, $amount, int $customer_coa_id, string $customer_name,int $payment_method, int $account_id, string $cheque_number = null) {
         if(!empty($type) && !empty($amount) && !empty($customer_coa_id) && !empty($customer_name)){
             $transaction_id = generator(10);
 
             $customer_accledger = array(
                 'chart_of_account_id' => $customer_coa_id,
-                'warehouse_id'        => $warehouse_id,
+                'warehouse_id'        => auth()->user()->warehouse->id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'Advance',
                 'voucher_date'        => date("Y-m-d"),
@@ -116,13 +155,20 @@ class CustomerAdvanceController extends BaseController
                 'created_by'          => auth()->user()->name,
                 'created_at'          => date('Y-m-d H:i:s')
             );
+            if($payment_method == 1){
+                $note = 'Cash in Hand For '.$customer_name;
+            }elseif ($payment_method == 2) {
+                $note = $cheque_number;
+            }else{
+                $note = 'Cash at Mobile Bank For '.$customer_name;
+            }
             $cc = array(
-                'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('cash_in_hand'))->value('id'),
-                'warehouse_id'        => $warehouse_id,
+                'chart_of_account_id' => $account_id,
+                'warehouse_id'        => auth()->user()->warehouse->id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'Advance',
                 'voucher_date'        => date("Y-m-d"),
-                'description'         => 'Cash in Hand For '.$customer_name.' Advance',
+                'description'         => $note,
                 'debit'               => ($type == 'debit') ? $amount : 0,
                 'credit'              => ($type == 'credit') ? $amount : 0,
                 'posted'              => 1,
@@ -137,7 +183,7 @@ class CustomerAdvanceController extends BaseController
         }
     }
 
-    private function advance_update(int $transaction_id, string $type, $amount, int $customer_coa_id, string $customer_name, int $warehouse_id) {
+    private function advance_update(int $transaction_id, string $type, $amount, int $customer_coa_id, string $customer_name,int $payment_method, int $account_id, string $cheque_number = null) {
         if(!empty($type) && !empty($amount) && !empty($customer_coa_id) && !empty($customer_name)){
 
             $customer_advance_data = $this->model->find($transaction_id);
@@ -145,7 +191,7 @@ class CustomerAdvanceController extends BaseController
             $voucher_no = $customer_advance_data->voucher_no;
 
             $updated = $customer_advance_data->update([
-                'warehouse_id'        => $warehouse_id,
+                'warehouse_id'        => auth()->user()->warehouse->id,
                 'description'         => 'Supplier Advance For '.$customer_name,
                 'debit'               => ($type == 'debit') ? $amount : 0,
                 'credit'              => ($type == 'credit') ? $amount : 0,
@@ -154,17 +200,25 @@ class CustomerAdvanceController extends BaseController
             ]);
             if($updated)
             {
-                $this->model->where([
-                    'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('cash_in_hand'))->value('id'), 
-                    'voucher_no'=> $voucher_no])
-                    ->update([
-                        'warehouse_id'        => $warehouse_id,
-                        'description'         => 'Cash in Hand For '.$customer_name.' Advance',
+                if($payment_method == 1){
+                    $note = 'Cash in Hand For '.$customer_name;
+                }elseif ($payment_method == 2) {
+                    $note = $cheque_number;
+                }else{
+                    $note = 'Cash at Mobile Bank For '.$customer_name;
+                }
+                $account = $this->model->where('voucher_no', $voucher_no)->orderBy('id','desc')->first();
+                if($account){
+                    $account->update([
+                        'chart_of_account_id' => $account_id,
+                        'warehouse_id'        => auth()->user()->warehouse->id,
+                        'description'         => $note,
                         'debit'               => ($type == 'debit') ? $amount : 0,
                         'credit'              => ($type == 'credit') ? $amount : 0,
                         'modified_by'         => auth()->user()->name,
                         'updated_at'          => date('Y-m-d H:i:s')
                     ]);
+                }
                 return true;
             }else{
                 return false;
@@ -176,18 +230,32 @@ class CustomerAdvanceController extends BaseController
     public function edit(Request $request)
     {
         if($request->ajax()){
-            $data   = $this->model->select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id')
-            ->join('chart_of_accounts as coa','transactions.chart_of_account_id','=','coa.id')
-            ->join('customers as c','coa.customer_id','c.id')->where('transactions.id',$request->id)->first();
-
-            $output = []; //if data found then it will return data otherwise return error message
-            if($data){
-                $output = [
-                    'id'          => $data->id,
-                    'customer_id' => $data->customer_id,
-                    'type'        => ($data->debit != 0) ? 'debit' : 'credit',
-                    'amount'      => ($data->debit != 0) ? $data->debit : $data->credit,
-                ];
+            if(permission('customer-advance-edit')){
+                $data   = $this->model->select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id')
+                ->join('chart_of_accounts as coa','transactions.chart_of_account_id','=','coa.id')
+                ->join('customers as c','coa.customer_id','c.id')->where('transactions.id',$request->id)->first();
+                $account = $this->account_data($data->voucher_no);
+                if($account->coa->parent_name == 'Cash & Cash Equivalent'){
+                    $payment_method = 1;
+                }elseif ($account->coa->parent_name == 'Cash At Bank') {
+                    $payment_method = 2;
+                }elseif ($account->coa->parent_name == 'Cash At Mobile Bank') {
+                    $payment_method = 3;
+                }
+                $output = []; //if data found then it will return data otherwise return error message
+                if($data){
+                    $output = [
+                        'id'          => $data->id,
+                        'customer_id' => $data->customer_id,
+                        'type'        => ($data->debit != 0) ? 'debit' : 'credit',
+                        'amount'      => ($data->debit != 0) ? $data->debit : $data->credit,
+                        'payment_method' => $payment_method,
+                        'account_id'     => $account->chart_of_account_id,
+                        'cheque_no'      => ($payment_method == 2) ? $account->description : '',
+                    ];
+                }
+            }else{
+                $output       = $this->unauthorized();
             }
             return response()->json($output);
         }else{
@@ -198,8 +266,12 @@ class CustomerAdvanceController extends BaseController
     public function delete(Request $request)
     {
         if($request->ajax()){
-            $result   = $this->model->where('voucher_no',$request->id)->delete();
-            $output   = $this->delete_message($result);
+            if(permission('customer-advance-delete')){
+                $result   = $this->model->where('voucher_no',$request->id)->delete();
+                $output   = $this->delete_message($result);
+            }else{
+                $output       = $this->unauthorized();
+            }
             return response()->json($output);
         }else{
             return response()->json($this->unauthorized());
@@ -209,11 +281,17 @@ class CustomerAdvanceController extends BaseController
     public function bulk_delete(Request $request)
     {
         if($request->ajax()){
-            $result   = $this->model->whereIn('voucher_no',$request->ids)->delete();
-            $output   = $this->bulk_delete_message($result);
+            if(permission('customer-advance-bulk-delete')){
+                $result   = $this->model->whereIn('voucher_no',$request->ids)->delete();
+                $output   = $this->bulk_delete_message($result);
+            }else{
+                $output       = $this->unauthorized();
+            }
             return response()->json($output);
         }else{
             return response()->json($this->unauthorized());
         }
     }
+
+
 }

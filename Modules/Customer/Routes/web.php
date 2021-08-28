@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::group(['middleware' => ['auth','xss']], function () {
+Route::group(['middleware' => ['auth']], function () {
     Route::get('customer', 'CustomerController@index')->name('customer');
     Route::group(['prefix' => 'customer', 'as'=>'customer.'], function () {
         Route::post('datatable-data', 'CustomerController@get_datatable_data')->name('datatable.data');
@@ -25,7 +25,7 @@ Route::group(['middleware' => ['auth','xss']], function () {
         Route::get('group-data/{id}','CustomerController@groupData');
         Route::get('previous-balance/{id}', 'CustomerController@previous_balance');
     });
-    Route::post('route-id-wise-customer-list','CustomerController@route_id_wise_customer_list');
+    Route::post('customer-list','CustomerController@customer_list');
 
     //Customer Ledger Routes
     Route::get('customer-ledger', 'CustomerLedgerController@index')->name('customer.ledger');
@@ -34,11 +34,13 @@ Route::group(['middleware' => ['auth','xss']], function () {
     //Credit Customer Routes
     Route::get('credit-customer', 'CreditCustomerController@index')->name('credit.customer');
     Route::post('credit-customer/datatable-data', 'CreditCustomerController@get_datatable_data')->name('credit.customer.datatable.data');
+    Route::post('credit-customer-list', 'CreditCustomerController@credit_customers')->name('credit.customer.list');
 
     //Paid Customer Routes
     Route::get('paid-customer', 'PaidCustomerController@index')->name('paid.customer');
     Route::post('paid-customer/datatable-data', 'PaidCustomerController@get_datatable_data')->name('paid.customer.datatable.data');
-    
+    Route::post('paid-customer-list', 'PaidCustomerController@paid_customers')->name('paid.customer.list');
+
     //Customer Advance Routes
     Route::get('customer-advance', 'CustomerAdvanceController@index')->name('customer.advance');
     Route::group(['prefix' => 'customer-advance', 'as'=>'customer.advance.'], function () {

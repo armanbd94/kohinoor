@@ -4,18 +4,19 @@ namespace Modules\Customer\Entities;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Facades\DB;
+use Modules\Location\Entities\Area;
 use Modules\Location\Entities\Route;
 use Illuminate\Support\Facades\Cache;
 use Modules\Location\Entities\Upazila;
 use Modules\Location\Entities\District;
 use Modules\Account\Entities\Transaction;
+use Modules\Setting\Entities\CustomerGroup;
 use Modules\Account\Entities\ChartOfAccount;
-use Modules\Customer\Entities\CustomerGroup;
 
 class Customer extends BaseModel
 {
-    protected $fillable = [ 'name', 'shop_name', 'mobile', 'email', 'customer_group_id','district_id','upazila_id','route_id', 'postal_code', 
-    'address', 'status', 'created_by', 'modified_by'];
+    protected $fillable = [ 'name', 'shop_name', 'mobile', 'email', 'avatar', 'customer_group_id',
+     'district_id', 'upazila_id', 'route_id', 'area_id', 'address', 'status', 'created_by', 'modified_by'];
 
     public function customer_group()
     {
@@ -32,6 +33,10 @@ class Customer extends BaseModel
     public function route()
     {
         return $this->belongsTo(Route::class,'route_id','id');
+    }
+    public function area()
+    {
+        return $this->belongsTo(Area::class,'area_id','id');
     }
     public function coa(){
         return $this->hasOne(ChartOfAccount::class,'customer_id','id');
@@ -65,6 +70,7 @@ class Customer extends BaseModel
     protected $_mobile; 
     protected $_email; 
     protected $_customer_group_id; 
+    protected $_area_id; 
     protected $_district_id; 
     protected $_upazila_id; 
     protected $_route_id; 
@@ -91,13 +97,17 @@ class Customer extends BaseModel
     {
         $this->_customer_group_id = $customer_group_id;
     }
+    public function setDistrictID($district_id)
+    {
+        $this->_district_id = $district_id;
+    }
     public function setUpazilaID($upazila_id)
     {
         $this->_upazila_id = $upazila_id;
     }
-    public function setDistrictID($district_id)
+    public function setAreaID($area_id)
     {
-        $this->_district_id = $district_id;
+        $this->_area_id = $area_id;
     }
     public function setRouteID($route_id)
     {
@@ -112,13 +122,11 @@ class Customer extends BaseModel
     private function get_datatable_query()
     {
         //set column sorting index table column name wise (should match with frontend table header)
-        if (permission('customer-bulk-delete')){
-            $this->column_order = [null,'id','name', 'shop_name', 'mobile', 'customer_group_id','district_id','upazila_id','route_id', 'postal_code','status', null, null];
-        }else{
-            $this->column_order = ['id','name', 'shop_name', 'mobile', 'customer_group_id','district_id','upazila_id','route_id', 'postal_code','status',null,null];
-        }
+
+        $this->column_order = ['id','id','name', 'shop_name', 'mobile', 'customer_group_id','district_id','upazila_id','route_id', 'area_id','status',null,null];
         
-        $query = self::with('customer_group','upazila','route');
+        
+        $query = self::with('customer_group','district','upazila','route','area');
 
         //search query
         if (!empty($this->_name)) {
@@ -138,6 +146,9 @@ class Customer extends BaseModel
         }
         if (!empty($this->_district_id)) {
             $query->where('district_id',  $this->_district_id);
+        }
+        if (!empty($this->_area_id)) {
+            $query->where('area_id',  $this->_area_id);
         }
         if (!empty($this->_upazila_id)) {
             $query->where('upazila_id',  $this->_upazila_id);

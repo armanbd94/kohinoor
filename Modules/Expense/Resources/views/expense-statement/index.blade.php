@@ -149,8 +149,12 @@
             },
             "columnDefs": [
                 {
-                    "targets": [4],
+                    "targets": [5],
                     "className": "text-right"
+                },
+                {
+                    "targets": [0,1,2,3],
+                    "className": "text-center"
                 }
             ],
             "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6' <'float-right'B>>>" +

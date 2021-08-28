@@ -3,6 +3,7 @@
 namespace Modules\Purchase\Entities;
 
 use App\Models\BaseModel;
+use Modules\Setting\Entities\Warehouse;
 
 class Purchase extends BaseModel
 {
@@ -12,6 +13,11 @@ class Purchase extends BaseModel
          'due_amount', 'purchase_status', 'payment_status', 'payment_method', 'document', 'note', 'purchase_date', 
          'created_by', 'modified_by'
     ];
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
 
     public function supplier()
     {

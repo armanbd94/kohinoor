@@ -3,7 +3,7 @@
 namespace Modules\Customer\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Modules\Customer\Entities\Customer;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BaseController;
 use Modules\Customer\Entities\CustomerLedger;
 
@@ -11,15 +11,15 @@ class CustomerLedgerController extends BaseController
 {
     public function __construct(CustomerLedger $model)
     {
-        parent::__construct($model);
+        $this->model = $model;
     }
 
     public function index()
     {
         if(permission('customer-ledger-access')){
             $this->setPageData('Customer Ledger','Customer Ledger','fas fa-file-invoice-dollar',[['name'=>'Customer','link'=>route('customer')],['name'=>'Customer Ledger']]);
-            $customers = Customer::with('coa')->where(['status'=>1])->orderBy('name','asc')->get();
-            return view('customer::ledger.index',compact('customers'));
+            $locations = DB::table('locations')->where('status', 1)->get();
+            return view('customer::ledger.index',compact('locations'));
         }else{
             return $this->access_blocked();
         }
@@ -28,7 +28,18 @@ class CustomerLedgerController extends BaseController
     public function get_datatable_data(Request $request)
     {
         if($request->ajax()){
-
+            if (!empty($request->district_id)) {
+                $this->model->setDistrictID($request->district_id);
+            }
+            if (!empty($request->upazila_id)) {
+                $this->model->setUpazilaID($request->upazila_id);
+            }
+            if (!empty($request->route_id)) {
+                $this->model->setRouteID($request->route_id);
+            }
+            if (!empty($request->area_id)) {
+                $this->model->setAreaID($request->area_id);
+            }
             if (!empty($request->customer_id)) {
                 $this->model->setCustomerID($request->customer_id);
             }

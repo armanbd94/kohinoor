@@ -30,7 +30,6 @@ class CreateCustomersTable extends Migration
             $table->foreign('route_id')->references('id')->on('locations');
             $table->unsignedBigInteger('area_id');
             $table->foreign('area_id')->references('id')->on('locations');
-            $table->string('postal_code')->nullable();
             $table->text('address')->nullable();
             $table->enum('status',['1','2'])->default('1')->comment = "1=Active, 2=Inactive";
             $table->string('created_by')->nullable();

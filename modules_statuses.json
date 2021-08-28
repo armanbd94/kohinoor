@@ -14,5 +14,6 @@
     "Bank": true,
     "MobileBank": true,
     "Transfer": true,
-    "Expense": true
+    "Expense": true,
+    "StockReturn": true
 }

@@ -19,15 +19,14 @@ class CustomerFormRequest extends FormRequest
         $this->rules['shop_name']         = ['required','string','max:100'];
         $this->rules['mobile']            = ['required','string','max:15','unique:customers,mobile'];
         $this->rules['email']             = ['nullable','email','string','max:100','unique:customers,email'];
-        $this->rules['warehouse_id']      = ['required'];
+        $this->rules['area_id']           = ['required'];
         $this->rules['customer_group_id'] = ['required'];
         $this->rules['district_id']       = ['required'];
         $this->rules['upazila_id']        = ['required'];
         $this->rules['route_id']          = ['required'];
-        $this->rules['postal_code']       = ['nullable','string'];
         $this->rules['address']           = ['required','string'];
-        $this->rules['previous_balance']  = ['nullable','numeric'];
-
+        $this->rules['previous_balance']  = ['nullable','numeric','gt:0'];
+        $this->rules['avatar']                = ['nullable','image', 'mimes:png,jpg,jpeg'];
         if(request()->update_id){
             $this->rules['mobile'][3] = 'unique:customers,mobile,'.request()->update_id;
             $this->rules['email'][4]  = 'unique:customers,email,'.request()->update_id;
@@ -37,7 +36,7 @@ class CustomerFormRequest extends FormRequest
 
     public function messages()
     {
-        $this->messages['warehouse_id.required']      = 'This warehouse field is required';
+        $this->messages['area_id.required']      = 'This area field is required';
         $this->messages['customer_group_id.required'] = 'This customer group field is required';
         $this->messages['district_id.required']       = 'This district field is required';
         $this->messages['upazila_id.required']        = 'This upazila field is required';
