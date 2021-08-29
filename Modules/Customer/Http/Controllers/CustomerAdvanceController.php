@@ -98,7 +98,6 @@ class CustomerAdvanceController extends BaseController
             }
             return $this->datatable_draw($request->input('draw'),$this->model->count_all(),
             $this->model->count_filtered(), $data);
-            
         }else{
             return response()->json($this->unauthorized());
         }

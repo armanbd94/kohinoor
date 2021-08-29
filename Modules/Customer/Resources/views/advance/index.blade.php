@@ -522,6 +522,7 @@ function getRouteList(upazila_id,selector,route_id=''){
         },
     });
 }
+
 function getAreaList(route_id,selector,area_id=''){
     $.ajax({
         url:"{{ url('route-id-wise-area-list') }}/"+route_id,

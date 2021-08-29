@@ -3,7 +3,6 @@
 namespace Modules\Customer\Entities;
 
 use App\Models\BaseModel;
-use Illuminate\Support\Facades\Auth;
 use Modules\Customer\Entities\Customer;
 use Modules\Account\Entities\ChartOfAccount;
 
@@ -77,7 +76,7 @@ class CustomerAdvance extends BaseModel
     {
         //set column sorting index table column name wise (should match with frontend table header)
 
-        $this->column_order = ['transactions.id','c.name', 'c.shop_name','c.mobile','c.upazila_id','c.route_id','c.area_id',null,null,'transactions.created_at',null,null,null];
+        $this->column_order = ['transactions.id','c.name', 'c.shop_name','c.mobile','c.district_id','c.upazila_id','c.route_id','c.area_id',null,null,'transactions.created_at',null,null,null];
         
         
         $query = self::select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id','c.name as customer_name',
@@ -91,8 +90,6 @@ class CustomerAdvance extends BaseModel
         ->where([
             'transactions.voucher_type'=>self::TYPE,
             'transactions.approve'=>1,
-            'c.district_id'=>auth()->user()->district_id,
-            'transactions.warehouse_id'=>auth()->user()->warehouse->id
         ]);
 
         //search query
@@ -153,7 +150,10 @@ class CustomerAdvance extends BaseModel
         return self::select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id','c.name','c.shop_name','c.mobile')
         ->join('chart_of_accounts as coa','transactions.chart_of_account_id','=','coa.id')
         ->join('customers as c','coa.customer_id','c.id')
-        ->where(['transactions.voucher_type'=>self::TYPE])->get()->count();
+        ->where([
+            'transactions.voucher_type' => self::TYPE,
+            'transactions.approve'      => 1,
+        ])->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *
