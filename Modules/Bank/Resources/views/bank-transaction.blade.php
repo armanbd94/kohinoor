@@ -81,7 +81,7 @@ function getBankList(warehouse_id)
         success:function(data){
             html = `<option value="">Select Please</option>`;
             $.each(data, function(key, value) {
-                    html += '<option value="'+ key +'">'+ value +'</option>';
+                    html += '<option value="'+ value.bank_name +'">'+ value.bank_name + ' - ' + value.account_number +'</option>';
             });
             
             $('#bank_transaction_form #bank_name').empty().append(html);

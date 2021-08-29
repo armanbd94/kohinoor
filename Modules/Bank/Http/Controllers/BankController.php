@@ -272,7 +272,7 @@ class BankController extends BaseController
 
     public function warehouse_wise_bank_list(int $warehouse_id)
     {
-        $banks = $this->model->where('warehouse_id',$warehouse_id)->pluck('bank_name','id');
+        $banks = $this->model->where('warehouse_id',$warehouse_id)->get();
         return json_encode($banks);
     }
 }
