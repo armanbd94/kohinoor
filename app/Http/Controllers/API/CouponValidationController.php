@@ -12,6 +12,7 @@ class CouponValidationController extends APIController
     public function index(Request $request)
     {
         // qrcode = 'ID:1;CODE:64T1OSYJO2';
+        $errors  = [];
         $data    = [];
         $message = "";
         $status  = true;
@@ -21,8 +22,16 @@ class CouponValidationController extends APIController
             $code = explode(':',explode(';',$qrcode_text)[1])[1];
             $production_coupon = DB::table('production_coupons as pc')
             ->join('production_products as pp','pc.production_product_id','=','pp.id')
+            ->join('productions as pro','pp.production_id','=','pro.id')
             ->join('products as p','pp.product_id','=','p.id')
-            ->where(['pc.id'=>$id,'pc.coupon_code'=>$code])
+            ->where([
+                'pc.id'                 => $id,
+                'pc.coupon_code'        => $code,
+                'pro.warehouse_id'      => auth()->user()->warehouse_id,
+                'pro.status'            => 1,
+                'pro.production_status' => 3,
+                'pro.transfer_status'   => 2
+            ])
             ->selectRaw('pc.*,pp.coupon_price,pp.coupon_exp_date,p.name,p.image')
             ->first();
 
@@ -59,7 +68,7 @@ class CouponValidationController extends APIController
             $status  = false;
             $message = "Invalid QR Code!";
         }
-        return $this->sendResult($message,$data,$status);
+        return $this->sendResult($message,$data,$errors,$status);
     }
 
 }

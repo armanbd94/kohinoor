@@ -12,6 +12,7 @@ class SalesmenController extends APIController
 {
     public function daily_route_list(int $salesmen_id)
     {
+        $errors = [];
         $data    = [];
         $message = "";
         $status  = true;
@@ -36,11 +37,12 @@ class SalesmenController extends APIController
             $message = $e->getMessage();
         }
         
-        return $this->sendResult($message,$data,$status);
+        return $this->sendResult($message,$data,$errors,$status);
     }
 
     public function route_area_list(int $route_id)
     {
+        $errors    = [];
         $data    = [];
         $message = "";
         $status  = true;
@@ -70,11 +72,12 @@ class SalesmenController extends APIController
             $status  = false;
             $message = $e->getMessage();
         }
-        return $this->sendResult($message,$data,$status);
+        return $this->sendResult($message,$data,$errors,$status);
     }
 
     public function area_customer_list(int $area_id)
     {
+        $errors    = [];
         $data    = [];
         $message = "";
         $status  = true;
@@ -96,7 +99,7 @@ class SalesmenController extends APIController
             $status  = false;
             $message = $e->getMessage();
         }
-        return $this->sendResult($message,$data,$status);
+        return $this->sendResult($message,$data,$errors,$status);
     }
 
 }
