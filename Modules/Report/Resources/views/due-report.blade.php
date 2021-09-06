@@ -268,7 +268,7 @@ $(document).ready(function(){
 
     $('#btn-reset').click(function () {
         $('#form-filter')[0].reset();
-        $('#start_date, #end_date, #district_id').val("");
+        $('#start_date, #end_date, #district_id, #warehouse_id').val("");
         $('#upazila_id, #route_id, #area_id,#customer_id').empty();
         $('#form-filter .selectpicker').selectpicker('refresh');
         table.ajax.reload();

@@ -32,8 +32,14 @@
                                 <input type="hidden" id="end_date" name="end_date">
                             </div>
                         </div>
-                        
-                        <div class="col-md-8">
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-4" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
+                        <div class="col-md-4">
                             <div style="margin-top:28px;">      
                                 <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                 data-toggle="tooltip" data-theme="dark" title="Reset">
@@ -57,7 +63,7 @@
                                     <tr>
                                         <th>Sl</th>
                                         <th>Sales Date</th>
-                                        <th>Invoice No.</th>
+                                        <th>Memo No.</th>
                                         <th>Customer Name</th>
                                         <th>Shipping Cost</th>
                                     </tr>
@@ -127,6 +133,7 @@
                 "data": function (data) {
                     data.start_date   = $("#form-filter #start_date").val();
                     data.end_date     = $("#form-filter #end_date").val();
+                    data.warehouse_id     = $("#form-filter #warehouse_id").val();
                     data._token       = _token;
                 }
             },
@@ -152,7 +159,7 @@
                     "extend": 'print',
                     'text':'Print',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
+                    "title": "{{ $page_title }}",
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
@@ -176,8 +183,8 @@
                     "extend": 'csv',
                     'text':'CSV',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
-                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
+                    "title": "{{ $page_title }}",
+                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}",
                     "exportOptions": {
                         columns: function (index, data, node) {
                             return table.column(index).visible();
@@ -189,8 +196,8 @@
                     "extend": 'excel',
                     'text':'Excel',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
-                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
+                    "title": "{{ $page_title }}",
+                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}",
                     "exportOptions": {
                         columns: function (index, data, node) {
                             return table.column(index).visible();
@@ -202,8 +209,8 @@
                     "extend": 'pdf',
                     'text':'PDF',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
-                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
+                    "title": "{{ $page_title }}",
+                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}",
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
@@ -241,7 +248,7 @@
                     }, 0 );
 
                 // Update footer
-                $(api.column(4).footer()).html('= '+number_format(pageTotal) +' ('+ number_format(total) +' Total)');
+                $(api.column(4).footer()).html('= '+number_format(total));
             }
         });
     
@@ -252,6 +259,8 @@
         $('#btn-reset').click(function () {
             $('#form-filter')[0].reset();
             $('#form-filter #start_date,#form-filter #end_date').val('');
+            $('#warehouse_id').val("");
+            $('#form-filter .selectpicker').selectpicker('refresh');
             table.ajax.reload();
         });
     

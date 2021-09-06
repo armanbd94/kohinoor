@@ -19,6 +19,7 @@ class ShippingCostReport extends BaseModel
     protected $order = ['s.sale_date' => 'desc'];
     protected $start_date; 
     protected $end_date; 
+    protected $_warehouse_id; 
 
     //methods to set custom search property value
     public function setStartDate($start_date)
@@ -28,6 +29,11 @@ class ShippingCostReport extends BaseModel
     public function setEndDate($end_date)
     {
         $this->end_date = $end_date;
+    }
+
+    public function setWarehouseID($warehouse_id)
+    {
+        $this->_warehouse_id = $warehouse_id;
     }
 
     private function get_datatable_query()
@@ -40,13 +46,17 @@ class ShippingCostReport extends BaseModel
         $query = DB::table('sales as s')
         ->selectRaw("s.*, c.name, c.shop_name")
         ->leftjoin('customers as c','s.customer_id','=','c.id')
-        ->where([['s.warehouse_id',auth()->user()->warehouse->id],['s.shipping_cost','>',0]]);
+        ->where('s.shipping_cost','>',0);
         //search query
         if (!empty($this->start_date)) {
             $query->where('s.sale_date', '>=',$this->start_date);
         }
         if (!empty($this->end_date)) {
             $query->where('s.sale_date', '<=',$this->end_date);
+        }
+
+        if (!empty($this->_warehouse_id)) {
+            $query->where('s.warehouse_id', $this->_warehouse_id);
         }
 
         //order by data fetching code
@@ -75,11 +85,15 @@ class ShippingCostReport extends BaseModel
 
     public function count_all()
     {
-        return  DB::table('sales as s')
+        $query = DB::table('sales as s')
         ->selectRaw("s.*, c.name, c.shop_name")
         ->leftjoin('customers as c','s.customer_id','=','c.id')
-        ->where([['s.warehouse_id',auth()->user()->warehouse->id],['s.shipping_cost','>',0]])
-        ->get()->count();
+        ->where('s.shipping_cost','>',0);
+
+        if (!empty($this->_warehouse_id)) {
+            $query->where('s.warehouse_id', $this->_warehouse_id);
+        }
+        return $query->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *

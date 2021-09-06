@@ -18,8 +18,8 @@ class ShippingCostReportController extends BaseController
     {
         if(permission('shipping-cost-report-access')){
             $this->setPageData('Shipping Cost Report','Shipping Cost Report','fas fa-file',[['name' => 'Report','link'=>'javascript::void();'],['name' => 'Shipping Cost Report']]);
-            $warehosues = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('report::shipping-cost-report',compact('warehosues'));
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('report::shipping-cost-report',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -34,7 +34,9 @@ class ShippingCostReportController extends BaseController
             if (!empty($request->end_date)) {
                 $this->model->setEndDate($request->end_date);
             }
-
+            if (!empty($request->warehouse_id)) {
+                $this->model->setWarehouseID($request->warehouse_id);
+            }
             $this->set_datatable_default_properties($request);//set datatable default properties
             $list = $this->model->getDatatableList();//get table data
             $data = [];
@@ -43,7 +45,7 @@ class ShippingCostReportController extends BaseController
                 $no++;
                 $row = [];
                 $row[] = $no;
-                $row[] = date(config('settings.date_format',strtotime($value->sale_date)));
+                $row[] = date('d-M-Y',strtotime($value->sale_date));
                 $row[] = $value->memo_no;
                 $row[] = $value->shop_name.' - '.$value->name;
                 $row[] = number_format(($value->shipping_cost),2, '.', ',');
