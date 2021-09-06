@@ -32,46 +32,34 @@
                                 <input type="hidden" id="end_date" name="end_date">
                             </div>
                         </div>
-                        <x-form.selectbox labelName="Salesman" name="salesmen_id" col="col-md-3" class="selectpicker" onchange="getRouteList(this.value)">
-                            @if (!$salesmen->isEmpty())
-                                @foreach ($salesmen as $id => $name)
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" required="required" onchange="getSalesmenList(this.value)" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
+                        <x-form.selectbox labelName="Salesman" name="salesmen_id" col="col-md-3" class="selectpicker"/>
+
+                        <x-form.selectbox labelName="District" name="district_id" col="col-md-3" class="selectpicker" onchange="getUpazilaList(this.value)">
+                            @if (!$districts->isEmpty())
+                                @foreach ($districts as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
                                 @endforeach
                             @endif
                         </x-form.selectbox>
 
-                        <x-form.selectbox labelName="Upazila" name="upazila_id" col="col-md-3" class="selectpicker" onchange="getRouteList(this.value)">
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 2 && $location->parent_id == auth()->user()->district_id)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </x-form.selectbox>
+                        <x-form.selectbox labelName="Upazila" name="upazila_id" col="col-md-3" class="selectpicker" onchange="getRouteList(this.value)"/>
 
-                        <x-form.selectbox labelName="Route" name="route_id" col="col-md-3" class="selectpicker" onchange="getAreaList(this.value)">
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 3 && $location->grand_parent_id == auth()->user()->district_id)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </x-form.selectbox>
 
-                        <x-form.selectbox labelName="Area" name="area_id" col="col-md-3" class="selectpicker" onchange="customer_list(this.value)">
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 4 && $location->grand_grand_parent_id == auth()->user()->district_id)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </x-form.selectbox>
+                        <x-form.selectbox labelName="Route" name="route_id" col="col-md-3" class="selectpicker" onchange="getAreaList(this.value);"/>
+
+
+                        <x-form.selectbox labelName="Area" name="area_id" col="col-md-3" class="selectpicker" onchange="customer_list(this.value)"/>
+
                         <x-form.selectbox labelName="Customer" name="customer_id" col="col-md-3" class="selectpicker"/>
                         
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div style="margin-top:28px;">     
                                     <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Reset">
@@ -97,6 +85,7 @@
                                         <th>Sale Date</th>
                                         <th>Sale By</th>
                                         <th>Memo No.</th>
+                                        <th>District</th>
                                         <th>Upazila</th>
                                         <th>Route</th>
                                         <th>Area</th>
@@ -107,6 +96,7 @@
                                 <tbody></tbody>
                                 <tfoot>
                                     <tr class="bg-primary">
+                                        <th></th>
                                         <th></th>
                                         <th></th>
                                         <th></th>
@@ -182,11 +172,11 @@ $(document).ready(function(){
         },
         "columnDefs": [
             {
-                "targets": [0,1,2,3,4,5,6,7],
+                "targets": [0,1,2,3,4,5,6,7,8],
                 "className": "text-center"
             },
             {
-                "targets": [8],
+                "targets": [9],
                 "className": "text-right"
             },
 
@@ -279,17 +269,17 @@ $(document).ready(function(){
                         i : 0;
             };
 
-            total = api.column(8).data().reduce( function (a, b) {
+            total = api.column(9).data().reduce( function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0 );
 
             // Total over this page
-            pageTotal = api.column(8, { page: 'current'}).data().reduce( function (a, b) {
+            pageTotal = api.column(9, { page: 'current'}).data().reduce( function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0 );
 
             // Update footer
-            $(api.column(8).footer()).html('= '+number_format(pageTotal) +' ('+ number_format(total) +' Total)');
+            $(api.column(9).footer()).html('= '+number_format(total));
         }
     });
 
@@ -298,31 +288,43 @@ $(document).ready(function(){
     });
 
     $('#btn-reset').click(function () {
-        window.location.replace("{{ url('collection-report') }}");
+        $('#form-filter')[0].reset();
+        $('#start_date, #end_date, #district_id, #warehouse_id').val("");
+        $('#salesmen_id,#upazila_id, #route_id, #area_id,#customer_id').empty();
+        $('#form-filter .selectpicker').selectpicker('refresh');
+        table.ajax.reload();
     });
 });
-customer_list();
-function customer_list()
-{
-    let upazila_id = document.getElementById('upazila_id').value;
-    let route_id = document.getElementById('route_id').value;
-    let area_id = document.getElementById('area_id').value;
+function getSalesmenList(warehouse_id){
     $.ajax({
-        url:"{{ url('customer-list') }}",
-        type:"POST",
-        data:{upazila_id:upazila_id,route_id:route_id,area_id:area_id,_token:_token},
+        url:"{{ url('warehouse-wise-salesmen-list') }}/"+warehouse_id,
+        type:"GET",
         dataType:"JSON",
         success:function(data){
             html = `<option value="">Select Please</option>`;
             $.each(data, function(key, value) {
-                html += `<option value="${value.id}">${value.name} - ${value.mobile} (${value.shop_name})</option>`;
+                html += '<option value="'+ key +'">'+ value +'</option>';
             });
-            $('#form-filter #customer_id').empty().append(html);
-            $('#form-filter #customer_id.selectpicker').selectpicker('refresh');
-      
+            $('#form-filter #salesmen_id').empty().append(html);
+            $('.selectpicker').selectpicker('refresh');
         },
     });
+}
 
+function getUpazilaList(district_id){
+    $.ajax({
+        url:"{{ url('district-id-wise-upazila-list') }}/"+district_id,
+        type:"GET",
+        dataType:"JSON",
+        success:function(data){
+            html = `<option value="">Select Please</option>`;
+            $.each(data, function(key, value) {
+                html += '<option value="'+ key +'">'+ value +'</option>';
+            });
+            $('#form-filter #upazila_id').empty().append(html);
+            $('.selectpicker').selectpicker('refresh');
+        },
+    });
 }
 function getRouteList(upazila_id){
     $.ajax({
@@ -353,6 +355,30 @@ function getAreaList(route_id,selector,area_id=''){
             $('.selectpicker').selectpicker('refresh');
         },
     });
+}
+
+function customer_list()
+{
+    let district_id = document.getElementById('district_id').value;
+    let upazila_id = document.getElementById('upazila_id').value;
+    let route_id = document.getElementById('route_id').value;
+    let area_id = document.getElementById('area_id').value;
+    $.ajax({
+        url:"{{ url('customer-list') }}",
+        type:"POST",
+        data:{district_id:district_id,upazila_id:upazila_id,route_id:route_id,area_id:area_id,_token:_token},
+        dataType:"JSON",
+        success:function(data){
+            html = `<option value="">Select Please</option>`;
+            $.each(data, function(key, value) {
+                html += `<option value="${value.id}">${value.name} - ${value.mobile} (${value.shop_name})</option>`;
+            });
+            $('#form-filter #customer_id').empty().append(html);
+            $('#form-filter #customer_id.selectpicker').selectpicker('refresh');
+      
+        },
+    });
+
 }
 </script>
 @endpush

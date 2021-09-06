@@ -19,8 +19,7 @@ class CollectionReportController extends BaseController
         if(permission('collection-report-access')){
             $this->setPageData('Collection Report','Collection Report','fas fa-file',[['name' => 'Collection Report']]);
             $data = [
-                'salesmen'    => DB::table('salesmen')->where([['district_id',auth()->user()->district_id],['status',1]])->pluck('name','id'),
-                'locations'   => DB::table('locations')->where('status', 1)->get(),
+                'districts'   => DB::table('locations')->where([['status', 1],['parent_id',0]])->pluck('name','id'),
                 'warehouses'  => DB::table('warehouses')->where('status',1)->pluck('name','id')
             ];
             return view('report::collection-report',$data);
@@ -32,6 +31,9 @@ class CollectionReportController extends BaseController
     public function get_datatable_data(Request $request)
     {
         if($request->ajax()){
+            if (!empty($request->warehouse_id)) {
+                $this->model->setWarehouseID($request->warehouse_id);
+            }
             if (!empty($request->start_date)) {
                 $this->model->setStartDate($request->start_date);
             }
@@ -44,8 +46,9 @@ class CollectionReportController extends BaseController
             if (!empty($request->customer_id)) {
                 $this->model->setCustomerID($request->customer_id);
             }
-            if (!empty($request->area_id)) {
-                $this->model->setAreaID($request->area_id);
+            
+            if (!empty($request->district_id)) {
+                $this->model->setDistrictID($request->district_id);
             }
             if (!empty($request->upazila_id)) {
                 $this->model->setUpazilaID($request->upazila_id);
@@ -54,7 +57,9 @@ class CollectionReportController extends BaseController
                 $this->model->setRouteID($request->route_id);
             }
 
-
+            if (!empty($request->area_id)) {
+                $this->model->setAreaID($request->area_id);
+            }
 
             $this->set_datatable_default_properties($request);//set datatable default properties
 
@@ -65,9 +70,10 @@ class CollectionReportController extends BaseController
                 $no++;
                 $row = [];
                 $row[] = $no;
-                $row[] = $value->sale_date;
+                $row[] = date('d-M-Y',strtotime($value->sale_date));
                 $row[] = $value->salesman_name;
                 $row[] = $value->memo_no;
+                $row[] = $value->district_name;
                 $row[] = $value->upazila_name;
                 $row[] = $value->route_name;
                 $row[] = $value->area_name;
