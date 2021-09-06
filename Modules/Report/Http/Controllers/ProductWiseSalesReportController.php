@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Modules\Product\Entities\Product;
 use App\Http\Controllers\BaseController;
 use Modules\Report\Entities\ProductWiseSalesReport;
+use Illuminate\Support\Facades\DB;
 
 class ProductWiseSalesReportController extends BaseController
 {
@@ -19,8 +20,8 @@ class ProductWiseSalesReportController extends BaseController
         if(permission('product-wise-sales-report-access')){
             $this->setPageData('Product Wise Sales Report','Product Wise Sales Report','fas fa-file',[['name' => 'Report'],['name' => 'Product Wise Sales Report']]);
             $products = Product::toBase()->select('id','name','code')->get();
-            $warehosues = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('report::product-wise-sales-report',compact('products','warehosues'));
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('report::product-wise-sales-report',compact('products','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -31,6 +32,9 @@ class ProductWiseSalesReportController extends BaseController
         if($request->ajax()){
             if (!empty($request->product_id)) {
                 $this->model->setProductID($request->product_id);
+            }
+            if (!empty($request->warehouse_id)) {
+                $this->model->setWarehouseID($request->warehouse_id);
             }
             if (!empty($request->start_date)) {
                 $this->model->setStartDate($request->start_date);
@@ -50,8 +54,8 @@ class ProductWiseSalesReportController extends BaseController
                 $row[] = $value->name;
                 $row[] = $value->code;
                 $row[] = $value->memo_no;
-                $row[] = $value->sale_date;
-                $row[] = $value->qty.' '.$value->unit_name.'('.$value->unit_code.')';
+                $row[] = date('d-M-Y',strtotime($value->sale_date));
+                $row[] = $value->qty.' '.$value->unit_name;
                 $row[] = number_format($value->net_unit_price,2,'.','');
                 $row[] = number_format($value->tax,2,'.','');
                 $row[] = number_format($value->total,2,'.','');

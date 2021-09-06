@@ -14,6 +14,7 @@ class ProductWiseSalesReport extends BaseModel
     protected $order = ['s.sale_date' => 'desc'];
     //custom search column property
     protected $_product_id; 
+    protected $_warehouse_id; 
     protected $_start_date; 
     protected $_end_date; 
 
@@ -21,6 +22,10 @@ class ProductWiseSalesReport extends BaseModel
     public function setProductID($product_id)
     {
         $this->_product_id = $product_id;
+    }
+    public function setWarehouseID($warehouse_id)
+    {
+        $this->_warehouse_id = $warehouse_id;
     }
     public function setStartDate($start_date)
     {
@@ -42,14 +47,15 @@ class ProductWiseSalesReport extends BaseModel
         ->join('sales as s','sp.sale_id','=','s.id')
         ->join('products as p','sp.product_id','=','p.id')
         ->join('units as u','sp.sale_unit_id','=','u.id')
-        ->selectRaw('sp.*,s.memo_no,s.sale_date,p.name,p.code,u.unit_name,u.unit_code')
-        ->where('s.warehouse_id',auth()->user()->warehouse->id);
+        ->selectRaw('sp.*,s.memo_no,s.sale_date,p.name,p.code,u.unit_name,u.unit_code');
 
         //search query
         if (!empty($this->_product_id)) {
-            $query->where('product_id', $this->_product_id);
+            $query->where('sp.product_id', $this->_product_id);
         }
-
+        if (!empty($this->_warehouse_id)) {
+            $query->where('s.warehouse_id', $this->_warehouse_id);
+        }
         if (!empty($this->_start_date) && !empty($this->_end_date)) {
             $query->whereDate('s.sale_date', '>=',$this->_start_date)
                 ->whereDate('s.sale_date', '<=',$this->_end_date);
@@ -81,10 +87,13 @@ class ProductWiseSalesReport extends BaseModel
 
     public function count_all()
     {
-        return  DB::table('sale_products as sp')
+        $query = DB::table('sale_products as sp')
         ->join('sales as s','sp.sale_id','=','s.id')
-        ->join('products as p','sp.product_id','=','p.id')
-        ->where('s.warehouse_id',auth()->user()->warehouse->id)->get()->count();
+        ->join('products as p','sp.product_id','=','p.id');
+        if (!empty($this->_warehouse_id)) {
+            $query->where('s.warehouse_id', $this->_warehouse_id);
+        }
+        return $query->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *

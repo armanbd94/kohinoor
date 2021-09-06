@@ -23,9 +23,9 @@
         <div class="card card-custom">
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
-                    <div class="row justify-content-center">
+                    <div class="row">
                         
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label for="name">Choose Your Date</label>
                             <div class="input-group">
                                 <input type="text" class="form-control daterangepicker-filed">
@@ -33,24 +33,30 @@
                                 <input type="hidden" id="end_date" name="end_date">
                             </div>
                         </div>
-                        <x-form.selectbox labelName="Product" name="product_id" col="col-md-4" class="selectpicker">
+                        <x-form.selectbox labelName="Product" name="product_id" col="col-md-6" class="selectpicker">
                             @if (!$products->isEmpty())
                                 @foreach ($products as $value)
-                                    <option value="{{ $value->id }}">{{ $value->name.' - '.$value->code }}</option>
+                                    <option value="{{ $value->id }}">{{ $value->code.' - '.$value->name }}</option>
                                 @endforeach
                             @endif
                         </x-form.selectbox>
 
-                        <div class="col-md-4">
-                            <div style="margin-top:28px;">    
-                                    <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
-                                    data-toggle="tooltip" data-theme="dark" title="Reset">
-                                    <i class="fas fa-undo-alt"></i></button>
-    
-                                    <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-right" type="button"
-                                    data-toggle="tooltip" data-theme="dark" title="Search">
-                                    <i class="fas fa-search"></i></button>
-                            </div>
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
+
+                        <div class="col-md-12">   
+                            <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
+                            data-toggle="tooltip" data-theme="dark" title="Reset">
+                            <i class="fas fa-undo-alt"></i></button>
+
+                            <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-right" type="button"
+                            data-toggle="tooltip" data-theme="dark" title="Search">
+                            <i class="fas fa-search"></i></button>
                         </div>
                     </div>
                 </form>
@@ -143,7 +149,8 @@
                 "url": "{{route('product.wise.sales.report.datatable.data')}}",
                 "type": "POST",
                 "data": function (data) {
-                    data.product_id     = $("#form-filter #product_id").val();
+                    data.warehouse_id = $("#form-filter #warehouse_id").val();
+                    data.product_id   = $("#form-filter #product_id").val();
                     data.start_date   = $("#form-filter #start_date").val();
                     data.end_date     = $("#form-filter #end_date").val();
                     data._token       = _token;
@@ -260,7 +267,7 @@
                     }, 0 );
 
                 // Update footer
-                $(api.column(9).footer()).html('= '+number_format(pageTotal) +' ('+ number_format(total) +' Total)');
+                $(api.column(9).footer()).html('= '+number_format(total));
             }
         });
 
@@ -270,8 +277,7 @@
     
         $('#btn-reset').click(function () {
             $('#form-filter')[0].reset();
-            $('#form-filter #start_date').val("");
-            $('#form-filter #end_date').val("");
+            $('#start_date, #end_date, #warehouse_id, #product_id').val("");
             $('#form-filter .selectpicker').selectpicker('refresh');
             table.ajax.reload();
         });
