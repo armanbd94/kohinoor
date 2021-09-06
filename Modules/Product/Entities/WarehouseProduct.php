@@ -2,11 +2,12 @@
 
 namespace Modules\Product\Entities;
 
+use App\Models\BaseModel;
+use Illuminate\Support\Facades\DB;
 use Modules\Product\Entities\Product;
-use Illuminate\Database\Eloquent\Model;
 use Modules\Setting\Entities\Warehouse;
 
-class WarehouseProduct extends Model
+class WarehouseProduct extends BaseModel
 {
     protected $table = 'warehouse_product';
     protected $fillable = ['batch_no', 'warehouse_id', 'product_id', 'qty'];
@@ -28,6 +29,7 @@ class WarehouseProduct extends Model
     //custom search column property
     protected $_batch_no; 
     protected $_product_id; 
+    protected $_warehouse_id; 
 
     //methods to set custom search property value
     public function setBatchNo($batch_no)
@@ -40,6 +42,11 @@ class WarehouseProduct extends Model
         $this->_product_id = $product_id;
     }
 
+    public function setWarehouseID($warehouse_id)
+    {
+        $this->_warehouse_id = $warehouse_id;
+    }
+
     private function get_datatable_query()
     {
 
@@ -49,7 +56,7 @@ class WarehouseProduct extends Model
         ->selectRaw('wp.*,p.name,p.base_unit_price,u.unit_name')
         ->join('products as p','wp.product_id','=','p.id')
         ->join('units as u','p.base_unit_id','=','u.id')
-        ->where('wp.warehouse_id',auth()->user()->warehouse->id)
+        ->where('wp.warehouse_id',$this->_warehouse_id)
         ->groupBy('wp.batch_no','wp.product_id');
 
         //search query
@@ -89,7 +96,7 @@ class WarehouseProduct extends Model
     public function count_all()
     {
         return DB::table('warehouse_product')
-        ->where('warehouse_id',auth()->user()->warehouse->id)->get()->count();
+        ->where('warehouse_id',$this->_warehouse_id)->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *

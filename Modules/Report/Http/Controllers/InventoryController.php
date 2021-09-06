@@ -2,6 +2,7 @@
 namespace Modules\Report\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BaseController;
 use Modules\Product\Entities\WarehouseProduct;
 
@@ -17,7 +18,8 @@ class InventoryController extends BaseController
     {
         if(permission('inventory-report-access')){
             $this->setPageData('Inventory Report','Inventory Report','fas fa-boxes',[['name'=>'Inventory Report']]);
-            return view('inventory.index');
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('report::inventory',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -33,6 +35,9 @@ class InventoryController extends BaseController
                 }
                 if (!empty($request->product_id)) {
                     $this->model->setProductID($request->product_id);
+                }
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
                 }
 
                 $this->set_datatable_default_properties($request);//set datatable default properties

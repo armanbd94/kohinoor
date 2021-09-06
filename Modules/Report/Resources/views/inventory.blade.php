@@ -25,12 +25,18 @@
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
                     <div class="row">
-                        <x-form.textbox labelName="Batch No." name="batch_no" col="col-md-4" />
-                        <x-form.textbox labelName="Product Name" name="product_name" col="col-md-4" />
+                        <x-form.textbox labelName="Batch No." name="batch_no" col="col-md-3" />
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" required="required" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
+                        <x-form.textbox labelName="Product Name" name="product_name" col="col-md-6" />
                         <input type="hidden" class="form-control" name="product_id" id="product_id">
                         
-                        <div class="col-md-4">
-                            <div style="margin-top:28px;">     
+                        <div class="col-md-12"> 
                                 <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                 data-toggle="tooltip" data-theme="dark" title="Reset">
                                 <i class="fas fa-undo-alt"></i></button>
@@ -38,7 +44,6 @@
                                 <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-right" type="button"
                                 data-toggle="tooltip" data-theme="dark" title="Search">
                                 <i class="fas fa-search"></i></button>
-                            </div>
                         </div>
                     </div>
                 </form>
@@ -152,8 +157,9 @@ $(document).ready(function(){
             "url": "{{route('inventory.report.datatable.data')}}",
             "type": "POST",
             "data": function (data) {
-                data.batch_no  = $("#form-filter #batch_no").val();
-                data.product_id  = $("#form-filter #product_id").val();
+                data.batch_no     = $("#form-filter #batch_no").val();
+                data.product_id   = $("#form-filter #product_id").val();
+                data.warehouse_id = $("#form-filter #warehouse_id").val();
                 data._token       = _token;
             }
         },
@@ -276,7 +282,8 @@ $(document).ready(function(){
 
     $('#btn-reset').click(function () {
         $('#form-filter')[0].reset();
-        $('#product_name,#product_id').val('');
+        $('#product_name,#product_id,#warehouse_id').val('');
+        $('#form-filter .selectpicker').selectpicker('refresh');
         table.ajax.reload();
     });
 });
