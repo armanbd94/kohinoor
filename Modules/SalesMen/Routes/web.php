@@ -25,5 +25,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('change-status', 'SalesMenController@change_status')->name('change.status');
         Route::post('upazila-route-list', 'SalesMenController@upazila_route_list')->name('upazila.route.list');
         Route::post('daily-route-list', 'SalesMenController@daily_route_list')->name('daily.route.list');
+        
     });
+    Route::get('warehouse-wise-salesmen-list/{warehouse_id}', 'SalesMenController@warehouse_wise_salesmen_list')->name('warehouse.wise.salesmen.list');
 });

@@ -341,7 +341,7 @@
                                 <table id="info-table" style="margin-top: 10px;">
                                     <tr><td width="20%"><b>Chalan No.</b></td><td width="5%"><b>:</b></td><td><b>{{ $transfer->chalan_no }}</b></td></tr>
                                     <tr><td width="20%"><b>Batch No.</b></td><td width="5%"><b>:</b></td><td>{{ $transfer->production->batch_no }}</td></tr>
-                                    <tr><td width="20%"><b>Warehouse</b></td><td width="5%"><b>:</b></td><td>{{ $transfer->warehouse_name }}</td></tr>
+                                    <tr><td width="20%"><b>Warehouse</b></td><td width="5%"><b>:</b></td><td>{{ $transfer->warehouse->name }}</td></tr>
                                     <tr><td width="20%"><b>Transfer Date</b></td><td width="5%"><b>:</b></td><td>{{ date('d-M-Y',strtotime($transfer->transfer_date)) }}</td></tr>
                                 </table>
 

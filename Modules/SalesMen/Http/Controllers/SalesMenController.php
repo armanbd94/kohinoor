@@ -261,4 +261,10 @@ class SalesMenController extends BaseController
             return $output;
         }
     }
+
+    public function warehouse_wise_salesmen_list(int $warehouse_id)
+    {
+        $salesmen = $this->model->where('warehouse_id',$warehouse_id)->pluck('name','id');
+        return json_encode($salesmen);
+    }
 }

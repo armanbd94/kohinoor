@@ -31,7 +31,7 @@
                             <tr>
                                 <td>{{ $key+1 }}</td>
                                 <td>{{ $item->material->material_name }}</td>
-                                <td class="text-center">{{ $item->material_code }}</td>
+                                <td class="text-center">{{ $item->material->material_code }}</td>
                                 <td class="text-center">{{ MATERIAL_TYPE[$item->material->type] }}</td>
                                 <td class="text-center">{{ $item->material->unit->unit_name }}</td>
                                 <td class="text-right">{{ number_format($item->material->cost,2,'.','') }}</td>
@@ -48,7 +48,7 @@
                         <tr>
                             <td>{{ $key+1 }}</td>
                             <td>{{ $item->material->material_name }}</td>
-                            <td class="text-center">{{ $item->material_code }}</td>
+                            <td class="text-center">{{ $item->material->material_code }}</td>
                             <td class="text-center">{{ MATERIAL_TYPE[$item->material->type] }}</td>
                             <td class="text-center">{{ $item->material->unit->unit_name }}</td>
                             <td class="text-right">{{ number_format($item->material->cost,2,'.','') }}</td>
