@@ -77,4 +77,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('inventory-report', 'InventoryController@index')->name('inventory.report');
     Route::post('inventory-report/datatable-data', 'InventoryController@get_datatable_data')->name('inventory.report.datatable.data');
 
+     //Material Alert Report Route
+     Route::get('material-stock-alert-report', 'MaterialStockAlertController@index')->name('material.stock.alert.report');
+     Route::post('material-stock-alert-report/datatable-data', 'MaterialStockAlertController@get_datatable_data')->name('material.stock.alert.report.datatable.data');
 });
