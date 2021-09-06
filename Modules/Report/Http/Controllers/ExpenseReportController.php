@@ -20,8 +20,8 @@ class ExpenseReportController extends BaseController
         if(permission('product-wise-sales-report-access')){
             $this->setPageData('Expense Report','Expense Report','fas fa-file',[['name' => 'Report'],['name' => 'Expense Report']]);
             $expense_items = ExpenseItem::toBase()->get();
-            $warehosues = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('report::expense-report',compact('expense_items','warehosues'));
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('report::expense-report',compact('expense_items','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -39,6 +39,9 @@ class ExpenseReportController extends BaseController
             if (!empty($request->end_date)) {
                 $this->model->setEndDate($request->end_date);
             }
+            if (!empty($request->warehouse_id)) {
+                $this->model->setWarehouseID($request->warehouse_id);
+            }
             $this->set_datatable_default_properties($request);//set datatable default properties
             $list = $this->model->getDatatableList();//get table data
             $data = [];
@@ -48,7 +51,7 @@ class ExpenseReportController extends BaseController
                 $row = [];
                 $row[] = $no;
                 $row[] = $value->voucher_no;
-                $row[] = date(config('settings.date_format',strtotime($value->date)));
+                $row[] = date('d-M-Y',strtotime($value->date));
                 $row[] = $value->expense_name;
                 $row[] = $value->remarks;
                 $row[] = PAYMENT_METHOD[$value->payment_type];

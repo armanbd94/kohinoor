@@ -27,6 +27,7 @@ class ExpenseReport extends BaseModel
     //custom search column property
     protected $order = ['e.id' => 'desc'];
     protected $_expense_item_id; 
+    protected $_warehouse_id; 
     protected $_start_date; 
     protected $_end_date; 
     //methods to set custom search property value
@@ -42,6 +43,10 @@ class ExpenseReport extends BaseModel
     {
         $this->_end_date = $end_date;
     }
+    public function setWarehouseID($warehouse_id)
+    {
+        $this->_warehouse_id = $warehouse_id;
+    }
 
     private function get_datatable_query()
     {
@@ -54,13 +59,13 @@ class ExpenseReport extends BaseModel
         ->join('expense_items as ei','e.expense_item_id','=','ei.id')
         ->join('chart_of_accounts as coa','e.account_id','=','coa.id')
         ->selectRaw('e.*,ei.name as expense_name,coa.name as account_name')
-        ->where('e.warehouse_id',auth()->user()->warehouse->id);
+        ->where('e.warehouse_id',$this->_warehouse_id);
 
         //search query
         if (!empty($this->_expense_item_id)) {
             $query->where('e.expense_item_id', $this->_expense_item_id);
         }
-        if (!empty($this->_start_date)) {
+        if (!empty($this->_start_date) && !empty($this->_end_date)) {
             $query->whereDate('e.date', '>=',$this->_start_date)
                   ->whereDate('e.date', '<=',$this->_end_date);
         }
@@ -92,7 +97,7 @@ class ExpenseReport extends BaseModel
 
     public function count_all()
     {
-        return self::toBase()->where('warehouse_id',auth()->user()->warehouse->id)->get()->count();
+        return self::toBase()->where('warehouse_id',$this->_warehouse_id)->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *
