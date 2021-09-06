@@ -81,7 +81,7 @@ class DueReport extends BaseModel
     {
         //set column sorting index table column name wise (should match with frontend table header)
 
-        $this->column_order = ['s,id','s.sale_date', 's.memo_no','s.customer_id','s.upazila_id','s.route_id','s.area_id','s.due_amount'];
+        $this->column_order = ['s,id','s.sale_date', 's.memo_no','s.customer_id','s.district_id','s.upazila_id','s.route_id','s.area_id','s.due_amount'];
         
         
         $query = DB::table('sales as s')
@@ -94,7 +94,7 @@ class DueReport extends BaseModel
         ->join('locations as u', 'c.upazila_id', '=', 'u.id')
         ->join('locations as r', 'c.route_id', '=', 'r.id')
         ->join('locations as a', 'c.area_id', '=', 'a.id')
-        ->where([['s.warehouse_id',auth()->user()->warehouse->id],['s.due_amount','>',0]]);
+        ->where('s.due_amount','>',0);
         //search query
         if (!empty($this->start_date)) {
             $query->where('s.sale_date', '>=',$this->start_date);
@@ -110,6 +110,9 @@ class DueReport extends BaseModel
             $query->where('s.customer_id', $this->_customer_id);
         }
         
+        if (!empty($this->_warehouse_id)) {
+            $query->where('s.warehouse_id', $this->_warehouse_id);
+        }
         if (!empty($this->_district_id)) {
             $query->where('c.district_id', $this->_district_id);
         }
@@ -148,18 +151,24 @@ class DueReport extends BaseModel
 
     public function count_all()
     {
-        return DB::table('sales')
-        ->where([['warehouse_id',auth()->user()->warehouse->id],['due_amount','>',0]])
-        ->get()->count();
+        $query = DB::table('sales')
+        ->where('due_amount','>',0);
+        if (!empty($this->_warehouse_id)) {
+            $query->where('warehouse_id', $this->_warehouse_id);
+        }
+        if (!empty($this->_customer_id)) {
+            $query->where('customer_id', $this->_customer_id);
+        }
+        return $query->get()->count();
     }
 
-    public function total_customer_dues($start_date=null,$end_date=null,$memo_no=null,$customer_id=null,$upazila_id=null,$route_id=null,$area_id=null)
+    public function total_customer_dues($warehouse_id=null,$start_date=null,$end_date=null,$memo_no=null,$customer_id=null,$district_id=null,$upazila_id=null,$route_id=null,$area_id=null)
     {
        $customer_dues = DB::table('sales as s')
        ->leftJoin('customers as c','s.customer_id','=','c.id')
             ->selectRaw('s.customer_id,s.due_amount,max(s.id) as last_due_id')
             ->groupBy('s.customer_id')
-            ->where([['s.warehouse_id',auth()->user()->warehouse->id],['s.due_amount','>',0]])
+            ->where('s.due_amount','>',0)
             ->when($start_date,function($q) use($start_date){
                 $q->whereDate('s.sale_date','>=',$start_date);
             })
@@ -169,8 +178,14 @@ class DueReport extends BaseModel
             ->when($memo_no,function($q) use($memo_no){
                 $q->where('s.memo_no',$memo_no);
             })
+            ->when($warehouse_id,function($q) use($warehouse_id){
+                $q->where('s.warehouse_id',$warehouse_id);
+            })
             ->when($customer_id,function($q) use($customer_id){
                 $q->where('s.customer_id',$customer_id);
+            })
+            ->when($district_id,function($q) use($district_id){
+                $q->where('c.district_id',$district_id);
             })
             ->when($upazila_id,function($q) use($upazila_id){
                 $q->where('c.upazila_id',$upazila_id);

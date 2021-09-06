@@ -19,7 +19,7 @@ class DueReportController extends BaseController
         if(permission('due-report-access')){
             $this->setPageData('Due Report','Due Report','fas fa-file',[['name' => 'Due Report']]);
             $data = [
-                'locations'   => DB::table('locations')->where('status', 1)->get(),
+                'districts'   => DB::table('locations')->where([['status', 1],['parent_id',0]])->pluck('name','id'),
                 'warehouses'  => DB::table('warehouses')->where('status',1)->pluck('name','id')
             ];
             return view('report::due-report',$data);
@@ -35,6 +35,9 @@ class DueReportController extends BaseController
                 $this->model->setMemoNo($request->memo_no);
             }
 
+            if (!empty($request->warehouse_id)) {
+                $this->model->setWarehouseID($request->warehouse_id);
+            }
             if (!empty($request->customer_id)) {
                 $this->model->setCustomerID($request->customer_id);
             }
@@ -45,9 +48,8 @@ class DueReportController extends BaseController
             if (!empty($request->end_date)) {
                 $this->model->setEndDate($request->end_date);
             }
-
-            if (!empty($request->area_id)) {
-                $this->model->setAreaID($request->area_id);
+            if (!empty($request->district_id)) {
+                $this->model->setDistrictID($request->district_id);
             }
             if (!empty($request->upazila_id)) {
                 $this->model->setUpazilaID($request->upazila_id);
@@ -55,10 +57,9 @@ class DueReportController extends BaseController
             if (!empty($request->route_id)) {
                 $this->model->setRouteID($request->route_id);
             }
-            if (!empty($request->payment_status)) {
-                $this->model->setPaymentStatus($request->payment_status);
+            if (!empty($request->area_id)) {
+                $this->model->setAreaID($request->area_id);
             }
-
             $this->set_datatable_default_properties($request);//set datatable default properties
 
             $list = $this->model->getDatatableList();//get table data
@@ -71,6 +72,7 @@ class DueReportController extends BaseController
                 $row[] = $no;
                 $row[] = $value->memo_no;
                 $row[] = $value->shop_name.' - '.$value->name;
+                $row[] = $value->district_name;
                 $row[] = $value->upazila_name;
                 $row[] = $value->route_name;
                 $row[] = $value->area_name;
@@ -81,7 +83,7 @@ class DueReportController extends BaseController
                 "draw" => $request->input('draw'),
                 "recordsTotal" => $this->model->count_all(),
                 "recordsFiltered" => $this->model->count_filtered(),
-                "data" => $data,'total_due'=> $this->model->total_customer_dues($request->start_date,$request->end_date,$request->memo_no,$request->customer_id,$request->upazila_id,$request->route_id,$request->area_id)
+                "data" => $data,'total_due'=> $this->model->total_customer_dues($request->warehouse_id,$request->start_date,$request->end_date,$request->memo_no,$request->customer_id,$request->district_id,$request->upazila_id,$request->route_id,$request->area_id)
             ];
             
             
