@@ -71,4 +71,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('warehouse-summary', 'WarehouseSummaryController@index')->name('warehouse.summary');
     Route::post('warehouse-summary/data', 'WarehouseSummaryController@summary_data')->name('warehouse.summary.data');
 
+    Route::get('coupon-received-report', 'ReceivedCouponController@index')->name('coupon.received.report');
+    Route::post('coupon-received-report/datatable-data', 'ReceivedCouponController@get_datatable_data')->name('coupon.received.report.datatable.data');
+
+    Route::get('inventory-report', 'InventoryController@index')->name('inventory.report');
+    Route::post('inventory-report/datatable-data', 'InventoryController@get_datatable_data')->name('inventory.report.datatable.data');
+
 });

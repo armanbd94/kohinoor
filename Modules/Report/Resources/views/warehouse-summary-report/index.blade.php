@@ -44,8 +44,14 @@
                                 <input type="hidden" id="end_date" name="end_date">
                             </div>
                         </div>
-                        
-                        <div class="col-md-8">
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-4" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
+                        <div class="col-md-4">
                             <div style="margin-top:28px;">     
                                     <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Reset">
@@ -116,26 +122,32 @@ $(document).ready(function(){
 
 function summary_data()
 {
+    let warehouse_id = document.getElementById('warehouse_id').value;
     let start_date = document.getElementById('start_date').value;
     let end_date = document.getElementById('end_date').value;
     if (start_date && end_date) {
-        $.ajax({
-            url:"{{ route('warehouse.summary.data') }}",
-            type:"POST",
-            data:{start_date:start_date,end_date:end_date,_token:_token},
-            beforeSend: function(){
-                $('#table-loader').removeClass('d-none');
-            },
-            complete: function(){
-                $('#table-loader').addClass('d-none');
-            },
-            success:function(data){
-                $('#summary_data').empty().html(data);
-            },
-            error: function (xhr, ajaxOption, thrownError) {
-                console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
-            }
-        });
+        if(warehouse_id)
+        {
+            $.ajax({
+                url:"{{ route('warehouse.summary.data') }}",
+                type:"POST",
+                data:{warehouse_id:warehouse_id,start_date:start_date,end_date:end_date,_token:_token},
+                beforeSend: function(){
+                    $('#table-loader').removeClass('d-none');
+                },
+                complete: function(){
+                    $('#table-loader').addClass('d-none');
+                },
+                success:function(data){
+                    $('#summary_data').empty().html(data);
+                },
+                error: function (xhr, ajaxOption, thrownError) {
+                    console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+                }
+            });
+        }else{
+            notification('error','Please select warehouse!');
+        }
     } else {
         notification('error','Please choose date!');
     }

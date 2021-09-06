@@ -12,8 +12,8 @@ class WarehouseSummaryController extends BaseController
     {
         if(permission('warehouse-summary-access')){
             $this->setPageData('Warehouse Summary','Warehouse Summary','fas fa-file',[['name' => 'Warehouse Summary']]);
-            $warehosues = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('report::warehouse-summary-report.index',compact('warehosues'));
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('report::warehouse-summary-report.index',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -24,7 +24,7 @@ class WarehouseSummaryController extends BaseController
         if($request->ajax())
         {
 
-            $warehouse_id = auth()->user()->warehouse->id;
+            $warehouse_id = $request->warehouse_id;
             $start_date = $request->start_date;
             $end_date   = $request->end_date;
             
@@ -41,14 +41,6 @@ class WarehouseSummaryController extends BaseController
                                 ->whereDate('sale_date','<=',$end_date)
                                 ->groupBy('warehouse_id')
                                 ->first();
-
-            // DB::select('SELECT customer_id, SUM(total_due)
-            // FROM
-            //     (SELECT customer_id, MAX(id) as last_due,due_amount as total_due
-            //     FROM sales
-            //     WHERE warehouse_id = ? AND due_amount > 0
-            //     GROUP BY customer_id) as due_amount
-            // GROUP BY customer_id', [$warehouse_id]);
 
             $total_due_grand_values = DB::table('sales')
             ->selectRaw('customer_id,due_amount,max(id) as last_due_id')

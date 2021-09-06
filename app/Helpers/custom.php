@@ -228,47 +228,47 @@ if (!function_exists('numberTowords')) {
     {
 
         $ones = array(
-            0 => "ZERO",
-            1 => "ONE",
-            2 => "TWO",
-            3 => "THREE",
-            4 => "FOUR",
-            5 => "FIVE",
-            6 => "SIX",
-            7 => "SEVEN",
-            8 => "EIGHT",
-            9 => "NINE",
-            10 => "TEN",
-            11 => "ELEVEN",
-            12 => "TWELVE",
-            13 => "THIRTEEN",
-            14 => "FOURTEEN",
-            15 => "FIFTEEN",
-            16 => "SIXTEEN",
-            17 => "SEVENTEEN",
-            18 => "EIGHTEEN",
-            19 => "NINETEEN",
-            "014" => "FOURTEEN",
+            0 => "Zero",
+            1 => "One",
+            2 => "Two",
+            3 => "Three",
+            4 => "Four",
+            5 => "Five",
+            6 => "Six",
+            7 => "Seven",
+            8 => "Eight",
+            9 => "Nine",
+            10 => "Ten",
+            11 => "Eleven",
+            12 => "Twelve",
+            13 => "Thirteen",
+            14 => "Fourteen",
+            15 => "Fifteen",
+            16 => "Sixteen",
+            17 => "Seventeen",
+            18 => "Eighteen",
+            19 => "Nineteen",
+            "014" => "Fourteen",
         );
         $tens = array(
-            0 => "ZERO",
-            1 => "TEN",
-            2 => "TWENTY",
-            3 => "THIRTY",
-            4 => "FORTY",
-            5 => "FIFTY",
-            6 => "SIXTY",
-            7 => "SEVENTY",
-            8 => "EIGHTY",
-            9 => "NINETY",
+            0 => "Zero",
+            1 => "Ten",
+            2 => "Twenty",
+            3 => "Thirty",
+            4 => "Forty",
+            5 => "Fifty",
+            6 => "Sixty",
+            7 => "Seventy",
+            8 => "Eighty",
+            9 => "Ninety",
         );
         $hundreds = array(
-            "HUNDRED",
-            "THOUSAND",
-            "MILLION",
-            "BILLION",
-            "TRILLION",
-            "QUARDRILLION",
+            "Hundred",
+            "Thousand",
+            "Million",
+            "Billion",
+            "Trillion",
+            "Quardrillion",
         ); /*limit t quadrillion */
         $num = number_format($num, 2, ".", ",");
         $num_arr = explode(".", $num);
@@ -284,7 +284,6 @@ if (!function_exists('numberTowords')) {
             }
 
             if ($i < 20) {
-/* echo "getting:".$i; */
                 $rettxt .= $ones[$i];
             } elseif ($i < 100) {
                 if (substr($i, 0, 1) != "0") {
@@ -326,4 +325,3 @@ if (!function_exists('numberTowords')) {
     }
 
 }
-

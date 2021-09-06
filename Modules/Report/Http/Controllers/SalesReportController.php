@@ -35,14 +35,15 @@ class SalesReportController extends BaseController
                 if (!empty($request->memo_no)) {
                     $this->model->setMemoNo($request->memo_no);
                 }
-                if (!empty($request->warehouse_id)) {
-                    $this->model->setWarehouseID($request->warehouse_id);
-                }
+                
                 if (!empty($request->start_date)) {
                     $this->model->setFromDate($request->start_date);
                 }
                 if (!empty($request->end_date)) {
                     $this->model->setToDate($request->end_date);
+                }
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
                 }
                 if (!empty($request->salesmen_id)) {
                     $this->model->setSalesmenID($request->salesmen_id);
