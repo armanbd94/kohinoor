@@ -94,5 +94,9 @@ Route::group(['middleware' => ['auth']], function () {
     //Material Issue Report Routes
     Route::get('material-issue-report', 'MaterialIssueReportController@index')->name('material.issue.report');
     Route::post('material-issue-report/datatable-data', 'MaterialIssueReportController@get_datatable_data')->name('material.issue.report.datatable.data');
+    
+    //Batch Wise Coupon Report Routes
+    Route::get('batch-wise-coupon-report', 'BatchWiseCouponController@index')->name('batch.wise.coupon.report');
+    Route::post('batch-wise-coupon-report/datatable-data', 'BatchWiseCouponController@get_datatable_data')->name('batch.wise.coupon.report.datatable.data');
 
 });
