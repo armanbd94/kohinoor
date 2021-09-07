@@ -61,8 +61,6 @@
                                         <th>Date</th>
                                         <th>Collection Received</th>
                                         <th>Payment</th>
-                                        <th>Balance</th>
-                                        <th>Collection Transfered</th>
                                         <th>Closing Balance</th>
                                     </tr>
                                 </thead>
@@ -71,8 +69,6 @@
                                     <tr class="bg-primary">
                                         <th></th>
                                         <th style="text-align: right !important;font-weight:bold;">Total</th>
-                                        <th style="text-align: right !important;font-weight:bold;"></th>
-                                        <th style="text-align: right !important;font-weight:bold;"></th>
                                         <th style="text-align: right !important;font-weight:bold;"></th>
                                         <th style="text-align: right !important;font-weight:bold;"></th>
                                         <th style="text-align: right !important;font-weight:bold;"></th>
@@ -142,7 +138,7 @@
                     "className": "text-center"
                 },
                 {
-                    "targets": [2,3,4,5,6],
+                    "targets": [2,3,4],
                     "className": "text-right"
                 },
             ],
@@ -158,7 +154,7 @@
                     "extend": 'print',
                     'text':'Print',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
+                    "title": "{{ $page_title }}",
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
@@ -193,8 +189,8 @@
                     "extend": 'excel',
                     'text':'Excel',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
-                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
+                    "title": "{{ $page_title }}",
+                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}",
                     "exportOptions": {
                         columns: function (index, data, node) {
                             return table.column(index).visible();
@@ -206,8 +202,8 @@
                     "extend": 'pdf',
                     'text':'PDF',
                     'className':'btn btn-secondary btn-sm text-white',
-                    "title": "{{ $page_title }} List",
-                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
+                    "title": "{{ $page_title }}",
+                    "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}",
                     "orientation": "landscape", //portrait
                     "pageSize": "A4", //A3,A5,A6,legal,letter
                     "exportOptions": {
@@ -236,7 +232,7 @@
                 };
 
                 // Total over all pages
-                for (let index = 2; index <= 6; index++) {
+                for (let index = 2; index <= 4; index++) {
                     // Total over this page
                     total = api
                         .column( index )
@@ -254,7 +250,7 @@
                         }, 0 );
         
                     // Update footer
-                    $( api.column( index ).footer() ).html('= '+number_format(pageTotal) +' ('+ number_format(total) +' Total)');
+                    $( api.column( index ).footer() ).html('= '+number_format(total) +' Tk');
                 }
             }
         });

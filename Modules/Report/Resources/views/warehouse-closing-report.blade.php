@@ -35,7 +35,7 @@
                         <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-4" required="required" class="selectpicker">
                             @if (!$warehouses->isEmpty())
                             @foreach ($warehouses as $id => $name)
-                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
+                                @if($id != 1)<option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>@endif
                             @endforeach
                             @endif
                         </x-form.selectbox>

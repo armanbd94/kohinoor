@@ -30,13 +30,13 @@ class DailyClosing extends BaseModel
     {
         //set column sorting index table column name wise (should match with frontend table header)
 
-        $this->column_order = ['dc.id','dc.date', 'dc.cash_in','dc.cash_out','dc.balance','dc.transfer','dc.closing_amount'];
+        $this->column_order = ['dc.id','dc.date', 'dc.cash_in','dc.cash_out','dc.closing_amount'];
         
         
         $query = DB::table('daily_closings as dc')
         ->join('warehouses as w','dc.warehouse_id','=','w.id')
         ->select('dc.*','w.name')
-        ->where('dc.warehouse_id',auth()->user()->warehouse->id);
+        ->where('dc.warehouse_id',1);
 
         //search query
         if (!empty($this->start_date)) {
@@ -72,7 +72,7 @@ class DailyClosing extends BaseModel
 
     public function count_all()
     {
-        return self::toBase()->where('warehouse_id',auth()->user()->warehouse->id)->get()->count();
+        return self::toBase()->where('warehouse_id',1)->get()->count();
     }
     /******************************************
      * * * End :: Custom Datatable Code * * *

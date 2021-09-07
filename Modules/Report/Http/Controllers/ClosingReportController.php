@@ -30,7 +30,7 @@ class ClosingReportController extends BaseController
     public function closing_data(Request $request)
     {
         if ($request->ajax()) {
-            $warehouse_id = auth()->user()->warehouse->id;
+            $warehouse_id = 1;
             $last_closing_amount_data = DailyClosing::select('closing_amount')->where('warehouse_id',$warehouse_id)->latest('date')->first();
             $cash_data=  DB::table('transactions as t')
                         ->selectRaw('SUM(debit) AS cash_in_amount, SUM(credit) AS cash_out_amount')
@@ -66,9 +66,8 @@ class ClosingReportController extends BaseController
     {
         if($request->ajax())
         {
-            $warehouse_id = auth()->user()->warehouse->id;
+            $warehouse_id = 1;
             $closing_data = DB::table('daily_closings')->where(['date' => date('Y-m-d'),'warehouse_id'=>$warehouse_id])->get()->count();
-            $closing_amount = ($request->balance ? $request->balance : 0) - ($request->transfer ? $request->transfer : 0);
             if($closing_data > 0)
             {
                 $output = ['status' => 'error','message'=>'Already Closed Today'];
@@ -79,8 +78,8 @@ class ClosingReportController extends BaseController
                     'cash_in'          => $request->cash_in ? $request->cash_in : 0,
                     'cash_out'         => $request->cash_out ? $request->cash_out : 0,
                     'balance'         => $request->balance ? $request->balance : 0,
-                    'transfer'         => $request->transfer ? $request->transfer : 0,
-                    'closing_amount'   => $closing_amount,
+                    'transfer'         =>  0,
+                    'closing_amount'   => $request->balance ? $request->balance : 0,
                     'date'             => date('Y-m-d'),
                     'thousands'        => $request->thousands ? $request->thousands : 0,
                     'five_hundred'     => $request->five_hundred ? $request->five_hundred : 0,
@@ -104,8 +103,7 @@ class ClosingReportController extends BaseController
     {
         if(permission('closing-report-access')){
             $this->setPageData('Closing Report','Closing Report','fas fa-file-signature',[['name' => 'Report'],['name' => 'Closing Report']]);
-            $warehosues = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('report::closing-report.report',compact('warehosues'));
+            return view('report::closing-report.report');
         }else{
             return $this->access_blocked();
         }
@@ -132,8 +130,6 @@ class ClosingReportController extends BaseController
                 $row[] = date(config('settings.date_format'),strtotime($value->date));
                 $row[] = number_format($value->cash_in,2, '.', '') ;
                 $row[] = number_format($value->cash_out,2, '.', '');
-                $row[] = number_format(($value->balance),2, '.', '');
-                $row[] = number_format(($value->transfer),2, '.', '');
                 $row[] = number_format(($value->closing_amount),2, '.', '');
                 $data[] = $row;
             }

@@ -42,7 +42,8 @@ class WarehouseClosingReport extends BaseModel
         
         $query = DB::table('daily_closings as dc')
         ->join('warehouses as w','dc.warehouse_id','=','w.id')
-        ->select('dc.*','w.name as warehouse_name');
+        ->select('dc.*','w.name as warehouse_name')
+        ->where('dc.warehouse_id','!=',1);
 
         //search query
         if (!empty($this->_start_date)) {
@@ -81,7 +82,7 @@ class WarehouseClosingReport extends BaseModel
 
     public function count_all()
     {
-        $query = self::toBase();
+        $query = self::toBase()->where('warehouse_id','!=',1);
         if (!empty($this->_warehouse_id)) {
             $query->where('warehouse_id', $this->_warehouse_id);
         }

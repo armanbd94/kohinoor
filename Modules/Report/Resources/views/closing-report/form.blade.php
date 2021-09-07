@@ -42,23 +42,15 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="cash_in">Collection Receive</label>
-                                            <input type="text" class="form-control bg-secondary" name="cash_in" id="cash_in" readonly>
+                                            <input type="text" class="form-control" name="cash_in" id="cash_in">
                                         </div>
                                         <div class="form-group">
                                             <label for="cash_out">Payment</label>
-                                            <input type="text" class="form-control bg-secondary" name="cash_out" id="cash_out" readonly>
+                                            <input type="text" class="form-control" name="cash_out" id="cash_out">
                                         </div>
                                         <div class="form-group">
                                             <label for="balance">Balance</label>
-                                            <input type="text" class="form-control bg-secondary" name="balance" id="balance" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="transfer">Transfer</label>
-                                            <input type="text" class="form-control" name="transfer" id="transfer" onkeyup="cashInHand()">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="cash_in_hand">Closing Balance</label>
-                                            <input type="text" class="form-control bg-primary text-white" name="cash_in_hand" id="cash_in_hand" readonly>
+                                            <input type="text" class="form-control" name="balance" id="balance">
                                         </div>
                                     </div>
                                 </div>
@@ -169,30 +161,13 @@ function closing_data()
             $('#cash_in').val(parseFloat(data.cash_in ? data.cash_in : 0).toFixed(2));
             $('#cash_out').val(parseFloat(data.cash_out ? data.cash_out : 0).toFixed(2));
             $('#balance').val(parseFloat(data.cash_in_hand ? data.cash_in_hand : 0).toFixed(2));
-            cashInHand();
         },
         error: function (xhr, ajaxOption, thrownError) {
             console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
         }
     });
 }
-function cashInHand()
-{
-    let balance = document.getElementById('balance').value;
-    let transfer = document.getElementById('transfer').value;
-    if(balance == ''){ balance = 0; }
-    if(transfer == ''){ transfer = 0; }
-    if(parseFloat(transfer) > parseFloat(balance))
-    {
-        notification('error','Transfer amount must be less than or equal to balance amount!');
-        document.getElementById('transfer').value = parseFloat(balance).toFixed(2);
-        cashInHand();
-    }else{
-        let cash_in_hand = parseFloat(balance) - parseFloat(transfer);
-        document.getElementById('cash_in_hand').value = parseFloat(cash_in_hand).toFixed(2);
-    }
-    
-}
+
 function store_data(){
     let form = document.getElementById('closing_balance_form');
     let formData = new FormData(form);
