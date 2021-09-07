@@ -23,6 +23,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('closing-report', 'ClosingReportController@report')->name('closing.report');
     Route::post('closing-report/datatable-data', 'ClosingReportController@get_datatable_data')->name('closing.report.datatable.data');
     
+    //Warehouse Closing Report Route
+    Route::get('warehouse-closing-report', 'WarehouseClosingReportController@index')->name('warehouse.closing.report');
+    Route::post('warehouse-closing-report/datatable-data', 'WarehouseClosingReportController@get_datatable_data')->name('warehouse.closing.report.datatable.data');
+    
     //Today Sales Report Route
     Route::get('today-sales-report', 'TodaySalesReportController@index')->name('today.sales.report');
     Route::post('today-sales-report/datatable-data', 'TodaySalesReportController@get_datatable_data')->name('today.sales.report.datatable.data');
