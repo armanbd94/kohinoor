@@ -86,5 +86,9 @@ Route::group(['middleware' => ['auth']], function () {
     //Transfer Report Routes
     Route::get('transfer-report', 'TransferReportController@index')->name('transfer.report');
     Route::post('transfer-report/datatable-data', 'TransferReportController@get_datatable_data')->name('transfer.report.datatable.data');
+    
+    //Finish Goods Inventory Report Routes
+    Route::get('finish-goods-inventory-report', 'FinishGoodsInventoryController@index')->name('finish.goods.inventory.report');
+    Route::post('finish-goods-inventory-report/datatable-data', 'FinishGoodsInventoryController@get_datatable_data')->name('finish.goods.inventory.report.datatable.data');
 
 });

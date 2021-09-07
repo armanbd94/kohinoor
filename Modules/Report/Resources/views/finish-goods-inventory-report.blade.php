@@ -5,32 +5,6 @@
 <link href="plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
 <link href="css/daterangepicker.min.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery-ui.css" rel="stylesheet" type="text/css" />
-<style>
-    #dataTable{
-        width: 2000px !important;
-    }
-    #dataTable ul li{
-        border-bottom: 1px solid #EBEDF3;
-        margin-bottom: 5px;
-    }
-    #dataTable ul li:last-child{
-        border-bottom: 0;
-        margin-bottom: 0;
-    }
-
-    #dataTable tbody tr td:nth-child(7),
-    #dataTable tbody tr td:nth-child(8),
-    #dataTable tbody tr td:nth-child(9),
-    #dataTable tbody tr td:nth-child(10),
-    #dataTable tbody tr td:nth-child(11),
-    #dataTable tbody tr td:nth-child(12),
-    #dataTable tbody tr td:nth-child(13),
-    #dataTable tbody tr td:nth-child(14),
-    #dataTable tbody tr td:nth-child(15){
-        padding-left: 0px !important;
-        padding-right: 0px !important;
-    }
-</style>
 @endpush
 @section('content')
 <div class="d-flex flex-column-fluid">
@@ -49,8 +23,8 @@
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
                     <div class="row">
-                        <x-form.textbox labelName="Chalan No." name="chalan_no" col="col-md-4" />
-                        <div class="form-group col-md-4">
+                        <x-form.textbox labelName="Batch No." name="batch_no" col="col-md-3" />
+                        <div class="form-group col-md-3">
                             <label for="name">Choose Date</label>
                             <div class="input-group">
                                 <input type="text" class="form-control daterangepicker-filed">
@@ -58,17 +32,10 @@
                                 <input type="hidden" id="end_date" name="end_date">
                             </div>
                         </div>
-                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-4" required="required" class="selectpicker">
-                            @if (!$warehouses->isEmpty())
-                            @foreach ($warehouses as $id => $name)
-                                <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
-                            @endforeach
-                            @endif
-                        </x-form.selectbox>
                         <x-form.textbox labelName="Product Name" name="product_name" col="col-md-6" />
                         <input type="hidden" class="form-control" name="product_id" id="product_id">
                     
-                        <div class="col-md-6">      
+                        <div class="col-md-12">      
                                 <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
                                 data-toggle="tooltip" data-theme="dark" title="Reset">
                                 <i class="fas fa-undo-alt"></i></button>
@@ -89,25 +56,19 @@
                                 <thead class="bg-primary">
                                     <tr>
                                         <th>Sl</th>
-                                        <th>Warehosue Name</th>
+                                        <th>Include Date</th>
                                         <th>Batch No.</th>
-                                        <th>Chalan No.</th>
-                                        <th>Date</th>
-                                        <th>Item</th>
-                                        <th>Product Description</th>
+                                        <th>Product Name</th>
+                                        <th>Barcode</th>
+                                        <th>Type</th>
                                         <th>Unit</th>
                                         <th>Base Unit</th>
-                                        <th>Qty Unit</th>
-                                        <th>Qty Base Unit</th>
-                                        <th>Unit Price</th>
-                                        <th>Base Unit Price</th>
-                                        <th>Tax</th>
-                                        <th>Subtotal</th>
-                                        <th>Total Tax</th>
-                                        <th>Total</th>
-                                        <th>Shipping Cost</th>
-                                        <th>Labor Cost</th>
-                                        <th>Grand Total</th>
+                                        <th>TP (Price) Unit</th>
+                                        <th>TP (Price) Base Unit</th>
+                                        <th>Direct Cost Base Unit</th>
+                                        <th>Stock Qty - Unit</th>
+                                        <th>Stock Qty - Base Unit</th>
+                                        <th>Total Unit Value</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -125,13 +86,7 @@
                                         <th></th>
                                         <th></th>
                                         <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th style="text-align: right !important;font-weight:bold;">Grand Total</th>
+                                        <th style="text-align: right !important;font-weight:bold;">Grand Unit Value</th>
                                         <th style="text-align: right !important;font-weight:bold;"></th>
                                     </tr>
                                 </tfoot>
@@ -221,27 +176,26 @@ $(document).ready(function(){
             zeroRecords: '<strong class="text-danger">No Data Found</strong>'
         },
         "ajax": {
-            "url": "{{route('transfer.report.datatable.data')}}",
+            "url": "{{route('finish.goods.inventory.report.datatable.data')}}",
             "type": "POST",
             "data": function (data) {
-                data.chalan_no    = $("#form-filter #chalan_no").val();
+                data.batch_no    = $("#form-filter #batch_no").val();
                 data.start_date   = $("#form-filter #start_date").val();
                 data.end_date     = $("#form-filter #end_date").val();
                 data.product_id   = $("#form-filter #product_id").val();
-                data.warehouse_id = $("#form-filter #warehouse_id").val();
                 data._token       = _token;
             }
         },
         "columnDefs": [{
-                "targets": [6,7,8,9,10,11,12,13,14],
+                "targets": [11,13],
                 "orderable": false,
             },
             {
-                "targets": [0,1,2,3,4,5,7,8,9,10],
+                "targets": [0,1,2,3,4,5,6,7,11,12],
                 "className": "text-center"
             },
             {
-                "targets": [11,12,13,14,15,16,17,18,19],
+                "targets": [8,9,10,13],
                 "className": "text-right"
             }
 
@@ -335,17 +289,17 @@ $(document).ready(function(){
                         i : 0;
             };
 
-            total = api.column(19).data().reduce( function (a, b) {
+            total = api.column(13).data().reduce( function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0 );
 
             // Total over this page
-            pageTotal = api.column(19, { page: 'current'}).data().reduce( function (a, b) {
+            pageTotal = api.column(13, { page: 'current'}).data().reduce( function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0 );
 
             // Update footer
-            $( api.column(19).footer() ).html('= '+number_format(total));
+            $( api.column(13).footer() ).html('= '+number_format(total));
         }
     });
 
@@ -355,8 +309,7 @@ $(document).ready(function(){
 
     $('#btn-reset').click(function () {
         $('#form-filter')[0].reset();
-        $('#product_name,#product_id,#start_date,#end_date,#warehouse_id').val('');
-        $('#form-filter .selectpicker').selectpicker('refresh');
+        $('#product_name,#product_id,#start_date,#end_date').val('');
         table.ajax.reload();
     });
 
