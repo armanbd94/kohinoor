@@ -311,10 +311,10 @@ $(document).ready(function(){
                 
                 var total = (currency_position == 1) ? currency_symbol+' '+number_format(pageTotal) : number_format(pageTotal)+' '+currency_symbol;
                 // Update footer
-                $(api.column( index ).footer()).html(total);
+                $(api.column( index ).footer()).html('= '+total+' Tk');
             }
             balance = (currency_position == 1) ? currency_symbol+' '+number_format((debit - credit)) : number_format((debit - credit))+' '+currency_symbol;
-            $(api.column(5).footer()).html(balance);
+            $(api.column(5).footer()).html('= '+balance+' Tk');
         }
     });
 

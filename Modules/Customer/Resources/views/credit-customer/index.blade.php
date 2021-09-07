@@ -276,17 +276,17 @@ $(document).ready(function(){
                         i : 0;
             };
 
-            total = api.column(8).data().reduce( function (a, b) {
+            total = api.column(9).data().reduce( function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0 );
 
             // Total over this page
-            pageTotal = api.column(8, { page: 'current'}).data().reduce( function (a, b) {
+            pageTotal = api.column(9, { page: 'current'}).data().reduce( function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0 );
 
             // Update footer
-            $( api.column( 8 ).footer() ).html('= '+number_format(pageTotal) +' ('+ number_format(total) +' Total)');
+            $( api.column( 9 ).footer() ).html('= '+number_format(total) +' Tk');
         }
     });
 

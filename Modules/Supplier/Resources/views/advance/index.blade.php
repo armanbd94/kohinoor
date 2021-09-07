@@ -430,10 +430,10 @@
                     data: {approve_id:approve_id,approval_status:approval_status,_token:_token},
                     dataType: "JSON",
                     beforeSend: function(){
-                        $('#status-btn').addClass('kt-spinner kt-spinner--md kt-spinner--light');
+                        $('#status-btn').addClass('spinner spinner-white spinner-right');
                     },
                     complete: function(){
-                        $('#status-btn').removeClass('kt-spinner kt-spinner--md kt-spinner--light');
+                        $('#status-btn').removeClass('spinner spinner-white spinner-right');
                     },
                     success: function (data) {
                         notification(data.status, data.message);

@@ -470,10 +470,10 @@
                 processData: false,
                 cache: false,
                 beforeSend: function(){
-                    $('#payment-save-btn').addClass('kt-spinner kt-spinner--md kt-spinner--light');
+                    $('#payment-save-btn').addClass('spinner spinner-white spinner-right');
                 },
                 complete: function(){
-                    $('#payment-save-btn').removeClass('kt-spinner kt-spinner--md kt-spinner--light');
+                    $('#payment-save-btn').removeClass('spinner spinner-white spinner-right');
                 },
                 success: function (data) {
                     $('#payment_form').find('.is-invalid').removeClass('is-invalid');

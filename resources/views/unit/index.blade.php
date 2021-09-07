@@ -244,10 +244,10 @@
                 processData: false,
                 cache: false,
                 beforeSend: function(){
-                    $('#save-btn').addClass('kt-spinner kt-spinner--md kt-spinner--light');
+                    $('#save-btn').addClass('spinner spinner-white spinner-right');
                 },
                 complete: function(){
-                    $('#save-btn').removeClass('kt-spinner kt-spinner--md kt-spinner--light');
+                    $('#save-btn').removeClass('spinner spinner-white spinner-right');
                 },
                 success: function (data) {
                     $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
