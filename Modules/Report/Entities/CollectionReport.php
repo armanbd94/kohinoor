@@ -123,7 +123,8 @@ class CollectionReport extends BaseModel
         ->join('locations as d', 'c.district_id', '=', 'd.id')
         ->join('locations as u', 'c.upazila_id', '=', 'u.id')
         ->join('locations as r', 'c.route_id', '=', 'r.id')
-        ->join('locations as a', 'c.area_id', '=', 'a.id');
+        ->join('locations as a', 'c.area_id', '=', 'a.id')
+        ->where('s.paid_amount','>',0);
 
         if (!empty($this->_warehouse_id)) {
             $query->where('s.warehouse_id', $this->_warehouse_id);
@@ -181,7 +182,7 @@ class CollectionReport extends BaseModel
 
     public function count_all()
     {
-        $query = DB::table('sales');
+        $query = DB::table('sales')->where('paid_amount','>',0);
         if (!empty($this->_warehouse_id)) {
             $query->where('warehouse_id', $this->_warehouse_id);
         }
