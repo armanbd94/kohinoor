@@ -90,5 +90,9 @@ Route::group(['middleware' => ['auth']], function () {
     //Finish Goods Inventory Report Routes
     Route::get('finish-goods-inventory-report', 'FinishGoodsInventoryController@index')->name('finish.goods.inventory.report');
     Route::post('finish-goods-inventory-report/datatable-data', 'FinishGoodsInventoryController@get_datatable_data')->name('finish.goods.inventory.report.datatable.data');
+    
+    //Material Issue Report Routes
+    Route::get('material-issue-report', 'MaterialIssueReportController@index')->name('material.issue.report');
+    Route::post('material-issue-report/datatable-data', 'MaterialIssueReportController@get_datatable_data')->name('material.issue.report.datatable.data');
 
 });

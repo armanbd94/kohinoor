@@ -17,7 +17,7 @@ class InventoryController extends BaseController
     public function index()
     {
         if(permission('inventory-report-access')){
-            $this->setPageData('Inventory Report','Inventory Report','fas fa-boxes',[['name'=>'Inventory Report']]);
+            $this->setPageData('Inventory Report','Inventory Report','fas fa-file',[['name'=>'Inventory Report']]);
             $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
             return view('report::inventory',compact('warehouses'));
         }else{
