@@ -71,13 +71,20 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('warehouse-summary', 'WarehouseSummaryController@index')->name('warehouse.summary');
     Route::post('warehouse-summary/data', 'WarehouseSummaryController@summary_data')->name('warehouse.summary.data');
 
+    //Coupon Received Report Routes
     Route::get('coupon-received-report', 'ReceivedCouponController@index')->name('coupon.received.report');
     Route::post('coupon-received-report/datatable-data', 'ReceivedCouponController@get_datatable_data')->name('coupon.received.report.datatable.data');
 
+    //Inventory Report Routes
     Route::get('inventory-report', 'InventoryController@index')->name('inventory.report');
     Route::post('inventory-report/datatable-data', 'InventoryController@get_datatable_data')->name('inventory.report.datatable.data');
 
-     //Material Alert Report Route
-     Route::get('material-stock-alert-report', 'MaterialStockAlertController@index')->name('material.stock.alert.report');
-     Route::post('material-stock-alert-report/datatable-data', 'MaterialStockAlertController@get_datatable_data')->name('material.stock.alert.report.datatable.data');
+    //Material Alert Report Route
+    Route::get('material-stock-alert-report', 'MaterialStockAlertController@index')->name('material.stock.alert.report');
+    Route::post('material-stock-alert-report/datatable-data', 'MaterialStockAlertController@get_datatable_data')->name('material.stock.alert.report.datatable.data');
+
+    //Transfer Report Routes
+    Route::get('transfer-report', 'TransferReportController@index')->name('transfer.report');
+    Route::post('transfer-report/datatable-data', 'TransferReportController@get_datatable_data')->name('transfer.report.datatable.data');
+
 });
