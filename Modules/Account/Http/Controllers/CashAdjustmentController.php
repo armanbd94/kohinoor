@@ -40,6 +40,7 @@ class CashAdjustmentController extends BaseController
                 try {
                     $data = array(
                         'chart_of_account_id' => DB::table('chart_of_accounts')->where('code', $this->coa_head_code('cash_in_hand'))->value('id'),
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_no'          => $request->voucher_no,
                         'voucher_type'        => 'ADJUSTMENT',
                         'voucher_date'        => $request->voucher_date,

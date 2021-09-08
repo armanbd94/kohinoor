@@ -15,9 +15,18 @@ class CashAdjustmentFormRequest extends FormRequest
     {
         return [
             'voucher_no'   => 'required',
+            'warehouse_id'  => 'required',
             'voucher_date' => 'required|date|date_format:Y-m-d',
             'type'         => 'required',
             'amount'       => 'required|numeric',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'warehouse_id.required' => 'The warehouse field is required',
+
         ];
     }
 
