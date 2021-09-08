@@ -21,8 +21,9 @@ class CustomerAdvanceController extends BaseController
     {
         if(permission('customer-advance-access')){
             $this->setPageData('Customer Advance','Customer Advance','fas fa-hand-holding-usd',[['name'=>'Customer','link'=>route('customer')],['name'=>'Customer Advance']]);
-            $locations = DB::table('locations')->where('status', 1)->get();
-            return view('customer::advance.index',compact('locations'));
+            $districts = DB::table('locations')->where([['status', 1],['parent_id',0]])->pluck('name','id');
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('customer::advance.index',compact('locations','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -79,7 +80,7 @@ class CustomerAdvanceController extends BaseController
                     $payment_method = 'Mobile Bank';
                 }
                 $row = [];
-                $row[] = row_checkbox($value->voucher_no);
+
                 $row[] = $no;
                 $row[] = $value->customer_name;
                 $row[] = $value->shop_name;

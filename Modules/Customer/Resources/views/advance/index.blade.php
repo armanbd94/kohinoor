@@ -124,6 +124,7 @@
                                         <th>Date</th>
                                         <th>Payment Method</th>
                                         <th>Account Name</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -446,25 +447,31 @@ function account_list(payment_method,account_id='')
         }
     });
 }
-customer_list();
-function customer_list()
+
+function customer_list(set_id)
 {
+    let district_id = document.getElementById('district_id').value;
     let upazila_id = document.getElementById('upazila_id').value;
     let route_id = document.getElementById('route_id').value;
     let area_id = document.getElementById('area_id').value;
     $.ajax({
         url:"{{ url('customer-list') }}",
         type:"POST",
-        data:{upazila_id:upazila_id,route_id:route_id,area_id:area_id,_token:_token},
+        data:{district_id:district_id,upazila_id:upazila_id,route_id:route_id,area_id:area_id,_token:_token},
         dataType:"JSON",
         success:function(data){
             html = `<option value="">Select Please</option>`;
             $.each(data, function(key, value) {
                 html += `<option value="${value.id}">${value.name} - ${value.mobile} (${value.shop_name})</option>`;
             });
-            $('#form-filter #customer_id').empty().append(html);
-            $('#form-filter #customer_id.selectpicker').selectpicker('refresh');
-      
+            if(set_id == 1)
+            {
+                $('#form-filter #customer_id').empty().append(html);
+                $('#form-filter #customer_id.selectpicker').selectpicker('refresh');
+            }else{
+                $('#store_or_update_form #customer_id').empty().append(html);
+                $('#store_or_update_form #customer_id.selectpicker').selectpicker('refresh');
+            }
         },
     });
 }
@@ -556,6 +563,10 @@ function showAdvanceFormModal(modal_title, btn_text) {
     $('#store_or_update_form').find('.is-invalid').removeClass('is-invalid');
     $('#store_or_update_form').find('.error').remove();
     $('#store_or_update_form #customer_id').empty();
+    $('#store_or_update_form #upazila_id').empty();
+    $('#store_or_update_form #route_id').empty();
+    $('#store_or_update_form #area_id').empty();
+    $('#store_or_update_form #account_id').empty();
     $('#store_or_update_form .selectpicker').selectpicker('refresh');
     $('#store_or_update_modal').modal({
         keyboard: false,
