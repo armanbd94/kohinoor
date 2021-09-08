@@ -53,11 +53,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('credit-voucher/update', 'CreditVoucherController@update');
 
     //Contra Voucher Route
-    Route::resource('contra-voucher', 'ContraVoucherController')->only(['index','store']);
-    Route::post('contra-voucher/update', 'ContraVoucherController@update');
-    Route::get('contra-voucher/list', 'ContraVoucherController@voucher_list');
-    Route::post('contra-voucher/view', 'ContraVoucherController@show')->name('contra.voucher.view');
-    Route::post('contra-voucher/datatable-data', 'ContraVoucherController@get_datatable_data')->name('contra.voucher.datatable.data');
+    Route::get('contra-voucher', 'ContraVoucherController@index');
+    Route::group(['prefix' => 'contra-voucher', 'as'=>'contra.voucher.'], function () {
+        Route::get('create', 'ContraVoucherController@create')->name('create');
+        Route::post('store', 'ContraVoucherController@store')->name('store');
+        Route::post('update', 'ContraVoucherController@update')->name('update');
+        Route::post('view', 'ContraVoucherController@show')->name('view');
+        Route::post('datatable-data', 'ContraVoucherController@get_datatable_data')->name('datatable.data');
+    });
+
     
     //Journal Voucher Route
     Route::resource('journal-voucher', 'JournalVoucherController')->only(['index','store']);

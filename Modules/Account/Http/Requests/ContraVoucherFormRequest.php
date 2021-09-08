@@ -17,6 +17,9 @@ class ContraVoucherFormRequest extends FormRequest
     {
         $this->rules['voucher_no']                = ['required'];
         $this->rules['voucher_date']              = ['required'];
+        $this->rules['warehouse_id']              = ['required'];
+        
+        $this->messages['warehouse_id.required']     = 'The warehouse field is required';
 
         if(request()->has('contra_account')){
             foreach (request()->contra_account as $key => $value) {

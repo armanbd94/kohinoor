@@ -136,13 +136,8 @@ class VoucherApprovalController extends BaseController
     public function delete(Request $request)
     {
         if($request->ajax()){
-            if(permission('delete-voucher')){
-                $result  = $this->model->where('voucher_no',$request->id)->delete();
-                $output   = $this->delete_message($result);
-            }else{
-                $output   = $this->unauthorized();
-
-            }
+            $result  = $this->model->where('voucher_no',$request->id)->delete();
+            $output   = $this->delete_message($result);
             return response()->json($output);
         }else{
             return response()->json($this->unauthorized());

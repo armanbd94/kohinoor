@@ -1,8 +1,11 @@
 <div class="col-md-12">
-    <p>Voucher No : {{ $voucher[0]->voucher_no }}</p>
+    <p><b>Voucher No :</b> {{ $voucher[0]->voucher_no }}</p>
 </div>
 <div class="col-md-12">
-    <p>Date : {{ $voucher[0]->voucher_date }}</p>
+    <p><b>Date :</b> {{ date('d-M-Y',strtotime($voucher[0]->voucher_date)) }}</p>
+</div>
+<div class="col-md-12">
+    <p><b>Warehouse :</b> {{ $voucher[0]->warehouse->name }}</p>
 </div>
 <div class="col-md-12">
     <div class="table-responsive">
@@ -25,8 +28,8 @@
                     @endphp
                     <tr>
                         <td>{{ $journal->coa->name }}</td>
-                        <td class="text-right">{{ $journal->debit }}</td>
-                        <td class="text-right">{{ $journal->credit }}</td>
+                        <td class="text-right">{{ number_format($journal->debit,2,'.','') }}</td>
+                        <td class="text-right">{{ number_format($journal->credit,2,'.','') }}</td>
                     </tr>
                     @endforeach
                 @endif
@@ -34,13 +37,13 @@
             <tfoot>
                 <tr class="bg-primary">
                     <th class="text-right">Total</th>
-                    <th class="text-right">{{ $total_debit }}</th>
-                    <th class="text-right"> {{ $total_credit }}</th>
+                    <th class="text-right">{{ number_format($total_debit,2,'.','') }}</th>
+                    <th class="text-right"> {{ number_format($total_credit,2,'.','') }}</th>
                 </tr>
             </tfoot>
         </table>
     </div>
 </div>
 <div class="col-md-12">
-    <p>Remarks : {{ $voucher[0]->description }}</p>
+    <p><b>Remarks :</b> {{ $voucher[0]->description }}</p>
 </div>

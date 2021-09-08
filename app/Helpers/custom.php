@@ -60,6 +60,11 @@ define('EXPENSE_APPROVE_STATUS_LABEL',[
     '2' => '<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Rejected</span>',
     '3' => '<span class="label label-info label-pill label-inline" style="min-width:70px !important;">Pending</span>',
 ]);
+define('VOUCHER_APPROVE_STATUS_LABEL',[
+    '1' => '<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Approved</span>',
+    '2' => '<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Rejected</span>',
+    '3' => '<span class="label label-info label-pill label-inline" style="min-width:70px !important;">Pending</span>',
+]);
 define('DAY_NIGHT_LABEL',[
     '1' => '<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Day</span>',
     '2' => '<span class="label label-danger label-pill label-inline" style="min-width:70px !important;">Night</span>',

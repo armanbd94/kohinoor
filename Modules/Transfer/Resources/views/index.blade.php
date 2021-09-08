@@ -14,14 +14,7 @@
                 <div class="card-title">
                     <h3 class="card-label"><i class="{{ $page_icon }} text-primary"></i> {{ $sub_title }}</h3>
                 </div>
-                <div class="card-toolbar">
-                    <!--begin::Button-->
-                    @if (permission('production-add'))
-                    <a href="{{ route('production.add') }}"  class="btn btn-primary btn-sm font-weight-bolder"> 
-                        <i class="fas fa-plus-circle"></i> Add New</a>
-                        @endif
-                    <!--end::Button-->
-                </div>
+                
             </div>
         </div>
         <!--end::Notice-->
