@@ -23,7 +23,7 @@ class CustomerAdvanceController extends BaseController
             $this->setPageData('Customer Advance','Customer Advance','fas fa-hand-holding-usd',[['name'=>'Customer','link'=>route('customer')],['name'=>'Customer Advance']]);
             $districts = DB::table('locations')->where([['status', 1],['parent_id',0]])->pluck('name','id');
             $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
-            return view('customer::advance.index',compact('locations','warehouses'));
+            return view('customer::advance.index',compact('districts','warehouses'));
         }else{
             return $this->access_blocked();
         }

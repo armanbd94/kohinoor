@@ -28,28 +28,51 @@
                     <form id="customer-receive-form" method="post">
                         @csrf
                         <div class="row">
-                            <div class="form-group col-md-6 required">
-                                <label for="voucher_no">Voucher No</label>
-                                <input type="text" class="form-control" name="voucher_no" id="voucher_no" value="{{ $voucher_no }}" readonly />
-                            </div>
-                            <div class="form-group col-md-6 required">
-                                <label for="voucher_date">Date</label>
-                                <input type="text" class="form-control date" name="voucher_date" id="voucher_date" value="{{ date('Y-m-d') }}" readonly />
-                            </div>
-                            <x-form.selectbox labelName="Customer" name="customer_id" required="required"  col="col-md-6" class="selectpicker">
-                                @if (!$customers->isEmpty())
-                                @foreach ($customers as $customer)
-                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                            <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-4" required="required" class="selectpicker">
+                                @if (!$warehouses->isEmpty())
+                                @foreach ($warehouses as $id => $name)
+                                    <option value="{{ $id }}" data-name="{{ $name }}">{{ $name }}</option>
                                 @endforeach
                                 @endif
                             </x-form.selectbox>
-                             <x-form.selectbox labelName="Payment Type" name="payment_type" required="required"  col="col-md-6" class="selectpicker">
+                            <div class="form-group col-md-4 required">
+                                <label for="voucher_no">Voucher No</label>
+                                <input type="text" class="form-control" name="voucher_no" id="voucher_no" value="{{ $voucher_no }}" readonly />
+                            </div>
+                            <div class="form-group col-md-4 required">
+                                <label for="voucher_date">Date</label>
+                                <input type="text" class="form-control date" name="voucher_date" id="voucher_date" value="{{ date('Y-m-d') }}" readonly />
+                            </div>
+                            
+                            <x-form.selectbox labelName="District" name="district_id" col="col-md-4" class="selectpicker"
+                                onchange="getUpazilaList(this.value,2)">
+                                @if (!$districts->isEmpty())
+                                @foreach ($districts as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                                @endif
+                            </x-form.selectbox>
+
+                            <x-form.selectbox labelName="Upazila" name="upazila_id" col="col-md-4" class="selectpicker" onchange="getRouteList(this.value,2)"/>
+    
+                            <x-form.selectbox labelName="Route" name="route_id" col="col-md-4" class="selectpicker" onchange="getAreaList(this.value,2)"/>
+    
+                            <x-form.selectbox labelName="Area" name="area_id" col="col-md-4" class="selectpicker" onchange="customer_list(2)"/>
+
+                            <x-form.selectbox labelName="Customer" name="customer_id" onchange="dueAmount(this.value)" required="required" col="col-md-4" class="selectpicker" />
+
+                            <div class="form-group col-md-4">
+                                <label for="due_amount">Due Amount</label>
+                                <input type="text" class="form-control"  id="due_amount" readonly />
+                            </div>
+                             <x-form.selectbox labelName="Payment Type" name="payment_type" required="required"  col="col-md-4" class="selectpicker">
                                 @foreach (SALE_PAYMENT_METHOD as $key => $value)
                                 <option value="{{ $key }}">{{ $value }}</option>
                                 @endforeach
                             </x-form.selectbox>
-                            <x-form.selectbox labelName="Account" name="account_id" required="required"  col="col-md-6" class="selectpicker"/>
-                            <x-form.textbox labelName="Amount" name="amount" required="required" col="col-md-6" placeholder="0.00"/>
+                            
+                            <x-form.selectbox labelName="Account" name="account_id" required="required"  col="col-md-4" class="selectpicker"/>
+                            <x-form.textbox labelName="Amount" name="amount" required="required" col="col-md-4" placeholder="0.00"/>
                             <x-form.textarea labelName="Remarks" name="remarks" col="col-md-12"/>
                             <div class="form-group col-md-12 pt-5">
                                 <button type="button" class="btn btn-danger btn-sm mr-3"><i class="fas fa-sync-alt"></i> Reset</button>
@@ -68,6 +91,7 @@
 @endsection
 
 @push('scripts')
+<script src="js/moment.js"></script>
 <script src="js/bootstrap-datetimepicker.min.js"></script>
 <script>
 $('.date').datetimepicker({format: 'YYYY-MM-DD',ignoreReadonly: true});
@@ -86,6 +110,95 @@ $(document).on('change', '#payment_type', function () {
         }
     });
 });
+function dueAmount(customer_id)
+{
+    $.ajax({
+        url: "{{url('customer/previous-balance')}}/"+customer_id,
+        type: "GET",
+        dataType: "JSON",
+        success: function (data) {
+            data ? $('#due_amount').val(parseFloat(data).toFixed(2)) : $('#due_amount').val('0.00');
+        },
+        error: function (xhr, ajaxOption, thrownError) {
+            console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+        }
+    });
+}
+function customer_list()
+{
+    let district_id = document.getElementById('district_id').value;
+    let upazila_id = document.getElementById('upazila_id').value;
+    let route_id = document.getElementById('route_id').value;
+    let area_id = document.getElementById('area_id').value;
+    $.ajax({
+        url:"{{ url('customer-list') }}",
+        type:"POST",
+        data:{district_id:district_id,upazila_id:upazila_id,route_id:route_id,area_id:area_id,_token:_token},
+        dataType:"JSON",
+        success:function(data){
+            html = `<option value="">Select Please</option>`;
+            $.each(data, function(key, value) {
+                html += `<option value="${value.id}">${value.name} - ${value.mobile} (${value.shop_name})</option>`;
+            });
+
+            $('#customer-receive-form #customer_id').empty().append(html);
+            $('#customer-receive-form #customer_id.selectpicker').selectpicker('refresh');
+            
+        },
+    });
+}
+function getUpazilaList(district_id){
+    $.ajax({
+        url:"{{ url('district-id-wise-upazila-list') }}/"+district_id,
+        type:"GET",
+        dataType:"JSON",
+        success:function(data){
+            html = `<option value="">Select Please</option>`;
+            $.each(data, function(key, value) {
+                html += '<option value="'+ key +'">'+ value +'</option>';
+            });
+
+            $('#customer-receive-form #upazila_id').empty().append(html);
+            $('.selectpicker').selectpicker('refresh');
+      
+        },
+    });
+}
+function getRouteList(upazila_id){
+    $.ajax({
+        url:"{{ url('upazila-id-wise-route-list') }}/"+upazila_id,
+        type:"GET",
+        dataType:"JSON",
+        success:function(data){
+            html = `<option value="">Select Please</option>`;
+            $.each(data, function(key, value) {
+                html += '<option value="'+ key +'">'+ value +'</option>';
+            });
+
+            $('#customer-receive-form #route_id').empty().append(html);
+            $('.selectpicker').selectpicker('refresh');
+            
+        },
+    });
+}
+
+function getAreaList(route_id){
+    $.ajax({
+        url:"{{ url('route-id-wise-area-list') }}/"+route_id,
+        type:"GET",
+        dataType:"JSON",
+        success:function(data){
+            html = `<option value="">Select Please</option>`;
+            $.each(data, function(key, value) {
+                html += '<option value="'+ key +'">'+ value +'</option>';
+            });
+
+            $('#customer-receive-form #area_id').empty().append(html);
+            $('.selectpicker').selectpicker('refresh');
+      
+        },
+    });
+}
 function store_data(){
     let form = document.getElementById('customer-receive-form');
     let formData = new FormData(form);

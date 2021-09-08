@@ -24,9 +24,10 @@ class CustomerReceiveController extends BaseController
     {
         if(permission('customer-receive-access')){
             $this->setPageData('Customer Receive','Customer Receive','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Customer Receive']]);
-            $voucher_no = 'CR-'.date('Ymd').rand(1,999);
-            $customers = Customer::activeCustomers();
-            return view('account::customer-receive.index',compact('voucher_no','customers'));
+            $voucher_no = 'CR-'.date('ymd').rand(1,999);
+            $districts = DB::table('locations')->where([['status', 1],['parent_id',0]])->pluck('name','id');
+            $warehouses = DB::table('warehouses')->where('status',1)->pluck('name','id');
+            return view('account::customer-receive.index',compact('voucher_no','districts','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -43,6 +44,7 @@ class CustomerReceiveController extends BaseController
                     /****************/
                     $customer_credit = array(
                         'chart_of_account_id' => $customer->coa->id,
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_no'          => $request->voucher_no,
                         'voucher_type'        => $vtype,
                         'voucher_date'        => $request->voucher_date,
@@ -58,6 +60,7 @@ class CustomerReceiveController extends BaseController
                         //Cah In Hand For Supplier
                         $payment = array(
                             'chart_of_account_id' => $request->account_id,
+                            'warehouse_id'        => $request->warehouse_id,
                             'voucher_no'          => $request->voucher_no,
                             'voucher_type'        => $vtype,
                             'voucher_date'        => $request->voucher_date,
@@ -74,6 +77,7 @@ class CustomerReceiveController extends BaseController
                         // Bank Ledger
                         $payment = array(
                             'chart_of_account_id' => $request->account_id,
+                            'warehouse_id'        => $request->warehouse_id,
                             'voucher_no'          => $request->voucher_no,
                             'voucher_type'        => $vtype,
                             'voucher_date'        => $request->voucher_date,
