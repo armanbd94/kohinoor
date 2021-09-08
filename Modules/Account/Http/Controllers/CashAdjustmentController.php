@@ -6,6 +6,7 @@ namespace Modules\Account\Http\Controllers;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Account\Entities\Transaction;
 use Modules\Account\Http\Requests\CashAdjustmentFormRequest;
@@ -24,7 +25,8 @@ class CashAdjustmentController extends BaseController
         if(permission('cash-adjustment-access')){
             $this->setPageData('Cash Adjustment','Cash Adjustment','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Cash Adjustment']]);
             $voucher_no = self::VOUCHER_PREFIX.'-'.date('Ymd').rand(1,999);
-            return view('account::cash-adjustment.index',compact('voucher_no'));
+            $warehouses = Warehouse::where('status',1)->pluck('name','id');
+            return view('account::cash-adjustment.index',compact('voucher_no','warehouses'));
         }else{
             return $this->access_blocked();
         }

@@ -88,7 +88,7 @@ class JournalVoucherController extends BaseController
         if(permission('journal-voucher-add')){
             $this->setPageData('Journal Voucher','Journal Voucher','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Journal Voucher']]);
             $data = [
-                'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('YmdHis').rand(1,999),
+                'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('ymdHis').rand(1,999),
                 'warehouses'             => Warehouse::where('status',1)->pluck('name','id'),
                 'transactional_accounts' => ChartOfAccount::where(['status'=>1,'transaction'=>1])->orderBy('id','asc')->get(),
             ];

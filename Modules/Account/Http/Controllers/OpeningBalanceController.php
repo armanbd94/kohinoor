@@ -5,11 +5,12 @@ namespace Modules\Account\Http\Controllers;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
-use App\Models\Warehouse;
 use Modules\Account\Entities\Transaction;
 use Modules\Account\Entities\ChartOfAccount;
 use Modules\Account\Http\Requests\OpeningBalanceFormRequest;
+
 
 class OpeningBalanceController extends BaseController
 {
@@ -24,9 +25,10 @@ class OpeningBalanceController extends BaseController
     {
         if(permission('opening-balance-access')){
             $this->setPageData('Opening Balance','Opening Balance','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Opening Balance']]);
-            $coas = ChartOfAccount::where('status',1)->orderBy('name','asc')->get();
-            $voucher_no = 'OP-'.date('Ymd').rand(1,999);
-            return view('account::opening-balance.index',compact('coas','voucher_no'));
+            $coas = ChartOfAccount::where('status',1)->orderBy('id','asc')->get();
+            $voucher_no = 'OP-'.date('ymd').rand(1,999);
+            $warehouses = Warehouse::where('status',1)->pluck('name','id');
+            return view('account::opening-balance.index',compact('coas','voucher_no','warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -40,6 +42,7 @@ class OpeningBalanceController extends BaseController
                 try {
                     $data = array(
                         'chart_of_account_id' => $request->chart_of_account_id,
+                        'warehouse_id'        => $request->warehouse_id,
                         'voucher_no'          => $request->voucher_no,
                         'voucher_type'        => 'Opening',
                         'voucher_date'        => $request->voucher_date,
