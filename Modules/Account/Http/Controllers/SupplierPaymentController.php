@@ -22,7 +22,7 @@ class SupplierPaymentController extends BaseController
     {
         if(permission('supplier-payment-access')){
             $this->setPageData('Supplier Payment','Supplier Payment','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Supplier Payment']]);
-            $voucher_no = 'PM-'.date('Ymd').rand(1,999);
+            $voucher_no = 'PM-'.date('ymd').rand(1,999);
             $suppliers = Supplier::where('status',1)->get();
             return view('account::supplier-payment.index',compact('voucher_no','suppliers'));
         }else{
@@ -41,6 +41,7 @@ class SupplierPaymentController extends BaseController
                     /****************/
                     $supplierdebit = array(
                         'chart_of_account_id' => $supplier->coa->id,
+                        'warehouse_id'        => 1,
                         'voucher_no'          => $request->voucher_no,
                         'voucher_type'        => $vtype,
                         'voucher_date'        => $request->voucher_date,
@@ -56,6 +57,7 @@ class SupplierPaymentController extends BaseController
                         //Cah In Hand For Supplier
                         $payment = array(
                             'chart_of_account_id' => $request->account_id,
+                            'warehouse_id'        => 1,
                             'voucher_no'          => $request->voucher_no,
                             'voucher_type'        => $vtype,
                             'voucher_date'        => $request->voucher_date,
@@ -72,6 +74,7 @@ class SupplierPaymentController extends BaseController
                         // Bank Ledger
                         $payment = array(
                             'chart_of_account_id' => $request->account_id,
+                            'warehouse_id'        => 1,
                             'voucher_no'          => $request->voucher_no,
                             'voucher_type'        => $vtype,
                             'voucher_date'        => $request->voucher_date,

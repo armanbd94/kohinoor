@@ -23,6 +23,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('delete', 'SupplierController@delete')->name('delete');
         Route::post('bulk-delete', 'SupplierController@bulk_delete')->name('bulk.delete');
         Route::post('change-status', 'SupplierController@change_status')->name('change.status');
+        Route::get('due-amount/{id}', 'SupplierController@due_amount');
     });
 
     Route::get('supplier-advance', 'SupplierAdvanceController@index')->name('supplier.advance');
