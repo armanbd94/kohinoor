@@ -29,7 +29,7 @@
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
                     <div class="row justify-content-center">
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label for="name">Choose Your Date</label>
                             <div class="input-group">
                                 <input type="text" class="form-control daterangepicker-filed" value="{{ date('Y-m-d') }} To {{ date('Y-m-d') }}">
@@ -37,7 +37,7 @@
                                 <input type="hidden" id="end_date" name="end_date" value="{{ date('Y-m-d')}}">
                             </div>
                         </div>
-                        <x-form.selectbox labelName="Bank" name="bank_acc_id"  col="col-md-3" class="selectpicker">
+                        <x-form.selectbox labelName="Bank" name="bank_acc_id"  col="col-md-4" class="selectpicker">
                             @if (!$banks->isEmpty())
                             @foreach ($banks as $bank)
                                 <option value="{{ $bank->id }}" data-name="{{ $bank->name }}">{{ $bank->name }}</option>
@@ -46,13 +46,11 @@
                         </x-form.selectbox>
 
                         
-                        <div class="col-md-1">
+                        <div class="col-md-4">
                             <div style="margin-top:28px;">    
-                                <div style="margin-top:28px;">    
                                     <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-left" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Search" onclick="report()">
                                     <i class="fas fa-search"></i></button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -121,6 +119,7 @@
 
 @push('scripts')
 <script src="js/jquery.printarea.js"></script>
+<script src="js/moment.js"></script>
 <script src="js/knockout-3.4.2.js"></script>
 <script src="js/daterangepicker.min.js"></script>
 <script>
