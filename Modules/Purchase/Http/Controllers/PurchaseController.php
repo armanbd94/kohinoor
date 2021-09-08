@@ -10,7 +10,6 @@ use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Modules\Material\Entities\Material;
 use Modules\Purchase\Entities\Purchase;
-use Modules\Setting\Entities\Warehouse;
 use Modules\Supplier\Entities\Supplier;
 use App\Http\Controllers\BaseController;
 use Modules\Account\Entities\Transaction;

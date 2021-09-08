@@ -42,7 +42,8 @@ class CashBookController extends BaseController
                                         ->when($warehouse_id,function($q) use($warehouse_id){
                                             $q->where('warehouse_id',$warehouse_id);
                                         })
-                                        ->groupBy('chart_of_account_id','approve')->first();
+                                        ->groupBy('chart_of_account_id','approve')
+                                        ->first();
             if($previous_balance_data)
             {
 

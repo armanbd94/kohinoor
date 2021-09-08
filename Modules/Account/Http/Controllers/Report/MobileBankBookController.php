@@ -41,7 +41,8 @@ class MobileBankBookController extends BaseController
                 $previous_balance_data = DB::table('transactions')
                                             ->selectRaw('SUM(debit) as debit, SUM(credit) as credit,approve')
                                             ->where([['voucher_date','<',$start_date],['chart_of_account_id',$bank_acc_id],['approve',1]])
-                                            ->groupBy('chart_of_account_id','approve')->first();
+                                            ->groupBy('chart_of_account_id','approve')
+                                            ->first();
                 if($previous_balance_data)
                 {
                     $previous_balance = $previous_balance_data->debit - $previous_balance_data->credit;
