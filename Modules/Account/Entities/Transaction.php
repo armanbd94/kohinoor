@@ -16,4 +16,9 @@ class Transaction extends BaseModel
         return $this->belongsTo(ChartOfAccount::class,'chart_of_account_id','id');
     }
 
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class,'warehouse_id','id');
+    }
+
 }

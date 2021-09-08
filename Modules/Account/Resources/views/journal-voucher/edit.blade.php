@@ -34,7 +34,13 @@
                                     <label for="voucher_date">Date</label>
                                     <input type="text" class="form-control date" name="voucher_date" id="voucher_date" value="{{ $voucher[0]->voucher_date }}" readonly />
                                 </div>
-    
+                                <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required"  col="col-md-4" class="selectpicker">
+                                    @if (!$warehouses->isEmpty())
+                                    @foreach ($warehouses as $id => $name)
+                                        <option value="{{ $id }}" {{ $voucher[0]->warehouse_id == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
+                                    @endif
+                                </x-form.selectbox>
                                 <div class="col-md-12">
                                     <table class="table table-bordered" id="debit-voucher-table">
                                         <thead class="bg-primary">
@@ -98,7 +104,7 @@
                                         </tfoot>
                                     </table>
                                 </div>
-                                <x-form.textarea labelName="Remarks" name="remarks" col="col-md-12"/>
+                                <x-form.textarea labelName="Remarks" name="remarks" col="col-md-12" value="{{ $voucher[0]->description }}"/>
                                 <div class="form-group col-md-12 pt-5 text-center">
                                     <a href="{{ url('voucher-approval') }}" type="button" class="btn btn-danger btn-sm mr-3"><i class="far fa-window-close"></i> Cancel</a>
                                     <button type="button" class="btn btn-primary btn-sm mr-3" id="save-btn" onclick="store_data()"><i class="fas fa-sync-alt"></i> Update</button>
@@ -116,6 +122,7 @@
 @endsection
 
 @push('scripts')
+<script src="js/moment.js"></script>
 <script src="js/bootstrap-datetimepicker.min.js"></script>
 <script>
 $('.date').datetimepicker({format: 'YYYY-MM-DD',ignoreReadonly: true});

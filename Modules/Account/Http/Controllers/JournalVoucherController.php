@@ -5,6 +5,7 @@ namespace Modules\Account\Http\Controllers;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Account\Entities\Transaction;
 use Modules\Account\Entities\ChartOfAccount;
@@ -19,26 +20,12 @@ class JournalVoucherController extends BaseController
         $this->model = $model;
     }
 
-
     public function index()
     {
         if(permission('journal-voucher-access')){
-            $this->setPageData('Journal Voucher','Journal Voucher','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Journal Voucher']]);
-            $data = [
-                'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('YmdHis').rand(1,999),
-                'transactional_accounts' => ChartOfAccount::where(['status'=>1,'transaction'=>1])->orderBy('id','asc')->get(),
-            ];
-            return view('account::journal-voucher.create',$data);
-        }else{
-            return $this->access_blocked();
-        }
-    }
-
-    public function voucher_list()
-    {
-        if(permission('journal-voucher-list-access')){
             $this->setPageData('Journal Voucher List','Journal Voucher List','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Journal Voucher List']]);
-            return view('account::journal-voucher.list');
+            $warehouses = Warehouse::where('status',1)->pluck('name','id');
+            return view('account::journal-voucher.list',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -47,13 +34,19 @@ class JournalVoucherController extends BaseController
     public function get_datatable_data(Request $request)
     {
         if($request->ajax()){
-            if(permission('journal-voucher-list-access')){
+            if(permission('journal-voucher-access')){
 
                 if (!empty($request->start_date)) {
                     $this->model->setStartDate($request->start_date);
                 }
                 if (!empty($request->end_date)) {
                     $this->model->setEndDate($request->end_date);
+                }
+                if (!empty($request->voucher_no)) {
+                    $this->model->setVoucherNo($request->voucher_no);
+                }
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
                 }
                 $this->set_datatable_default_properties($request);//set datatable default properties
                 $list = $this->model->getDatatableList();//get table data
@@ -65,18 +58,19 @@ class JournalVoucherController extends BaseController
                     if(permission('journal-voucher-view')){
                         $action .= ' <a class="dropdown-item view_data" data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '">'.self::ACTION_BUTTON['View'].'</a>';
                     }
-                    if(permission('journal-voucher-delete')){
+                    if(permission('journal-voucher-delete') && $value->approve != 1){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '">'.self::ACTION_BUTTON['Delete'].'</a>';
                     }
                     
                     $row = [];
                     $row[] = $no;
+                    $row[] = $value->warehouse_name;
                     $row[] = $value->voucher_no;
                     $row[] = date(config('settings.date_format'),strtotime($value->voucher_date));;
                     $row[] = $value->description;
                     $row[] = number_format($value->debit,2);
                     $row[] = number_format($value->credit,2);
-                    $row[] =  '<span class="label label-success label-pill label-inline " style="min-width:70px !important;cursor:pointer;">Approved</span>';
+                    $row[] = VOUCHER_APPROVE_STATUS_LABEL[$value->approve];
                     $row[] = $value->created_by;
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
@@ -89,10 +83,25 @@ class JournalVoucherController extends BaseController
         }
     }
 
+    public function create()
+    {
+        if(permission('journal-voucher-add')){
+            $this->setPageData('Journal Voucher','Journal Voucher','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Journal Voucher']]);
+            $data = [
+                'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('YmdHis').rand(1,999),
+                'warehouses'             => Warehouse::where('status',1)->pluck('name','id'),
+                'transactional_accounts' => ChartOfAccount::where(['status'=>1,'transaction'=>1])->orderBy('id','asc')->get(),
+            ];
+            return view('account::journal-voucher.create',$data);
+        }else{
+            return $this->access_blocked();
+        }
+    }
+
     public function store(JournalVoucherFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('journal-voucher-access')){
+            if(permission('journal-voucher-add')){
                 // dd($request->all());
                 DB::beginTransaction();
                 try {
@@ -104,6 +113,7 @@ class JournalVoucherController extends BaseController
                             {
                                 $journal_voucher_transaction[] = array(
                                     'chart_of_account_id' => $value['id'],
+                                    'warehouse_id'        => $request->warehouse_id,
                                     'voucher_no'          => $request->voucher_no,
                                     'voucher_type'        => self::VOUCHER_PREFIX,
                                     'voucher_date'        => $request->voucher_date,
@@ -111,7 +121,7 @@ class JournalVoucherController extends BaseController
                                     'debit'               => $value['debit_amount'] ? $value['debit_amount'] : 0,
                                     'credit'              => $value['credit_amount'] ? $value['credit_amount'] : 0,
                                     'posted'              => 1,
-                                    'approve'             => 2,
+                                    'approve'             => 3,
                                     'created_by'          => auth()->user()->name,
                                     'created_at'          => date('Y-m-d H:i:s')
                                 );
@@ -139,7 +149,7 @@ class JournalVoucherController extends BaseController
     {
         if($request->ajax()){
             if(permission('journal-voucher-view')){
-                $voucher = $this->model->with('coa')->where('voucher_no',$request->id)->get();
+                $voucher = $this->model->with('coa','warehouse')->where('voucher_no',$request->id)->get();
                 return view('account::journal-voucher.view-modal-data',compact('voucher'))->render();
             }
         }
@@ -148,7 +158,7 @@ class JournalVoucherController extends BaseController
     public function update(JournalVoucherFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('edit-voucher')){
+            if(permission('voucher-edit')){
                 DB::beginTransaction();
                 try {
                     Transaction::where('voucher_no',$request->voucher_no)->delete();
@@ -160,6 +170,7 @@ class JournalVoucherController extends BaseController
                             {
                                 $journal_voucher_transaction[] = array(
                                     'chart_of_account_id' => $value['id'],
+                                    'warehouse_id'        => $request->warehouse_id,
                                     'voucher_no'          => $request->voucher_no,
                                     'voucher_type'        => self::VOUCHER_PREFIX,
                                     'voucher_date'        => $request->voucher_date,
@@ -167,7 +178,7 @@ class JournalVoucherController extends BaseController
                                     'debit'               => $value['debit_amount'] ? $value['debit_amount'] : 0,
                                     'credit'              => $value['credit_amount'] ? $value['credit_amount'] : 0,
                                     'posted'              => 1,
-                                    'approve'             => 2,
+                                    'approve'             => 3,
                                     'created_by'          => auth()->user()->name,
                                     'created_at'          => date('Y-m-d H:i:s')
                                 );

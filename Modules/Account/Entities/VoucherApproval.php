@@ -4,6 +4,7 @@ namespace Modules\Account\Entities;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Entities\Warehouse;
 use Modules\Account\Entities\ChartOfAccount;
 
 
@@ -16,6 +17,11 @@ class VoucherApproval extends BaseModel
     public function coa()
     {
         return $this->belongsTo(ChartOfAccount::class,'chart_of_account_id','id');
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class,'warehouse_id','id');
     }
 
     /******************************************

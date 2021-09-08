@@ -17,6 +17,9 @@ class JournalVoucherFormRequest extends FormRequest
     {
         $this->rules['voucher_no']                = ['required'];
         $this->rules['voucher_date']              = ['required'];
+        $this->rules['warehouse_id']              = ['required'];
+        
+        $this->messages['warehouse_id.required']     = 'The warehouse field is required';
         if(request()->has('journal_account')){
             foreach (request()->journal_account as $key => $value) {
                 $this->rules    ['journal_account.'.$key.'.id']             = ['required'];

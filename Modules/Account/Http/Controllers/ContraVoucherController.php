@@ -73,7 +73,7 @@ class ContraVoucherController extends BaseController
                     $row[] = $value->description;
                     $row[] = number_format($value->debit,2);
                     $row[] = number_format($value->credit,2);
-                    $row[] =  VOUCHER_APPROVE_STATUS_LABEL[$value->approve];
+                    $row[] = VOUCHER_APPROVE_STATUS_LABEL[$value->approve];
                     $row[] = $value->created_by;
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;

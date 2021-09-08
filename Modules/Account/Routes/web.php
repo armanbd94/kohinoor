@@ -62,15 +62,25 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('datatable-data', 'ContraVoucherController@get_datatable_data')->name('datatable.data');
     });
 
+    //Journal Voucher Route
+    Route::get('journal-voucher', 'JournalVoucherController@index');
+    Route::group(['prefix' => 'journal-voucher', 'as'=>'journal.voucher.'], function () {
+        Route::get('create', 'JournalVoucherController@create')->name('create');
+        Route::post('store', 'JournalVoucherController@store')->name('store');
+        Route::post('update', 'JournalVoucherController@update')->name('update');
+        Route::post('view', 'JournalVoucherController@show')->name('view');
+        Route::post('datatable-data', 'JournalVoucherController@get_datatable_data')->name('datatable.data');
+    });
+
     
     //Journal Voucher Route
-    Route::resource('journal-voucher', 'JournalVoucherController')->only(['index','store']);
-    Route::post('journal-voucher/update', 'JournalVoucherController@update');
-    Route::get('journal-voucher/list', 'JournalVoucherController@voucher_list');
-    Route::post('journal-voucher/view', 'JournalVoucherController@show')->name('journal.voucher.view');
-    Route::post('journal-voucher/datatable-data', 'JournalVoucherController@get_datatable_data')->name('journal.voucher.datatable.data');
+    // Route::resource('journal-voucher', 'JournalVoucherController')->only(['index','store']);
+    // Route::post('journal-voucher/update', 'JournalVoucherController@update');
+    // Route::get('journal-voucher/list', 'JournalVoucherController@voucher_list');
+    // Route::post('journal-voucher/view', 'JournalVoucherController@show')->name('journal.voucher.view');
+    // Route::post('journal-voucher/datatable-data', 'JournalVoucherController@get_datatable_data')->name('journal.voucher.datatable.data');
 
-    //Journal Voucher Route
+    //Voucher Approval Route
     Route::get('voucher-approval', 'VoucherApprovalController@index')->name('voucher.approval');
     Route::get('voucher-update/{voucher_no}', 'VoucherApprovalController@edit')->name('voucher.update');
     Route::post('voucher-approval/datatable-data', 'VoucherApprovalController@get_datatable_data')->name('voucher.approval.datatable.data');

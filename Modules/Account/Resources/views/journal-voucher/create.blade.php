@@ -34,6 +34,14 @@
                                     <label for="voucher_date">Date</label>
                                     <input type="text" class="form-control date" name="voucher_date" id="voucher_date" value="{{ date('Y-m-d') }}" readonly />
                                 </div>
+
+                                <x-form.selectbox labelName="Warehouse" name="warehouse_id" required="required"  col="col-md-4" class="selectpicker">
+                                    @if (!$warehouses->isEmpty())
+                                    @foreach ($warehouses as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                    @endif
+                                </x-form.selectbox>
                                 
                                 <div class="col-md-12">
                                     <table class="table table-bordered" id="debit-voucher-table">
@@ -95,6 +103,7 @@
 @endsection
 
 @push('scripts')
+<script src="js/moment.js"></script>
 <script src="js/bootstrap-datetimepicker.min.js"></script>
 <script>
 $('.date').datetimepicker({format: 'YYYY-MM-DD',ignoreReadonly: true});
@@ -167,7 +176,7 @@ function calculate_total(type)
 function store_data(){
     let form = document.getElementById('journal-voucher-form');
     let formData = new FormData(form);
-    let url = "{{url('journal-voucher')}}";
+    let url = "{{url('journal-voucher/store')}}";
     $.ajax({
         url: url,
         type: "POST",
