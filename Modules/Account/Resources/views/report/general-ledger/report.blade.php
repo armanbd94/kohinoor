@@ -1,14 +1,9 @@
 <?php
-    $total_debit = 0;
-    $total_credit = 0;
     $current_balance = $pre_balance;
 
     if (!$report_data->isEmpty()){
         foreach ($report_data as $key =>  $value){
-            $total_debit += $value->debit;
             $current_balance += $value->debit;
-
-            $total_credit += $value->credit;
             $current_balance -= $value->credit;
         }
     }
@@ -124,33 +119,48 @@
     <thead class="bg-primary">
         <tr>
             <th class="text-center">SL.</th>
-            <th class="text-cnter">Transaction Date</th>
-            <th class="text-cnter">Particulars</th>
+            <th class="text-center">Warehouse</th>
+            <th class="text-center">Transaction Date</th>
+            <th class="text-center">Particulars</th>
             <th class="text-right">Debit</th>
             <th class="text-right">Credit</th>
             <th class="text-right">Balance</th>
         </tr>
     </thead>
     <tbody>
+        @php
+        $TotalCredit=0;
+        $TotalDebit=0;
+        $CurBalance = $pre_balance;
+        @endphp
         @if (!$report_data->isEmpty())
             @foreach ($report_data as $key =>  $value)
+            <?php
+            $TotalDebit += $value->debit;
+            $CurBalance += $value->debit;
+
+            $TotalCredit += $value->credit;
+            $CurBalance -= $value->credit;
+            ?>
             <tr>
                 <td class="text-center">{{ $key + 1 }}</td>
+                <td class="text-center">{{ $value->warehouse_name }}</td>
                 <td class="text-center">{{ $value->voucher_date }}</td>
                 <td>{{ $value->description }}</td>
                 <td class="text-right"> {{ number_format($value->debit,2) }}</td>
                 <td class="text-right"> {{ number_format($value->credit,2)  }}</td>
-                <td class="text-right">{{ number_format($current_balance,2)  }}</td>
+                <td class="text-right">{{ number_format($CurBalance,2)  }}</td>
             </tr>
+            
             @endforeach
         @endif
     </tbody>
     <tfoot>
         <tr class="bg-primary">
-            <td colspan="3" class="text-right text-white font-weight-bolder">Total</td>
-            <td class="text-right text-white font-weight-bolder">{{ number_format($total_debit,2)  }}</td>
-            <td class="text-right text-white font-weight-bolder">{{ number_format($total_credit,2)  }}</td>
-            <td class="text-right text-white font-weight-bolder">{{ number_format($current_balance,2)  }}</td>
+            <td colspan="4" class="text-right text-white font-weight-bolder">Total</td>
+            <td class="text-right text-white font-weight-bolder">{{ number_format($TotalDebit,2)  }}</td>
+            <td class="text-right text-white font-weight-bolder">{{ number_format($TotalCredit,2)  }}</td>
+            <td class="text-right text-white font-weight-bolder">{{ number_format($CurBalance,2)  }}</td>
         </tr>
     </tfoot>
 </table>
