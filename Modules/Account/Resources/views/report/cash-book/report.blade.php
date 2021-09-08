@@ -106,9 +106,9 @@
     <thead class="bg-primary">
         <tr>
             <th class="text-center">SL.</th>
-            <th class="text-cnter">Date</th>
-            <th class="text-cnter">Voucher No.</th>
-            <th class="text-cnter">Voucher Type</th>
+            <th class="text-center">Date</th>
+            <th class="text-center">Voucher No.</th>
+            <th class="text-center">Voucher Type</th>
             <th class="text-left">Remarks</th>
             <th class="text-right">Debit</th>
             <th class="text-right">Credit</th>

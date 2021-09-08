@@ -41,8 +41,12 @@ class BankBookController extends BaseController
                 
                 $previous_balance_data = DB::table('transactions')
                                             ->selectRaw('SUM(debit) as debit, SUM(credit) as credit,approve')
-                                            ->where([['voucher_date','<',$start_date],['chart_of_account_id',$bank_acc_id]]);
-
+                                            ->where([['voucher_date','<',$start_date],['chart_of_account_id',$bank_acc_id],['approve',1]])
+                                            ->groupBy('chart_of_account_id','approve')->first();
+                if($previous_balance_data)
+                {
+                    $previous_balance = $previous_balance_data->debit - $previous_balance_data->credit;
+                }
                 $report_data = DB::table('transactions as t')
                                 ->selectRaw('t.id,t.voucher_no, t.voucher_type, t.voucher_date, 
                                 t.debit, t.credit, t.approve, t.chart_of_account_id, coa.name as account_name, coa.parent_name, coa.type,
@@ -51,18 +55,10 @@ class BankBookController extends BaseController
                                 ->whereDate('t.voucher_date','>=',$start_date)
                                 ->whereDate('t.voucher_date','<=',$end_date)
                                 ->where('t.chart_of_account_id',$bank_acc_id)
-                                ->where('t.approve',1);
-
-                $previous_balance_data = $previous_balance_data->groupBy('chart_of_account_id','approve')->first();
-                $report_data = $report_data->orderBy('t.voucher_date','asc')
-                                        ->orderBy('t.voucher_no','asc')
-                                        ->get();
-
-                if($previous_balance_data)
-                {
-                    $previous_balance = $previous_balance_data->debit - $previous_balance_data->credit;
-                }
-                
+                                ->where('t.approve',1)
+                                ->orderBy('t.voucher_date','asc')
+                                ->orderBy('t.voucher_no','asc')
+                                ->get();
 
                 return view('account::report.bank-book.report',compact('start_date','end_date','previous_balance','report_data','bank_name'))->render();
             }

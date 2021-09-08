@@ -29,7 +29,7 @@
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
                     <div class="row justify-content-center">
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label for="name">Choose Your Date</label>
                             <div class="input-group">
                                 <input type="text" class="form-control daterangepicker-filed" value="{{ date('Y-m-d') }} To {{ date('Y-m-d') }}">
@@ -37,14 +37,20 @@
                                 <input type="hidden" id="end_date" name="end_date" value="{{ date('Y-m-d')}}">
                             </div>
                         </div>
+
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-4" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
                         
-                        <div class="col-md-1">
-                            <div style="margin-top:28px;">    
-                                <div style="margin-top:28px;">    
+                        <div class="col-md-4">
+                            <div style="margin-top:28px;">       
                                     <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-left" type="button"
                                     data-toggle="tooltip" data-theme="dark" title="Search" onclick="report()">
                                     <i class="fas fa-search"></i></button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -113,6 +119,7 @@
 
 @push('scripts')
 <script src="js/jquery.printarea.js"></script>
+<script src="js/moment.js"></script>
 <script src="js/knockout-3.4.2.js"></script>
 <script src="js/daterangepicker.min.js"></script>
 <script>
@@ -137,24 +144,28 @@ $(document).on('click','#print-report',function(){
     $("#report").printArea(options);
 });
 
-report();
 function report()
 {
     var start_date   = $('input[name="start_date"]').val();
     var end_date     = $('input[name="end_date"]').val();
-
-    $.ajax({
-        url:"{{ url('cash-book/report') }}",
-        type:"POST",
-        data:{start_date:start_date,end_date:end_date,_token:_token},
-        success:function(data){
-            $('#report').empty();
-            $('#report').append(data);
-        },
-        error: function (xhr, ajaxOption, thrownError) {
-            console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
-        }
-    });
+    var warehouse_id = document.getElementById('warehouse_id').value;
+    if(warehouse_id){
+        $.ajax({
+            url:"{{ url('cash-book/report') }}",
+            type:"POST",
+            data:{warehouse_id:warehouse_id,start_date:start_date,end_date:end_date,_token:_token},
+            success:function(data){
+                $('#report').empty();
+                $('#report').append(data);
+            },
+            error: function (xhr, ajaxOption, thrownError) {
+                console.log(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+            }
+        });
+    }else{
+        notification('error','Please select warehouse!');
+    }
+    
 }
 
 
