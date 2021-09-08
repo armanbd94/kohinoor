@@ -160,7 +160,7 @@ class ContraVoucherController extends BaseController
     public function update(ContraVoucherFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('edit-voucher')){
+            if(permission('voucher-edit')){
                 DB::beginTransaction();
                 try {
                     Transaction::where('voucher_no',$request->voucher_no)->delete();
@@ -172,6 +172,7 @@ class ContraVoucherController extends BaseController
                             {
                                 $contra_voucher_transaction[] = array(
                                     'chart_of_account_id' => $value['id'],
+                                    'warehouse_id'        => $request->warehouse_id,
                                     'voucher_no'          => $request->voucher_no,
                                     'voucher_type'        => self::VOUCHER_PREFIX,
                                     'voucher_date'        => $request->voucher_date,
@@ -179,7 +180,7 @@ class ContraVoucherController extends BaseController
                                     'debit'               => $value['debit_amount'] ? $value['debit_amount'] : 0,
                                     'credit'              => $value['credit_amount'] ? $value['credit_amount'] : 0,
                                     'posted'              => 1,
-                                    'approve'             => 2,
+                                    'approve'             => 3,
                                     'created_by'          => auth()->user()->name,
                                     'created_at'          => date('Y-m-d H:i:s')
                                 );

@@ -26,6 +26,11 @@ define('APPROVE_STATUS',['1' => 'Approved', '2' => 'Pending','3'=>'Cancelled']);
 define('EXPENSE_APPROVE_STATUS',['1' => 'Approved', '2' => 'Rejected','3'=>'Pending']);
 define('TAX_METHOD',['1' => 'Exclusive','2' => 'Inclusive']);
 define('TYPE',['1'=>'Standard','2'=>'Variant']);
+define('VOUCHER_APPROVE_STATUS',[
+    '1' => 'Approved',
+    '2' => 'Rejected',
+    '3' => 'Pending',
+]);
 define('TYPE_LABEL',[
     '1'=>'<span class="label label-success label-pill label-inline" style="min-width:70px !important;">Standard</span>',
     '2'=>'<span class="label label-primary label-pill label-inline" style="min-width:70px !important;">Variant</span>',

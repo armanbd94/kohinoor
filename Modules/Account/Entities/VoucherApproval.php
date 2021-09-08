@@ -10,7 +10,7 @@ use Modules\Account\Entities\ChartOfAccount;
 class VoucherApproval extends BaseModel
 {
     protected $table = 'transactions';
-    protected $fillable = ['chart_of_account_id', 'voucher_no', 'voucher_type', 'voucher_date', 'description', 'debit', 
+    protected $fillable = ['chart_of_account_id', 'warehouse_id','voucher_no', 'voucher_type', 'voucher_date', 'description', 'debit', 
     'credit', 'posted', 'approve', 'created_by', 'modified_by'];
 
     public function coa()
@@ -24,6 +24,8 @@ class VoucherApproval extends BaseModel
     protected $order = ['t.id' => 'desc'];
     protected $_start_date; 
     protected $_end_date; 
+    protected $_voucher_no; 
+    protected $_warehouse_id; 
 
     //methods to set custom search property value
     public function setStartDate($start_date)
@@ -34,18 +36,27 @@ class VoucherApproval extends BaseModel
     {
         $this->_end_date = $end_date;
     }
+    public function setVoucherNo($voucher_no)
+    {
+        $this->_voucher_no = $voucher_no;
+    }
+    public function setWarehouseID($warehouse_id)
+    {
+        $this->_warehouse_id = $warehouse_id;
+    }
 
     private function get_datatable_query()
     {
         //set column sorting index table column name wise (should match with frontend table header)
 
-        $this->column_order = ['t.id', 't.voucher_no','t.voucher_date','t.descritpion','t.debit','t.credit','t.approve', 't.created_by',null];
+        $this->column_order = ['t.id', 't.warehouse_id','t.voucher_no','t.voucher_date','t.descritpion','t.debit','t.credit','t.approve', 't.created_by',null];
         
         
         $query = DB::table('transactions as t')
-        ->selectRaw("t.*,sum(t.credit) as credit,sum(t.debit) as debit")
+        ->leftjoin('warehouses as w','t.warehouse_id','=','w.id')
+        ->selectRaw("t.*,sum(t.credit) as credit,sum(t.debit) as debit,w.name as warehouse_name")
         ->whereIn('t.voucher_type',['DV','CV','CONTRAV','JOURNALV'])
-        ->where('t.approve',2)
+        ->where('t.approve',3)
         ->groupBy('t.voucher_no');
         //search query
         if (!empty($this->_start_date)) {
@@ -53,6 +64,12 @@ class VoucherApproval extends BaseModel
         }
         if (!empty($this->_end_date)) {
             $query->where('t.voucher_date', '<=',$this->_end_date);
+        }
+        if (!empty($this->_voucher_no)) {
+            $query->where('t.voucher_no', $this->_voucher_no);
+        }
+        if (!empty($this->_warehouse_id)) {
+            $query->where('t.warehouse_id', $this->_warehouse_id);
         }
 
         //order by data fetching code
@@ -84,13 +101,16 @@ class VoucherApproval extends BaseModel
         $query =  DB::table('transactions as t')
         ->selectRaw("t.*,sum(t.credit) as credit,sum(t.debit) as debit")
         ->whereIn('t.voucher_type',['DV','CV','CONTRAV','JOURNALV'])
-        ->where('t.approve',2)
+        ->where('t.approve',3)
         ->groupBy('t.voucher_no');
         if (!empty($this->_start_date)) {
             $query->where('t.voucher_date', '>=',$this->_start_date);
         }
         if (!empty($this->_end_date)) {
             $query->where('t.voucher_date', '<=',$this->_end_date);
+        }
+        if (!empty($this->_warehouse_id)) {
+            $query->where('t.warehouse_id', $this->_warehouse_id);
         }
 
         return $query->get()->count();

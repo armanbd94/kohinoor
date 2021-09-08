@@ -4,6 +4,7 @@ namespace Modules\Account\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Account\Entities\ChartOfAccount;
 use Modules\Account\Entities\VoucherApproval;
@@ -18,9 +19,10 @@ class VoucherApprovalController extends BaseController
 
     public function index()
     {
-        if(permission('voucher-approval-access')){
+        if(permission('voucher-access')){
             $this->setPageData('Voucher Approval','Voucher Approval','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Voucher Approval']]);
-            return view('account::voucher-approval.index');
+            $warehouses = Warehouse::where('status',1)->pluck('name','id');
+            return view('account::voucher-approval.index',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }
@@ -29,13 +31,19 @@ class VoucherApprovalController extends BaseController
     public function get_datatable_data(Request $request)
     {
         if($request->ajax()){
-            if(permission('voucher-approval-access')){
+            if(permission('voucher-access')){
 
                 if (!empty($request->start_date)) {
                     $this->model->setStartDate($request->start_date);
                 }
                 if (!empty($request->end_date)) {
                     $this->model->setEndDate($request->end_date);
+                }
+                if (!empty($request->voucher_no)) {
+                    $this->model->setVoucherNo($request->voucher_no);
+                }
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
                 }
 
                 $this->set_datatable_default_properties($request);//set datatable default properties
@@ -45,21 +53,29 @@ class VoucherApprovalController extends BaseController
                 foreach ($list as $value) {
                     $no++;
                     $action = '';
-                    if(permission('edit-voucher')){
+                    if(permission('voucher-edit')){
                         $action .= ' <a class="dropdown-item" href="'.route("voucher.update",$value->voucher_no).'">'.self::ACTION_BUTTON['Edit'].'</a>';
                     }
-                    if(permission('delete-voucher')){
+                    if(permission('voucher-delete')){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '">'.self::ACTION_BUTTON['Delete'].'</a>';
+                    }
+
+                    if($value->approve == 3 && permission('voucher-approve'))
+                        {
+                        $voucher_approve = '<span class="label label-success label-pill label-inline approve_voucher" data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '" data-status="1" style="min-width:70px !important;cursor:pointer;">Approve It</span>';
+                    }else{
+                        $voucher_approve = VOUCHER_APPROVE_STATUS[$value->approve];
                     }
                     
                     $row = [];
                     $row[] = $no;
+                    $row[] = $value->warehouse_name;
                     $row[] = $value->voucher_no;
                     $row[] = date(config('settings.date_format'),strtotime($value->voucher_date));;
                     $row[] = $value->description;
                     $row[] = $value->voucher_type == 'CV' ? 0 : number_format($value->debit,2);
                     $row[] = $value->voucher_type == 'DV' ? 0 : number_format($value->credit,2);
-                    $row[] = permission('approve-voucher') ? '<span class="label label-success label-pill label-inline approve_voucher" data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '" data-status="1" style="min-width:70px !important;cursor:pointer;">Approved</span>' : 'Not Approved Yet';
+                    $row[] = $voucher_approve;
                     $row[] = $value->created_by;
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
@@ -74,9 +90,9 @@ class VoucherApprovalController extends BaseController
 
     public function edit(string $voucher_no)
     {
-        if(permission('edit-voucher')){
+        if(permission('voucher-edit')){
             $voucher_data = $this->model->where('voucher_no',$voucher_no)->get();
-            
+            $data = [];
             if($voucher_data)
             {
                 $data = [
@@ -124,6 +140,7 @@ class VoucherApprovalController extends BaseController
                     $view = 'account::journal-voucher.edit';
                 }
                 $this->setPageData($title,$title,'far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>$title]]);
+                $data['warehouses'] = Warehouse::where('status',1)->pluck('name','id');
                 return view($view,$data);
             }else{
                 return redirect()->back();
@@ -147,7 +164,7 @@ class VoucherApprovalController extends BaseController
     public function approve(Request $request)
     {
         if($request->ajax()){
-            if(permission('approve-voucher')){
+            if(permission('voucher-approve')){
                 $result   = $this->model->where('voucher_no',$request->id)->update(['approve' => $request->status]);
                 $output   = $result ? ['status' => 'success','message' => 'Voucher Approved Successfully']
                 : ['status' => 'error','message' => 'Failed To Approve Voucher'];

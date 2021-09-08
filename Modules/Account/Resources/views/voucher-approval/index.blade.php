@@ -3,6 +3,7 @@
 @section('title', $page_title)
 
 @push('styles')
+<link href="plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
 <link href="css/daterangepicker.min.css" rel="stylesheet" type="text/css" />
 @endpush
 
@@ -32,17 +33,28 @@
                             </div>
                         </div>
 
-                        <div class="col-md-1">
-                            <div style="margin-top:28px;">    
-                                <div style="margin-top:28px;">    
-                                    <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
-                                    data-toggle="tooltip" data-theme="dark" title="Reset">
-                                    <i class="fas fa-undo-alt"></i></button>
-    
-                                    <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-right" type="button"
-                                    data-toggle="tooltip" data-theme="dark" title="Search">
-                                    <i class="fas fa-search"></i></button>
-                                </div>
+                        <div class="form-group col-md-3">
+                            <label for="voucher_no">Voucher No</label>
+                            <input type="text" class="form-control" name="voucher_no" id="voucher_no"/>
+                        </div>
+
+                        <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" class="selectpicker">
+                            @if (!$warehouses->isEmpty())
+                            @foreach ($warehouses as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                            @endif
+                        </x-form.selectbox>
+
+                        <div class="col-md-3">
+                            <div style="margin-top:28px;">      
+                                <button id="btn-reset" class="btn btn-danger btn-sm btn-elevate btn-icon float-right" type="button"
+                                data-toggle="tooltip" data-theme="dark" title="Reset">
+                                <i class="fas fa-undo-alt"></i></button>
+
+                                <button id="btn-filter" class="btn btn-primary btn-sm btn-elevate btn-icon mr-2 float-right" type="button"
+                                data-toggle="tooltip" data-theme="dark" title="Search">
+                                <i class="fas fa-search"></i></button>
                             </div>
                         </div>
                     </div>
@@ -58,6 +70,7 @@
                                     <thead class="bg-primary">
                                         <tr>
                                             <th>Sl</th>
+                                            <th>Warehouse</th>
                                             <th>Voucher No.</th>
                                             <th>Date</th>
                                             <th>Remark</th>
@@ -83,6 +96,8 @@
 @endsection
 
 @push('scripts')
+<script src="plugins/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+<script src="js/moment.js"></script>
 <script src="js/knockout-3.4.2.js"></script>
 <script src="js/daterangepicker.min.js"></script>
 <script>
@@ -122,24 +137,25 @@ $(document).ready(function(){
             "data": function (data) {
                 data.start_date   = $("#form-filter #start_date").val();
                 data.end_date     = $("#form-filter #end_date").val();
+                data.voucher_no     = $("#form-filter #voucher_no").val();
+                data.warehouse_id     = $("#form-filter #warehouse_id").val();
                 data._token            = _token;
             }
         },
         "columnDefs": [
             {
-                "targets": [8],
+                "targets": [9],
                 "orderable": false,
                 "className": "text-center"
             },
             {
-                "targets": [0,1,2,6,7],
+                "targets": [0,1,2,3,7,8],
                 "className": "text-center"
             },
             {
-                "targets": [4,5],
+                "targets": [5,6],
                 "className": "text-right"
             },
-
         ],
         "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6' <'float-right'B>>>" +
             "<'row'<'col-sm-12'tr>>" +
@@ -158,7 +174,7 @@ $(document).ready(function(){
                 "orientation": "landscape", //portrait
                 "pageSize": "A4", //A3,A5,A6,legal,letter
                 "exportOptions": {
-                    columns: ':visible:not(:eq(8))' 
+                    columns: ':visible:not(:eq(9))' 
                 },
                 customize: function (win) {
                     $(win.document.body).addClass('bg-white');
@@ -176,7 +192,7 @@ $(document).ready(function(){
                 "title": "{{ $page_title }} List",
                 "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                 "exportOptions": {
-                    columns: ':visible:not(:eq(8))'
+                    columns: ':visible:not(:eq(9))'
                 }
             },
             {
@@ -186,7 +202,7 @@ $(document).ready(function(){
                 "title": "{{ $page_title }} List",
                 "filename": "{{ strtolower(str_replace(' ','-',$page_title)) }}-list",
                 "exportOptions": {
-                    columns: ':visible:not(:eq(8))'
+                    columns: ':visible:not(:eq(9))'
                 }
             },
             {
@@ -198,7 +214,7 @@ $(document).ready(function(){
                 "orientation": "landscape", //portrait
                 "pageSize": "A4", //A3,A5,A6,legal,letter
                 "exportOptions": {
-                    columns: ':visible:not(:eq(8))'
+                    columns: ':visible:not(:eq(9))'
                 },
                 customize: function(doc) {
                     doc.defaultStyle.fontSize = 7; //<-- set fontsize to 16 instead of 10 
@@ -217,7 +233,9 @@ $(document).ready(function(){
     $('#btn-reset').click(function () {
         $('#form-filter')[0].reset();
         $('#form-filter #start_date').val("");
-            $('#form-filter #end_date').val("");
+        $('#form-filter #end_date').val("");
+        $('#form-filter #voucher_no').val("");
+        $('#form-filter #warehouse_id').val("");
         $('#form-filter .selectpicker').selectpicker('refresh');
         table.ajax.reload();
     });
