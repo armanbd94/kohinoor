@@ -100,7 +100,7 @@
         <!--end::Card-->
     </div>
 </div>
-@include('account::credit-voucher.view-modal')
+@include('account::debit-voucher.view-modal')
 @endsection
 
 @push('scripts')
@@ -161,7 +161,7 @@ $(document).ready(function(){
                 "className": "text-center"
             },
             {
-                "targets": [5,
+                "targets": [5],
                 "className": "text-right"
             },
 

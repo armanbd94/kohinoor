@@ -18,7 +18,7 @@ class CreditVoucherFormRequest extends FormRequest
         $this->rules['voucher_no']                = ['required'];
         $this->rules['voucher_date']              = ['required'];
         $this->rules['debit_account_id']          = ['required'];
-
+        $this->rules['warehouse_id'] = ['required'];
         $this->messages['warehouse_id.required']     = 'The warehouse field is required';
         $this->messages['debit_account_id.required'] = 'The debit account head field is required';
 

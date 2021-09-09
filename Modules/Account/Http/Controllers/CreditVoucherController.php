@@ -126,7 +126,7 @@ class CreditVoucherController extends BaseController
                                 'debit'               => 0,
                                 'credit'              => $value['amount'],
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );
@@ -143,7 +143,7 @@ class CreditVoucherController extends BaseController
                                 'debit'               => $value['amount'],
                                 'credit'              => 0,
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );
@@ -188,7 +188,7 @@ class CreditVoucherController extends BaseController
                                 'debit'               => 0,
                                 'credit'              => $value['amount'],
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );
@@ -205,7 +205,7 @@ class CreditVoucherController extends BaseController
                                 'debit'               => $value['amount'],
                                 'credit'              => 0,
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );

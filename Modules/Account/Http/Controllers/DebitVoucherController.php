@@ -40,6 +40,7 @@ class DebitVoucherController extends BaseController
                 }
                 if (!empty($request->end_date)) {
                     $this->model->setEndDate($request->end_date);
+
                 }
                 if (!empty($request->voucher_no)) {
                     $this->model->setVoucherNo($request->voucher_no);
@@ -127,7 +128,7 @@ class DebitVoucherController extends BaseController
                                 'debit'               => $value['amount'],
                                 'credit'              => 0,
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );
@@ -144,7 +145,7 @@ class DebitVoucherController extends BaseController
                                 'debit'               => 0,
                                 'credit'              => $value['amount'],
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );
@@ -171,7 +172,7 @@ class DebitVoucherController extends BaseController
     public function update(DebitVoucherFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('edit-voucher')){
+            if(permission('voucher-edit')){
                 // dd($request->all());
                 DB::beginTransaction();
                 try {
@@ -190,7 +191,7 @@ class DebitVoucherController extends BaseController
                                 'debit'               => $value['amount'],
                                 'credit'              => 0,
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );
@@ -207,7 +208,7 @@ class DebitVoucherController extends BaseController
                                 'debit'               => 0,
                                 'credit'              => $value['amount'],
                                 'posted'              => 1,
-                                'approve'             => 2,
+                                'approve'             => 3,
                                 'created_by'          => auth()->user()->name,
                                 'created_at'          => date('Y-m-d H:i:s')
                             );

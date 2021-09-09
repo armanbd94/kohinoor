@@ -55,8 +55,15 @@ Route::group(['middleware' => ['auth']], function () {
     });
 
     //Credit Voucher Route
-    Route::resource('credit-voucher', 'CreditVoucherController')->only(['index','store']);
-    Route::post('credit-voucher/update', 'CreditVoucherController@update');
+    Route::get('credit-voucher', 'CreditVoucherController@index');
+    Route::group(['prefix' => 'credit-voucher', 'as'=>'credit.voucher.'], function () {
+        Route::get('create', 'CreditVoucherController@create')->name('create');
+        Route::post('store', 'CreditVoucherController@store')->name('store');
+        Route::post('update', 'CreditVoucherController@update')->name('update');
+        Route::post('view', 'CreditVoucherController@show')->name('view');
+        Route::post('datatable-data', 'CreditVoucherController@get_datatable_data')->name('datatable.data');
+    });
+
 
     //Contra Voucher Route
     Route::get('contra-voucher', 'ContraVoucherController@index');

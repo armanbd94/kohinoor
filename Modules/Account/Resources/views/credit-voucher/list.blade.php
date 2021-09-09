@@ -161,7 +161,7 @@ $(document).ready(function(){
                 "className": "text-center"
             },
             {
-                "targets": [5,
+                "targets": [5],
                 "className": "text-right"
             },
 
