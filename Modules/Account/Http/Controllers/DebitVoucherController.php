@@ -5,17 +5,82 @@ namespace Modules\Account\Http\Controllers;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
-use Modules\Account\Entities\Transaction;
 use Modules\Account\Entities\ChartOfAccount;
+use Modules\Account\Entities\DebitVoucher;
 use Modules\Account\Http\Requests\DebitVoucherFormRequest;
 
 class DebitVoucherController extends BaseController
 {
     private const VOUCHER_PREFIX = 'DV';
-    public function __construct(Transaction $model)
+    public function __construct(DebitVoucher $model)
     {
         $this->model = $model;
+    }
+
+    public function index()
+    {
+        if(permission('debit-voucher-access')){
+            $this->setPageData('Debit Voucher List','Debit Voucher List','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Debit Voucher List']]);
+            $warehouses = Warehouse::where('status',1)->pluck('name','id');
+            return view('account::debit-voucher.list',compact('warehouses'));
+        }else{
+            return $this->access_blocked();
+        }
+    }
+
+    public function get_datatable_data(Request $request)
+    {
+        if($request->ajax()){
+            if(permission('debit-voucher-access')){
+
+                if (!empty($request->start_date)) {
+                    $this->model->setStartDate($request->start_date);
+                }
+                if (!empty($request->end_date)) {
+                    $this->model->setEndDate($request->end_date);
+                }
+                if (!empty($request->voucher_no)) {
+                    $this->model->setVoucherNo($request->voucher_no);
+                }
+                if (!empty($request->warehouse_id)) {
+                    $this->model->setWarehouseID($request->warehouse_id);
+                }
+
+                $this->set_datatable_default_properties($request);//set datatable default properties
+                $list = $this->model->getDatatableList();//get table data
+                $data = [];
+                $no = $request->input('start');
+                foreach ($list as $value) {
+                    $no++;
+                    $action = '';
+                    if(permission('debit-voucher-view')){
+                        $action .= ' <a class="dropdown-item view_data" data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '">'.self::ACTION_BUTTON['View'].'</a>';
+                    }
+                    if(permission('debit-voucher-delete') && $value->approve != 1){
+
+                        $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '">'.self::ACTION_BUTTON['Delete'].'</a>';
+                    }
+                    
+                    $row = [];
+                    $row[] = $no;
+                    $row[] = $value->warehouse_name;
+                    $row[] = $value->voucher_no;
+                    $row[] = date('d-M-Y',strtotime($value->voucher_date));;
+                    $row[] = $value->description;
+                    $row[] = number_format($value->debit,2);
+                    $row[] = VOUCHER_APPROVE_STATUS_LABEL[$value->approve];
+                    $row[] = $value->created_by;
+                    $row[] = action_button($action);//custom helper function for action button
+                    $data[] = $row;
+                }
+                return $this->datatable_draw($request->input('draw'),$this->model->count_all(),
+                $this->model->count_filtered(), $data);
+            }
+        }else{
+            return response()->json($this->unauthorized());
+        }
     }
 
 
@@ -24,13 +89,16 @@ class DebitVoucherController extends BaseController
         if(permission('debit-voucher-add')){
             $this->setPageData('Debit Voucher','Debit Voucher','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Debit Voucher']]);
             $data = [
-            'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('Ymd').rand(1,999),
+            'warehouses'             => Warehouse::where('status',1)->pluck('name','id'),
+            'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('ymd').rand(1,999),
             'transactional_accounts' => ChartOfAccount::where(['status'=>1,'transaction'=>1])->orderBy('id','asc')->get(),
             'credit_accounts'        => ChartOfAccount::where(['status'=>1,'transaction'=>1])
                                     ->where('code','like','1020101')
                                     ->orWhere('code','like','10201020%')
                                     ->orWhere('code','like','10201030%')
-                                    ->orderBy('id','asc')->get()
+                                    ->orderBy('id','asc')
+                                    ->get(),
+            
             ];
             return view('account::debit-voucher.create',$data);
         }else{
@@ -51,6 +119,7 @@ class DebitVoucherController extends BaseController
                             //Debit Insert
                             $debit_voucher_transaction[] = array(
                                 'chart_of_account_id' => $value['id'],
+                                'warehouse_id'        => $request->warehouse_id,
                                 'voucher_no'          => $request->voucher_no,
                                 'voucher_type'        => self::VOUCHER_PREFIX,
                                 'voucher_date'        => $request->voucher_date,
@@ -67,6 +136,7 @@ class DebitVoucherController extends BaseController
                             $credit_account = ChartOfAccount::find($request->credit_account_id);
                             $debit_voucher_transaction[] = array(
                                 'chart_of_account_id' => $request->credit_account_id,
+                                'warehouse_id'        => $request->warehouse_id,
                                 'voucher_no'          => $request->voucher_no,
                                 'voucher_type'        => self::VOUCHER_PREFIX,
                                 'voucher_date'        => $request->voucher_date,
@@ -105,13 +175,14 @@ class DebitVoucherController extends BaseController
                 // dd($request->all());
                 DB::beginTransaction();
                 try {
-                    Transaction::where('voucher_no',$request->voucher_no)->delete();
+                    $this->model->where('voucher_no',$request->voucher_no)->delete();
                     $debit_voucher_transaction = [];
                     if ($request->has('debit_account')) {
                         foreach ($request->debit_account as $key => $value) {
                             //Debit Insert
                             $debit_voucher_transaction[] = array(
                                 'chart_of_account_id' => $value['id'],
+                                'warehouse_id'        => $request->warehouse_id,
                                 'voucher_no'          => $request->voucher_no,
                                 'voucher_type'        => self::VOUCHER_PREFIX,
                                 'voucher_date'        => $request->voucher_date,
@@ -128,6 +199,7 @@ class DebitVoucherController extends BaseController
                             $credit_account = ChartOfAccount::find($request->credit_account_id);
                             $debit_voucher_transaction[] = array(
                                 'chart_of_account_id' => $request->credit_account_id,
+                                'warehouse_id'        => $request->warehouse_id,
                                 'voucher_no'          => $request->voucher_no,
                                 'voucher_type'        => self::VOUCHER_PREFIX,
                                 'voucher_date'        => $request->voucher_date,
