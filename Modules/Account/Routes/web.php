@@ -45,8 +45,14 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('customer-receive/{id}/{payment_type}', 'CustomerReceiveController@show');
 
     //Debit Voucher Route
-    Route::resource('debit-voucher', 'DebitVoucherController')->only(['index','store']);
-    Route::post('debit-voucher/update', 'DebitVoucherController@update');
+    Route::get('debit-voucher', 'DebitVoucherController@index');
+    Route::group(['prefix' => 'debit-voucher', 'as'=>'debit.voucher.'], function () {
+        Route::get('create', 'DebitVoucherController@create')->name('create');
+        Route::post('store', 'DebitVoucherController@store')->name('store');
+        Route::post('update', 'DebitVoucherController@update')->name('update');
+        Route::post('view', 'DebitVoucherController@show')->name('view');
+        Route::post('datatable-data', 'DebitVoucherController@get_datatable_data')->name('datatable.data');
+    });
 
     //Credit Voucher Route
     Route::resource('credit-voucher', 'CreditVoucherController')->only(['index','store']);

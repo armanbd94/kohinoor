@@ -89,6 +89,7 @@ class MobileBankController extends BaseController
                 try {
                     $collection = collect($request->validated());
                     $collection = $this->track_data($collection,$request->update_id);
+                    $result   = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
                     $coa_code        = ChartOfAccount::mobileBankHeadCode();
                     if($coa_code){
                         $headcode = $coa_code + 1;
@@ -103,6 +104,7 @@ class MobileBankController extends BaseController
                         $bank_coa['type']              = 'A';
                         $bank_coa['transaction']       = 1;               //1=yes,2=no
                         $bank_coa['general_ledger']    = 2;               //1=yes,2=no
+                        $bank_coa['mobile_bank_id']    = $result->id;               //1=yes,2=no
                         $bank_coa['budget']            = 2;               //1=yes,2=no
                         $bank_coa['depreciation']      = 2;               //1=yes,2=no
                         $bank_coa['depreciation_rate'] = 0;
@@ -110,7 +112,7 @@ class MobileBankController extends BaseController
                     }
                     $bank_coa = collect($bank_coa);
                     $bank_coa = $this->track_data($bank_coa,$request->update_id); 
-                    $result   = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
+                    
                     ChartOfAccount::updateOrCreate(['name'=>$request->bank_old_name],$bank_coa->all());
                     $output       = $this->store_message($result, $request->update_id);
                     

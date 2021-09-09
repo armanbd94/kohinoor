@@ -89,32 +89,38 @@ class BankController extends BaseController
                 try {
                     $collection = collect($request->validated());
                     $collection = $this->track_data($collection,$request->update_id);
-                    $coa_code        = ChartOfAccount::bankHeadCode();
-                    if($coa_code){
-                        $headcode = $coa_code + 1;
-                    }else{
-                        $headcode = "102010201";
-                    }
-                    $bank_coa['name'] = $request->bank_name;;
-                    if(empty($request->update_id)){
-                        $bank_coa['code']              = $headcode;
-                        $bank_coa['parent_name']       = self::CASH_AT_BANK;
-                        $bank_coa['level']             = 4;
-                        $bank_coa['type']              = 'A';
-                        $bank_coa['transaction']       = 1;               //1=yes,2=no
-                        $bank_coa['general_ledger']    = 2;               //1=yes,2=no
-                        $bank_coa['budget']            = 2;               //1=yes,2=no
-                        $bank_coa['depreciation']      = 2;               //1=yes,2=no
-                        $bank_coa['depreciation_rate'] = 0;
-                    
-                    }
-                    $bank_coa = collect($bank_coa);
-                    $bank_coa = $this->track_data($bank_coa,$request->update_id); 
                     $result   = $this->model->updateOrCreate(['id'=>$request->update_id],$collection->all());
-                    ChartOfAccount::updateOrCreate(['name'=>$request->bank_old_name],$bank_coa->all());
-                    $output       = $this->store_message($result, $request->update_id);
+                    if($result)
+                    {
+                        $coa_code        = ChartOfAccount::bankHeadCode();
+                        if($coa_code){
+                            $headcode = $coa_code + 1;
+                        }else{
+                            $headcode = "102010201";
+                        }
+                        $bank_coa['name'] = $request->bank_name;;
+                        if(empty($request->update_id)){
+                            $bank_coa['code']              = $headcode;
+                            $bank_coa['parent_name']       = self::CASH_AT_BANK;
+                            $bank_coa['level']             = 4;
+                            $bank_coa['type']              = 'A';
+                            $bank_coa['transaction']       = 1;               //1=yes,2=no
+                            $bank_coa['general_ledger']    = 2;               //1=yes,2=no
+                            $bank_coa['bank_id']           = $result->id;               //1=yes,2=no
+                            $bank_coa['budget']            = 2;               //1=yes,2=no
+                            $bank_coa['depreciation']      = 2;               //1=yes,2=no
+                            $bank_coa['depreciation_rate'] = 0;
+                        }
+                        $bank_coa = collect($bank_coa);
+                        $bank_coa = $this->track_data($bank_coa,$request->update_id); 
+                        ChartOfAccount::updateOrCreate(['name'=>$request->bank_old_name],$bank_coa->all());
+                        $output       = $this->store_message($result, $request->update_id);
+                        
+                        $this->model->flushCache();//Remove Database Cache Data
+                    }else{
+                        $output = ['status' => 'error','message' => 'Failed to create bank account!'];
+                    }
                     
-                    $this->model->flushCache();//Remove Database Cache Data
                     DB::commit();
                 } catch (Exception $e) {
                     DB::rollback();

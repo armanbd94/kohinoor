@@ -19,9 +19,9 @@ class DebitVoucherController extends BaseController
     }
 
 
-    public function index()
+    public function create()
     {
-        if(permission('debit-voucher-access')){
+        if(permission('debit-voucher-add')){
             $this->setPageData('Debit Voucher','Debit Voucher','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Debit Voucher']]);
             $data = [
             'voucher_no'             => self::VOUCHER_PREFIX.'-'.date('Ymd').rand(1,999),
@@ -41,7 +41,7 @@ class DebitVoucherController extends BaseController
     public function store(DebitVoucherFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('debit-voucher-access')){
+            if(permission('debit-voucher-add')){
                 // dd($request->all());
                 DB::beginTransaction();
                 try {
