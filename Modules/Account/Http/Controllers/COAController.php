@@ -470,6 +470,7 @@ class COAController extends BaseController
         $query = $query->first();
         return $query;
     }
+    
     public function coa_balance($coa_id, $coa_name)
     {
         $head_info = $this->model->find($coa_id);
