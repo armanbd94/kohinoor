@@ -313,7 +313,7 @@
                     ->where([['approve', 1], ['chart_of_account_id', $chliab_head->id]])
                     ->whereDate('voucher_date', '>=', $start_date)
                     ->whereDate('voucher_date', '<=', $end_date) ->first(); ?>
-                        <?php if ($liab_balance->balance != 0) { ?>
+                        <?php //if ($liab_balance->balance != 0) { ?>
                         <tr>
                             <td align="left" class="paddingleft10px "><?php echo $chliab_head->name; ?></td>
 
@@ -324,7 +324,7 @@
                                 ?>
                             </td>
                         </tr>
-                        <?php } ?>
+                        <?php //} ?>
 
                         <?php
                         } ?>

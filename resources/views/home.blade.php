@@ -24,7 +24,7 @@
 @section('content')
 <div class="d-flex flex-column-fluid">
     <div class="container-fluid">
-        {{-- <div class="row">
+        <div class="row">
 
             <div class="col-md-3">
                 <div class="bg-white text-center py-3  rounded-xl">
@@ -32,7 +32,7 @@
                         <img src="images/purchase.svg" alt="purchase" class="icon">
                     </span>
                     <h6 id="purchase" class="m-0">{{ number_format($purchase,2) }}TK</h6>
-                    <a href="{{ route('purchase') }}" class="font-weight-bold font-size-h7 mt-2">Purchase</a>
+                    <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Purchase</a>
                 </div>
             </div>
             
@@ -42,17 +42,17 @@
                         <img src="images/sale.svg" alt="sale" class="icon">
                     </span>
                     <h6 id="sale" class="m-0">{{ number_format($sale,2) }}TK</h6>
-                    <a href="{{ route('sale') }}" class="font-weight-bold font-size-h7 mt-2">Sale</a>
+                    <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Sale</a>
                 </div>
             </div>
 
             <div class="col-md-3">
                 <div class="bg-white text-center py-3  rounded-xl">
                     <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
-                        <img src="images/customer.svg" alt="customer" class="icon">
+                        <img src="images/income.svg" alt="income" class="icon">
                     </span>
-                    <h6 id="customer" class="m-0">{{ $customer }}</h6>
-                    <a href="{{ route('customer') }}" class="font-weight-bold font-size-h7 mt-2">Customer</a>
+                    <h6 id="income" class="m-0">{{ $income }}</h6>
+                    <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Income</a>
                 </div>
             </div>
             
@@ -61,13 +61,13 @@
                     <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
                         <img src="images/expense.svg" alt="expense" class="icon">
                     </span>
-                    <h6 id="expense" class="m-0">{{ number_format($total_expense_amount,2) }}TK</h6>
-                    <a href="{{ route('expense') }}" class="font-weight-bold font-size-h7 mt-2">Expense</a>
+                    <h6 id="expense" class="m-0">{{ number_format($expense,2) }}TK</h6>
+                    <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Expense</a>
                 </div>
             </div>
-        </div> --}}
+        </div>
         <!-- Start :: Bar Chart-->
-        {{-- <div class="row py-5">
+        <div class="row py-5">
             <div class="col-md-12">
             <div class="card bar-chart">
                 <div class="card-header d-flex align-items-center">
@@ -79,7 +79,7 @@
                 </div>
             </div>
             </div>
-        </div> --}}
+        </div>
         <!-- End :: Bar Chart-->
     </div>
 </div>
@@ -97,7 +97,7 @@ $(document).ready(function(){
         $.get("{{ url('dashboard-data') }}/"+start_date+'/'+end_date, function(data){
             $('#sale').text((data.sale).toFixed(2)+'Tk');
             $('#purchase').text((data.purchase).toFixed(2)+'Tk');
-            $('#customer').text(data.customer);
+            $('#income').text((data.income).toFixed(2)+'Tk');
             $('#expense').text((data.expense).toFixed(2)+'Tk');
         });
     });
