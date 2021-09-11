@@ -103,7 +103,6 @@ class DebitVoucher extends BaseModel
         $query =  DB::table('transactions as t')
         ->selectRaw("t.*,sum(t.credit) as credit,sum(t.debit) as debit")
         ->where('t.voucher_type','DV')
-        ->where('t.approve',1)
         ->groupBy('t.voucher_no');
         if (!empty($this->_start_date)) {
             $query->where('t.voucher_date', '>=',$this->_start_date);
