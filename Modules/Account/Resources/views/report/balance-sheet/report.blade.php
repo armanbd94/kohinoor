@@ -229,30 +229,7 @@
                             ?>
                         </td>
                     </tr>
-                    @php
-                    $fixedAssets = DB::table('assets as a')
-                    ->selectRaw('sum(cost) as balance,a.asset_type_id,at.name')
-                    ->join('asset_types as at','a.asset_type_id','=','at.id')
-                    ->groupBy('a.asset_type_id')
-                    ->orderBy('at.name','asc')
-                    ->get();
-                @endphp,
-                @if (!empty($fixedAssets))
-                    @foreach ($fixedAssets as $item)
-                    @if ($item->balance != 0)
-                    <tr>
-                        <td align="left" class="paddingleft10px">{{ $item->name }}</td>
-
-                        <td align="right" class="cashflowamnt">
-                            <?php
-                            echo $item->balance;
-                            $total_assets += $item->balance;
-                            ?>
-                        </td>
-                    </tr>
-                    @endif
-                    @endforeach
-                @endif
+                    
                     <?php } ?>
 
                     <?php

@@ -52,8 +52,22 @@
             <div class="card-body">
                 <!--begin: Datatable-->
                 <div id="kt_datatable_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
-                    <div id="report" style="width: 100%;margin:0;padding:0;">
+                    <div id="report" style="width: 100%;margin:0;padding:0;" class="row">
                         
+                    </div>
+                    <div class="col-md-12 d-none" id="table-loader" style="position: absolute;top:120px;left:0;">
+                        <div style="width: 120px;
+                        height: 70px;
+                        background: white;
+                        text-align: center;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        border: 1px solid #ddd;
+                        border-radius: 5px;
+                        margin: 0 auto;">
+                            <i class="fas fa-spinner fa-spin fa-3x fa-fw text-primary"></i>
+                        </div>
                     </div>
                 </div>
                 <!--end: Datatable-->
@@ -67,6 +81,7 @@
 
 @push('scripts')
 <script src="js/jquery.printarea.js"></script>
+<script src="js/moment.js"></script>
 <script src="js/knockout-3.4.2.js"></script>
 <script src="js/daterangepicker.min.js"></script>
 <script>
@@ -101,6 +116,12 @@ function report()
         url:"{{ url('balance-sheet/report') }}",
         type:"POST",
         data:{start_date:start_date,end_date:end_date,_token:_token},
+        beforeSend: function(){
+            $('#table-loader').removeClass('d-none');
+        },
+        complete: function(){
+            $('#table-loader').addClass('d-none');
+        },
         success:function(data){
             $('#report').empty();
             $('#report').append(data);
