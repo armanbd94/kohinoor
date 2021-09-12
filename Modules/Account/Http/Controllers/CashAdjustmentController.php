@@ -20,9 +20,9 @@ class CashAdjustmentController extends BaseController
     }
 
 
-    public function index()
+    public function create()
     {
-        if(permission('cash-adjustment-access')){
+        if(permission('cash-adjustment-add')){
             $this->setPageData('Cash Adjustment','Cash Adjustment','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Cash Adjustment']]);
             $voucher_no = self::VOUCHER_PREFIX.'-'.date('Ymd').rand(1,999);
             $warehouses = Warehouse::where('status',1)->pluck('name','id');
@@ -35,7 +35,7 @@ class CashAdjustmentController extends BaseController
     public function store(CashAdjustmentFormRequest $request)
     {
         if($request->ajax()){
-            if(permission('cash-adjustment-access')){
+            if(permission('cash-adjustment-add')){
                 DB::beginTransaction();
                 try {
                     $data = array(

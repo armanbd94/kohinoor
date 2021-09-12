@@ -211,7 +211,7 @@
             @endphp
             
             @if($profit_loss != 0)
-                <tr class="text-white font-weight-bolder">
+                <tr class="font-weight-bolder">
                     <td align="left">&nbsp;</td>
                     <td align="left">Profit-Loss</td>
                     @if($profit_loss < 0)

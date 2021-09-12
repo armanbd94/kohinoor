@@ -24,13 +24,14 @@ class ModuleFormRequest extends FormRequest
      */
     public function rules()
     {
+
         $rules['type']                = ['required','integer'];
         if(request()->type == 1){
             $rules['divider_title']   = ['required','string'];
         }else{
             $rules['module_name']     = ['required','string'];
             if(request()->update_id){
-                $rules['url']         = ['nullable','string','unique:modules,url,'.request()->update_id];
+                $rules['url']         = ['nullable','string',Rule::unique('modules','url')->where('menu_id',request()->menu_id)->where('id','<>',request()->update_id)];
             }else{
                 $rules['url']         = ['nullable','string',Rule::unique('modules','url')->where('menu_id',request()->menu_id)];
             }

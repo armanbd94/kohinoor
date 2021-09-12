@@ -34,7 +34,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('opening-balance', 'OpeningBalanceController')->only(['index','store']);
 
     //Cash Adjustment Routes
-    Route::resource('cash-adjustment', 'CashAdjustmentController')->only(['index','store']);
+    Route::get('cash-adjustment', 'CashAdjustmentController@index');
+    Route::group(['prefix' => 'cash-adjustment', 'as'=>'cash.adjustment.'], function () {
+        Route::get('create', 'CashAdjustmentController@create')->name('create');
+        Route::post('store', 'CashAdjustmentController@store')->name('store');
+        Route::get('edit/{voucher_no}', 'CashAdjustmentController@edit')->name('edit');
+        Route::post('update', 'CashAdjustmentController@update')->name('update');
+        Route::post('delete', 'CashAdjustmentController@delete')->name('delete');
+        Route::post('datatable-data', 'CashAdjustmentController@get_datatable_data')->name('datatable.data');
+    });
 
     //Supplier Payment Route
     Route::resource('supplier-payment', 'SupplierPaymentController')->only(['index','store']);

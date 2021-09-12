@@ -26,43 +26,61 @@
     <div class="container-fluid">
         <div class="row">
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="bg-white text-center py-3  rounded-xl">
                     <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
                         <img src="images/purchase.svg" alt="purchase" class="icon">
                     </span>
-                    <h6 id="purchase" class="m-0">{{ number_format($purchase,2) }}TK</h6>
+                    <h6 id="purchase" class="m-0">{{ number_format(0,2) }}TK</h6>
                     <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Purchase</a>
                 </div>
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="bg-white text-center py-3  rounded-xl">
                     <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
                         <img src="images/sale.svg" alt="sale" class="icon">
                     </span>
-                    <h6 id="sale" class="m-0">{{ number_format($sale,2) }}TK</h6>
+                    <h6 id="sale" class="m-0">{{ number_format(0,2) }}TK</h6>
                     <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Sale</a>
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="bg-white text-center py-3  rounded-xl">
                     <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
                         <img src="images/income.svg" alt="income" class="icon">
                     </span>
-                    <h6 id="income" class="m-0">{{ $income }}</h6>
+                    <h6 id="income" class="m-0">{{ number_format(0,2) }}TK</h6>
                     <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Income</a>
                 </div>
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="bg-white text-center py-3  rounded-xl">
                     <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
                         <img src="images/expense.svg" alt="expense" class="icon">
                     </span>
-                    <h6 id="expense" class="m-0">{{ number_format($expense,2) }}TK</h6>
+                    <h6 id="expense" class="m-0">{{ number_format(0,2) }}TK</h6>
                     <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Expense</a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        <img src="images/coupon.svg" alt="coupon" class="icon">
+                    </span>
+                    <h6 id="coupon" class="m-0">0 Piece</h6>
+                    <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Coupon Received</a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="bg-white text-center py-3  rounded-xl">
+                    <span class="svg-icon svg-icon-3x svg-icon-danger d-block my-3">
+                        <img src="images/payment.svg" alt="payment" class="icon">
+                    </span>
+                    <h6 id="payment" class="m-0">{{ number_format(0,2) }}TK</h6>
+                    <a href="javascript::void(0);" class="font-weight-bold font-size-h7 mt-2">Coupon Payment</a>
                 </div>
             </div>
         </div>
@@ -89,18 +107,31 @@
 <script src="js/chart.min.js"></script>
 <script>
 $(document).ready(function(){
+    loadData("{{ date('Y-m-d') }}","{{ date('Y-m-d') }}");
     $('.data-btn').on('click',function(){
         $('.data-btn').removeClass('active');
         $(this).addClass('active');
         var start_date = $(this).data('start_date');
         var end_date = $(this).data('end_date');
+        loadData(start_date,end_date);
+    });
+
+    function loadData(start_date,end_date)
+    {
         $.get("{{ url('dashboard-data') }}/"+start_date+'/'+end_date, function(data){
             $('#sale').text((data.sale).toFixed(2)+'Tk');
             $('#purchase').text((data.purchase).toFixed(2)+'Tk');
             $('#income').text((data.income).toFixed(2)+'Tk');
             $('#expense').text((data.expense).toFixed(2)+'Tk');
+            $('#payment').text((data.total_coupon_payment).toFixed(2)+'Tk');
+            if(data.total_coupon_received == 0 || data.total_coupon_received == 1)
+            {
+                $('#coupon').text(data.total_coupon_received+' Piece');
+            }else{
+                $('#coupon').text(data.total_coupon_received+' Pieces');
+            }
         });
-    });
+    }
 
     //Yearly Report Chart
 
