@@ -169,6 +169,11 @@ $(document).ready(function(){
         },
         "columnDefs": [
             {
+                "targets": [13],
+                "className": "text-center",
+                "orderable":false
+            },
+            {
                 "targets": [0,3,4,5,6,7,8,10,11,12],
                 "className": "text-center"
             },
