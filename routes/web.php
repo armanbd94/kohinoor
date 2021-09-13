@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('my-profile', 'MyProfileController@index')->name('my.profile');
     Route::post('update-profile', 'MyProfileController@updateProfile')->name('update.profile');
     Route::post('update-password', 'MyProfileController@updatePassword')->name('update.password');
+    Route::get('material-stock-notification', 'HomeController@material_stock_alert');
     
     //Menu Routes
     Route::get('menu', 'MenuController@index')->name('menu');

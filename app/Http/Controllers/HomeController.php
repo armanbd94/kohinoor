@@ -95,4 +95,10 @@ class HomeController extends BaseController
         $this->setPageData('Unauthorized','Unauthorized','fas fa-ban',[['name' => 'Unauthorized']]);
         return view('unauthorized');
     }
+
+    public function material_stock_alert()
+    {
+        $materials = DB::table('materials')->where('status',1)->whereColumn('alert_qty','>','qty')->count();
+        return response()->json($materials);
+    }
 }
