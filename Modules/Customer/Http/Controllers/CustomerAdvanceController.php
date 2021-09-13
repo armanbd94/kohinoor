@@ -64,10 +64,10 @@ class CustomerAdvanceController extends BaseController
             foreach ($list as $value) {
                 $no++;
                 $action = '';
-                if(permission('credit-advance-edit')){
+                if(permission('customer-advance-edit')){
                 $action .= ' <a class="dropdown-item edit_data" data-id="' . $value->id . '">'.self::ACTION_BUTTON['Edit'].'</a>';
                 }
-                if(permission('credit-advance-delete')){
+                if(permission('customer-advance-delete')){
                 $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->name . ' advance ">'.self::ACTION_BUTTON['Delete'].'</a>';
                 }
                 $account = $this->account_data($value->voucher_no);
@@ -231,7 +231,7 @@ class CustomerAdvanceController extends BaseController
     {
         if($request->ajax()){
             if(permission('customer-advance-edit')){
-                $data   = $this->model->select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id','c.upazila_id','c.route_id','c.area_id')
+                $data   = $this->model->select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id','c.district_id','c.upazila_id','c.route_id','c.area_id')
                 ->join('chart_of_accounts as coa','transactions.chart_of_account_id','=','coa.id')
                 ->join('customers as c','coa.customer_id','c.id')
                 ->where('transactions.id',$request->id)
@@ -247,14 +247,15 @@ class CustomerAdvanceController extends BaseController
                 $output = []; //if data found then it will return data otherwise return error message
                 if($data){
                     $output = [
-                        'id'          => $data->id,
-                        'customer_id' => $data->customer_id,
-                        'type'        => ($data->debit != 0) ? 'debit' : 'credit',
-                        'amount'      => ($data->debit != 0) ? $data->debit : $data->credit,
+                        'id'             => $data->id,
+                        'warehouse_id'   => $data->warehouse_id,
+                        'customer_id'    => $data->customer_id,
+                        'type'           => ($data->debit != 0) ? 'debit' : 'credit',
+                        'amount'         => ($data->debit != 0) ? $data->debit : $data->credit,
                         'payment_method' => $payment_method,
                         'account_id'     => $account->chart_of_account_id,
                         'cheque_no'      => ($payment_method == 2) ? $account->description : '',
-                        'district_id'     => $data->district_id,
+                        'district_id'    => $data->district_id,
                         'upazila_id'     => $data->upazila_id,
                         'route_id'       => $data->route_id,
                         'area_id'        => $data->area_id,

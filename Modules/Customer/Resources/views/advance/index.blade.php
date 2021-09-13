@@ -274,6 +274,11 @@ $(document).ready(function(){
         var amount         = $('#store_or_update_form #amount').val();
         var payment_method = $('#store_or_update_form #payment_method option:selected').val();
         var account_id    = $('#store_or_update_form #account_id option:selected').val();
+        var warehouse_id    = $('#store_or_update_form #warehouse_id option:selected').val();
+        var district_id    = $('#store_or_update_form #district_id option:selected').val();
+        var upazila_id    = $('#store_or_update_form #upazila_id option:selected').val();
+        var route_id    = $('#store_or_update_form #route_id option:selected').val();
+        var area_id    = $('#store_or_update_form #area_id option:selected').val();
         var cheque_number = '';
         if(payment_method == 2){
             cheque_number = $('#store_or_update_form #cheque_number').val();
@@ -291,7 +296,8 @@ $(document).ready(function(){
             url: url,
             type: "POST",
             data: {id:id,customer:customer,customer_coaid:customer_coaid,customer_name:customer_name,type:type,amount:amount,
-                payment_method:payment_method,account_id:account_id,cheque_number:cheque_number,_token:_token},
+                payment_method:payment_method,account_id:account_id,cheque_number:cheque_number,warehouse_id:warehouse_id,
+                district_id:district_id,upazila_id:upazila_id,route_id:route_id,area_id:area_id,_token:_token},
             dataType: "JSON",
             beforeSend: function(){
                 $('#save-btn').addClass('spinner spinner-white spinner-right');
@@ -345,7 +351,7 @@ $(document).ready(function(){
                         notification(data.status,data.message)
                     }else{
                         $('#store_or_update_form #update_id').val(data.id);
-                        $('#store_or_update_form #customer').val(data.customer_id);
+                        
                         $('#store_or_update_form #type').val(data.type);
                         $('#store_or_update_form #amount').val(data.amount);
                         $('#store_or_update_form #payment_method').val(data.payment_method);
@@ -357,8 +363,13 @@ $(document).ready(function(){
                             $('.cheque_number').addClass('d-none');
                             $('#store_or_update_form #cheque_number').val('');
                         }
-                        
-                        account_list(data.payment_method,data.account_id)
+                        $('#store_or_update_form #warehouse_id').val(data.warehouse_id);
+                        $('#store_or_update_form #district_id').val(data.district_id);
+                        getUpazilaList(data.district_id,2,data.upazila_id);
+                        getRouteList(data.upazila_id,2,data.route_id);
+                        getAreaList(data.route_id,2,data.area_id);
+                        customer_list(data.area_id,2,data.customer_id);
+                        account_list(data.payment_method,data.account_id);
                         $('#store_or_update_form select#customer').each(function(){
                             $('#store_or_update_form select#customer option').each(function() {
                                 if(!this.selected) {
