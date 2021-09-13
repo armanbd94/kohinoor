@@ -23,7 +23,8 @@ class CashAdjustmentController extends BaseController
     {
         if(permission('cash-adjustment-access')){
             $this->setPageData('Cash Adjustment List','Cash Adjustment List','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Cash Adjustment List']]);
-            return view('account::cash-adjustment.list');
+            $warehouses = Warehouse::where('status',1)->pluck('name','id');
+            return view('account::cash-adjustment.list',compact('warehouses'));
         }else{
             return $this->access_blocked();
         }

@@ -42,6 +42,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('update', 'CashAdjustmentController@update')->name('update');
         Route::post('delete', 'CashAdjustmentController@delete')->name('delete');
         Route::post('datatable-data', 'CashAdjustmentController@get_datatable_data')->name('datatable.data');
+        Route::post('approve', 'VoucherApprovalController@approve')->name('approve');
     });
 
     //Supplier Payment Route
