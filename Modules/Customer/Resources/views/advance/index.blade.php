@@ -42,44 +42,19 @@
                         </div>
 
                         <x-form.selectbox labelName="District" name="district_id" col="col-md-4" class="selectpicker" onchange="getUpazilaList(this.value,1);customer_list();" >
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 1 && $location->parent_id == null)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
+                            @if (!$districts->isEmpty())
+                                @foreach ($districts as $district)
+                                    <option value="{{ $district->id }}">{{ $district->name }}</option>
                                 @endforeach
                             @endif
                         </x-form.selectbox>
 
-                        <x-form.selectbox labelName="Upazila" name="upazila_id" col="col-md-4" class="selectpicker" onchange="getRouteList(this.value,1);customer_list();" >
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 2 && $location->parent_id == auth()->user()->district_id)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </x-form.selectbox>
+                        <x-form.selectbox labelName="Upazila" name="upazila_id" col="col-md-4" class="selectpicker" onchange="getRouteList(this.value,1);customer_list();" />
 
-                        <x-form.selectbox labelName="Route" name="route_id" col="col-md-4" class="selectpicker" onchange="getAreaList(this.value,1);customer_list();">
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 3 && $location->grand_parent_id == auth()->user()->district_id)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </x-form.selectbox>
+                        <x-form.selectbox labelName="Route" name="route_id" col="col-md-4" class="selectpicker" onchange="getAreaList(this.value,1);customer_list();"/>
 
-                        <x-form.selectbox labelName="Area" name="area_id" col="col-md-4" class="selectpicker" onchange="customer_list()">
-                            @if (!$locations->isEmpty())
-                                @foreach ($locations as $location)
-                                    @if ($location->type == 4 && $location->grand_grand_parent_id == auth()->user()->district_id)
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </x-form.selectbox>
+                        <x-form.selectbox labelName="Area" name="area_id" col="col-md-4" class="selectpicker" onchange="customer_list()"/>
+
                         <x-form.selectbox labelName="Customer" name="customer_id" col="col-md-4" class="selectpicker"/>
                         
 
