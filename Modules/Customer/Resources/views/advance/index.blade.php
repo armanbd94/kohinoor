@@ -53,7 +53,7 @@
 
                         <x-form.selectbox labelName="Route" name="route_id" col="col-md-4" class="selectpicker" onchange="getAreaList(this.value,1);customer_list();"/>
 
-                        <x-form.selectbox labelName="Area" name="area_id" col="col-md-4" class="selectpicker" onchange="customer_list()"/>
+                        <x-form.selectbox labelName="Area" name="area_id" col="col-md-4" class="selectpicker" onchange="customer_list(1)"/>
 
                         <x-form.selectbox labelName="Customer" name="customer_id" col="col-md-4" class="selectpicker"/>
                         
@@ -423,7 +423,7 @@ function account_list(payment_method,account_id='')
     });
 }
 
-function customer_list(set_id)
+function customer_list(set_id,customer_id='')
 {
     let district_id = document.getElementById('district_id').value;
     let upazila_id = document.getElementById('upazila_id').value;
@@ -445,6 +445,11 @@ function customer_list(set_id)
                 $('#form-filter #customer_id.selectpicker').selectpicker('refresh');
             }else{
                 $('#store_or_update_form #customer_id').empty().append(html);
+                $('#store_or_update_form #customer_id.selectpicker').selectpicker('refresh');
+            }
+            if(customer_id)
+            {
+                $('#store_or_update_form #customer_id').val(customer_id);
                 $('#store_or_update_form #customer_id.selectpicker').selectpicker('refresh');
             }
         },
