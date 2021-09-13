@@ -53,6 +53,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('change-status', 'CustomerAdvanceController@change_status')->name('change.status');
     });
 
+    Route::post('area-wise-customer-list', 'CustomerAdvanceController@area_wise_customer_list')->name('area.wise.customer.list');
+
     //Customer Group Routes
     Route::get('customer-group', 'CustomerGroupController@index')->name('customer.group');
     Route::group(['prefix' => 'customer-group', 'as'=>'customer.group.'], function () {
