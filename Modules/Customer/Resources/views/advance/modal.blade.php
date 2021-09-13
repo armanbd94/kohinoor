@@ -41,7 +41,7 @@
                             onchange="getAreaList(this.value,2)"/>
 
                         <x-form.selectbox labelName="Area" name="area_id" col="col-md-4" class="selectpicker"
-                            onchange="customer_list(2)"/>
+                            onchange="customer_list(this.value,2)"/>
                         <x-form.selectbox labelName="Customer" name="customer" col="col-md-4" class="selectpicker" />
 
                         <x-form.selectbox labelName="Advance Type" name="type" required="required" col="col-md-4"

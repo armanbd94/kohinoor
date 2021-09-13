@@ -117,10 +117,10 @@ class CustomerAdvanceController extends BaseController
                 DB::beginTransaction();
                 try {
                     if(empty($request->id)){
-                        $result = $this->advance_add($request->type,$request->amount,$request->customer_coaid,$request->customer_name,$request->payment_method,$request->account_id,$request->cheque_number);
+                        $result = $this->advance_add($request->type,$request->amount,$request->customer_coaid,$request->customer_name,$request->payment_method,$request->account_id,$request->cheque_number,$request->warehouse_id);
                         $output = $this->store_message($result, $request->id);
                     }else{
-                        $result = $this->advance_update($request->id,$request->type,$request->amount,$request->customer_coaid,$request->customer_name,$request->payment_method,$request->account_id,$request->cheque_number);
+                        $result = $this->advance_update($request->id,$request->type,$request->amount,$request->customer_coaid,$request->customer_name,$request->payment_method,$request->account_id,$request->cheque_number,$request->warehouse_id);
                         $output = $this->store_message($result, $request->id);
                     }
                     DB::commit();
@@ -137,13 +137,13 @@ class CustomerAdvanceController extends BaseController
         }
     }
 
-    private function advance_add(string $type, $amount, int $customer_coa_id, string $customer_name,int $payment_method, int $account_id, string $cheque_number = null) {
+    private function advance_add(string $type, $amount, int $customer_coa_id, string $customer_name,int $payment_method, int $account_id, string $cheque_number = null,$warehouse_id) {
         if(!empty($type) && !empty($amount) && !empty($customer_coa_id) && !empty($customer_name)){
             $transaction_id = generator(10);
 
             $customer_accledger = array(
                 'chart_of_account_id' => $customer_coa_id,
-                'warehouse_id'        => auth()->user()->warehouse->id,
+                'warehouse_id'        => $warehouse_id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'Advance',
                 'voucher_date'        => date("Y-m-d"),
@@ -164,7 +164,7 @@ class CustomerAdvanceController extends BaseController
             }
             $cc = array(
                 'chart_of_account_id' => $account_id,
-                'warehouse_id'        => auth()->user()->warehouse->id,
+                'warehouse_id'        => $warehouse_id,
                 'voucher_no'          => $transaction_id,
                 'voucher_type'        => 'Advance',
                 'voucher_date'        => date("Y-m-d"),
@@ -183,7 +183,7 @@ class CustomerAdvanceController extends BaseController
         }
     }
 
-    private function advance_update(int $transaction_id, string $type, $amount, int $customer_coa_id, string $customer_name,int $payment_method, int $account_id, string $cheque_number = null) {
+    private function advance_update(int $transaction_id, string $type, $amount, int $customer_coa_id, string $customer_name,int $payment_method, int $account_id, string $cheque_number = null,$warehouse_id) {
         if(!empty($type) && !empty($amount) && !empty($customer_coa_id) && !empty($customer_name)){
 
             $customer_advance_data = $this->model->find($transaction_id);
@@ -191,7 +191,7 @@ class CustomerAdvanceController extends BaseController
             $voucher_no = $customer_advance_data->voucher_no;
 
             $updated = $customer_advance_data->update([
-                'warehouse_id'        => auth()->user()->warehouse->id,
+                'warehouse_id'        => $warehouse_id,
                 'description'         => 'Supplier Advance For '.$customer_name,
                 'debit'               => ($type == 'debit') ? $amount : 0,
                 'credit'              => ($type == 'credit') ? $amount : 0,
@@ -211,7 +211,7 @@ class CustomerAdvanceController extends BaseController
                 if($account){
                     $account->update([
                         'chart_of_account_id' => $account_id,
-                        'warehouse_id'        => auth()->user()->warehouse->id,
+                        'warehouse_id'        => $warehouse_id,
                         'description'         => $note,
                         'debit'               => ($type == 'debit') ? $amount : 0,
                         'credit'              => ($type == 'credit') ? $amount : 0,
@@ -231,9 +231,11 @@ class CustomerAdvanceController extends BaseController
     {
         if($request->ajax()){
             if(permission('customer-advance-edit')){
-                $data   = $this->model->select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id')
+                $data   = $this->model->select('transactions.*','coa.id as coa_id','coa.code','c.id as customer_id','c.upazila_id','c.route_id','c.area_id')
                 ->join('chart_of_accounts as coa','transactions.chart_of_account_id','=','coa.id')
-                ->join('customers as c','coa.customer_id','c.id')->where('transactions.id',$request->id)->first();
+                ->join('customers as c','coa.customer_id','c.id')
+                ->where('transactions.id',$request->id)
+                ->first();
                 $account = $this->account_data($data->voucher_no);
                 if($account->coa->parent_name == 'Cash & Cash Equivalent'){
                     $payment_method = 1;
@@ -252,6 +254,10 @@ class CustomerAdvanceController extends BaseController
                         'payment_method' => $payment_method,
                         'account_id'     => $account->chart_of_account_id,
                         'cheque_no'      => ($payment_method == 2) ? $account->description : '',
+                        'district_id'     => $data->district_id,
+                        'upazila_id'     => $data->upazila_id,
+                        'route_id'       => $data->route_id,
+                        'area_id'        => $data->area_id,
                     ];
                 }
             }else{
@@ -290,6 +296,21 @@ class CustomerAdvanceController extends BaseController
             return response()->json($output);
         }else{
             return response()->json($this->unauthorized());
+        }
+    }
+
+    public function area_wise_customer_list(Request $request)
+    {
+        if($request->ajax()){
+            $customers  = Customer::with('coa')->where([['status',1],['area_id',$request->area_id]])->orderBy('id','asc')->get();
+            $output = '';
+            if (!$customers->isEmpty()){
+                $output .= '<option value="">Select Please</option>';
+                foreach ($customers as $customer){
+                    $output .=  '<option value="'.$customer->id.'" data-coaid="'.$customer->coa->id.'" data-name="'.$customer->name.'">'. $customer->name.' - '.$customer->mobile.'</option>';
+                }
+            }
+            return $output;
         }
     }
 
