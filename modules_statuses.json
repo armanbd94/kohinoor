@@ -16,5 +16,7 @@
     "Transfer": true,
     "Expense": true,
     "StockReturn": true,
+    "HRM": true,
+    "Loan": true,
     "Report": true
 }
