@@ -43,9 +43,9 @@
 
                         <x-form.selectbox labelName="District" name="district_id" col="col-md-4" class="selectpicker" onchange="getUpazilaList(this.value,1);customer_list();" >
                             @if (!$districts->isEmpty())
-                                @foreach ($districts as $district)
-                                    <option value="{{ $district->id }}">{{ $district->name }}</option>
-                                @endforeach
+                            @foreach ($districts as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
                             @endif
                         </x-form.selectbox>
 
