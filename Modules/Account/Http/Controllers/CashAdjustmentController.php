@@ -8,13 +8,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
-use Modules\Account\Entities\Transaction;
+use Modules\Account\Entities\CashAdjustment;
 use Modules\Account\Http\Requests\CashAdjustmentFormRequest;
 
 class CashAdjustmentController extends BaseController
 {
     protected const VOUCHER_PREFIX = 'CHV';
-    public function __construct(Transaction $model)
+    public function __construct(CashAdjustment $model)
     {
         $this->model = $model;
     }
@@ -144,7 +144,7 @@ class CashAdjustmentController extends BaseController
             {
                 $this->setPageData('Edit Cash Adjustment','Edit Cash Adjustment','far fa-money-bill-alt',[['name'=>'Accounts'],['name'=>'Edit Cash Adjustment']]);
                 $warehouses = Warehouse::where('status',1)->pluck('name','id');
-                return view('account::cash-adjustment.edit',compact('voucher_data'));
+                return view('account::cash-adjustment.edit',compact('voucher_data','warehouses'));
             }else{
                 return redirect()->back();
             }
