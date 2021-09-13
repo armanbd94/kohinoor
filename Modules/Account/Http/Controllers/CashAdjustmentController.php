@@ -71,6 +71,13 @@ class CashAdjustmentController extends BaseController
                     if(permission('cash-adjustment-delete') && $value->approve != 1){
                         $action .= ' <a class="dropdown-item delete_data"  data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '">'.self::ACTION_BUTTON['Delete'].'</a>';
                     }
+
+                    if($value->approve == 3 && permission('cash-adjustment-approve'))
+                        {
+                        $voucher_approve = '<span class="label label-success label-pill label-inline approve_voucher" data-id="' . $value->voucher_no . '" data-name="' . $value->voucher_no . '" data-status="1" style="min-width:70px !important;cursor:pointer;">Approve It</span>';
+                    }else{
+                        $voucher_approve = VOUCHER_APPROVE_STATUS_LABEL[$value->approve];
+                    }
                     
                     $row = [];
                     $row[] = $no;
@@ -80,7 +87,7 @@ class CashAdjustmentController extends BaseController
                     $row[] = $value->description;
                     $row[] = number_format($value->debit,2);
                     $row[] = number_format($value->credit,2);
-                    $row[] = VOUCHER_APPROVE_STATUS_LABEL[$value->approve];
+                    $row[] = $voucher_approve;
                     $row[] = $value->created_by;
                     $row[] = action_button($action);//custom helper function for action button
                     $data[] = $row;
