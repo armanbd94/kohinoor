@@ -211,9 +211,9 @@ class PurchaseController extends BaseController
                                 }
                             }else{
                                 if($unit->operator == '*'){
-                                    $material_cost = ((floatval($value['subtotal'] + ($value['discount'] / $value['qty'])) / $value['qty']) / $unit->operation_value) + $shipping_cost;
+                                    $material_cost = ((floatval($value['subtotal'] + ($value['discount'] / $value['qty']) + $shipping_cost) / $value['qty']) / $unit->operation_value);
                                 }elseif ($unit->operator == '/') {
-                                    $material_cost = ((floatval($value['subtotal'] + ($value['discount'] / $value['qty'])) / $value['qty']) * $unit->operation_value) + $shipping_cost;
+                                  	$material_cost = ((floatval($value['subtotal'] + ($value['discount'] / $value['qty']) + $shipping_cost) / $value['qty']) * $unit->operation_value);
                                 }
                                 
                             }

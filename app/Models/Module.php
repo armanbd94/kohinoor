@@ -76,6 +76,7 @@ class Module extends Model
                 ->orderBy('order','asc')
                 ->with('permission:id,module_id,name','submenu:id,parent_id,module_name,icon_class')
                 ->where('menu_id',$menu_id)
+                ->whereNotIn('id',[8,9,127])
                 ->get();
     }
 }
