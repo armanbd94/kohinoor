@@ -174,7 +174,6 @@ class SalesMenController extends BaseController
         if($request->ajax()){
             if(permission('sr-view')){
                 $salesmen   = $this->model->with('warehouse','district','upazila','routes')->findOrFail($request->id);
-                // dd($salesmen->routes[0]);
                 return view('salesmen::view-data',compact('salesmen'))->render();
             }
         }

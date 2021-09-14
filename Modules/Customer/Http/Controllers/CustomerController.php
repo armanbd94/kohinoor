@@ -92,7 +92,7 @@ class CustomerController extends BaseController
                     }
                     if(!empty($value->avatar))
                     {
-                        $avatar =  "<img src='"."http://kohinoor-asm.test/storage/".CUSTOMER_AVATAR_PATH.$value->avatar."' alt='".$value->name."' style='width:50px;'/>";
+                        $avatar =  "<img src='".ASM_BASE_PATH."storage/".CUSTOMER_AVATAR_PATH.$value->avatar."' alt='".$value->name."' style='width:50px;'/>";
                     }else{
                         $avatar =  "<img src='".asset("images/male.svg")."' alt='Default Image' style='width:50px;'/>";
                     }
@@ -254,13 +254,23 @@ class CustomerController extends BaseController
         }
     }
 
+    public function show(Request $request)
+    {
+        if($request->ajax()){
+            if(permission('customer-view')){
+                $customer   = $this->model->with(['customer_group','district','upazila','route','area'])->findOrFail($request->id);
+                return view('customer::view-data',compact('customer'))->render();
+            }
+        }
+    }
+
     public function delete(Request $request)
     {
         if($request->ajax()){
             if(permission('customer-delete')){
                 DB::beginTransaction();
                 try {
-                    $total_sale_data = Sale::where('customer_id',$request->id)->get()->count();
+                    $total_sale_data = DB::table('sales')->where('customer_id',$request->id)->get()->count();
                     if ($total_sale_data > 0) {
                         $output = ['status'=>'error','message'=>'This data cannot delete because it is related with others data.'];
                     } else {
@@ -284,21 +294,21 @@ class CustomerController extends BaseController
         }
     }
 
-    public function change_status(Request $request)
-    {
-        if($request->ajax()){
-            if(permission('material-edit')){
-                $result   = $this->model->find($request->id)->update(['status' => $request->status]);
-                $output   = $result ? ['status' => 'success','message' => 'Status Has Been Changed Successfully']
-                : ['status' => 'error','message' => 'Failed To Change Status'];
-            }else{
-                $output   = $this->unauthorized();
-            }
-            return response()->json($output);
-        }else{
-            return response()->json($this->unauthorized());
-        }
-    }
+    // public function change_status(Request $request)
+    // {
+    //     if($request->ajax()){
+    //         if(permission('customer-edit')){
+    //             $result   = $this->model->find($request->id)->update(['status' => $request->status]);
+    //             $output   = $result ? ['status' => 'success','message' => 'Status Has Been Changed Successfully']
+    //             : ['status' => 'error','message' => 'Failed To Change Status'];
+    //         }else{
+    //             $output   = $this->unauthorized();
+    //         }
+    //         return response()->json($output);
+    //     }else{
+    //         return response()->json($this->unauthorized());
+    //     }
+    // }
 
 
     public function customer_list(Request $request)

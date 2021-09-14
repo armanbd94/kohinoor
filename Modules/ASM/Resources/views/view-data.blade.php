@@ -15,7 +15,7 @@
             </tr>
             <tr>
                 <td><b>NID No.</b></td><td><b>:</b></td><td>{{ $asm->nid_no }}</td>
-                <td><b>Monthly Target Value</b></td><td><b>:</b></td><td>{{ number_format($asm->monthly_target_value,2,'.','') }}</td>
+                <td><b>Monthly Target Value</b></td><td><b>:</b></td><td>{{ number_format($asm->monthly_target_value,2,'.','') }} Tk</td>
             </tr>
             <tr>
                 <td><b>Status</b></td><td><b>:</b></td><td>{!! STATUS_LABEL[$asm->status] !!}</td>
