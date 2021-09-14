@@ -77,6 +77,10 @@ class PurchaseController extends BaseController
                     if(permission('purchase-view')){
                         $action .= ' <a class="dropdown-item view_data" href="'.route("purchase.view",$value->id).'">'.self::ACTION_BUTTON['View'].'</a>';
                     }
+                    if($value->document)
+                    {
+                        $action .= '<a class="dropdown-item" href="'.asset('storage/'.PURCHASE_DOCUMENT_PATH.$value->document).'" download><i class="fas fa-download mr-2"></i> Document</a>';
+                    }
                     if(permission('purchase-payment-add')){
                         if($value->payment_status != 1){
                         $action .= ' <a class="dropdown-item add_payment" data-id="'.$value->id.'" data-due="'.($value->grand_total - $value->paid_amount).'"><i class="fas fa-plus-square text-info mr-2"></i> Add Payment</a>';
@@ -577,7 +581,7 @@ class PurchaseController extends BaseController
                     }
                     
                     $purchase = $purchaseData->update($purchase_data);
-                    if(empty($result))
+                    if(empty($purchase))
                     {
                         if($request->hasFile('document')){
                             $this->delete_file($purchase_data['document'], PURCHASE_DOCUMENT_PATH);
