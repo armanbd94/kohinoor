@@ -64,7 +64,7 @@
                                         <th width="10%" class="text-center">Batch No.</th>
                                         <th width="10%" class="text-center">Base Unit</th>
                                         <th width="10%" class="text-center">Qty Base Unit</th>
-                                        <th width="10%" class="text-right">Base Unit Cost</th>
+                                        <th width="10%" class="text-right">Base Unit Price</th>
                                         <th width="10%" class="text-right">Tax</th>
                                         <th width="15%" class="text-right">Sub Total</th>
                                         <th class="text-center"><i class="fas fa-trash text-white"></i></th>

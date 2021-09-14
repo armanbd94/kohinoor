@@ -17,7 +17,7 @@ class AdjustmentFormRequest extends FormRequest
     {
         $this->rules['adjustment_no'] = ['required','unique:adjustments,adjustment_no'];
         $this->rules['warehouse_id']  = ['required'];
-        $this->rules['note']          = ['required'];
+        $this->rules['note']          = ['nullable'];
         if(request()->update_id)
         {
             $this->rules['adjustment_no'] = 'unique:adjustments,adjustment_no,'.request()->update_id;
