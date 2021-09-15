@@ -73,7 +73,7 @@ class GeneralLedgerController extends BaseController
 
                 $pre_balance_data = DB::table('transactions')
                                     ->selectRaw('sum(debit) as predebit, sum(credit) as precredit')
-                                    ->where('voucher_date','<',$end_date)
+                                    ->where('voucher_date','<',$start_date)
                                     ->where('chart_of_account_id',$request->transaction_head)
                                     ->where('approve',1)
                                     ->when($warehouse_id,function($q) use($warehouse_id){
