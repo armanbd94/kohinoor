@@ -23,7 +23,7 @@
             <div class="card-header flex-wrap py-5">
                 <form method="POST" id="form-filter" class="col-md-12 px-0">
                     <div class="row justify-content-center">
-                        <x-form.textbox labelName="Product Name" name="product_name" col="col-md-3" />
+                        <x-form.textbox labelName="Product Name" name="product_name" required="required"  col="col-md-3" />
                         <input type="hidden" class="form-control bg-brand" name="product_id" id="product_id">
                         <x-form.selectbox labelName="Warehouse" name="warehouse_id" col="col-md-3" required="required" class="selectpicker">
                             @if (!$warehouses->isEmpty())
