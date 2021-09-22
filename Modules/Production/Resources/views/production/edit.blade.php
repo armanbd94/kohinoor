@@ -90,7 +90,7 @@
                                                         <div class="row">
                                                             <div class="form-group col-md-12 required">
                                                                 <label >Product</label>
-                                                                <input type="text" class="form-control" value="{{ $item->product->product_name }}">
+                                                                <input type="text" class="form-control" value="{{ $item->product->name }}">
                                                                 <input type="hidden" class="form-control" value="{{ $item->id }}" name="production[{{ $key+1 }}][production_product_id]" id="production_{{ $key+1 }}_production_product_id">
                                                                 <input type="hidden" class="form-control" value="{{ $item->product_id }}" name="production[{{ $key+1 }}][product_id]" id="production_{{ $key+1 }}_product_id">
                                                             </div>
