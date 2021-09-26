@@ -54,7 +54,7 @@
                                     </div>
                                 </div>
 
-                                <x-form.selectbox labelName="District" name="district_id" col="col-md-6" class="selectpicker">
+                                <x-form.selectbox labelName="District" name="district_id" required="required" col="col-md-6" class="selectpicker">
                                     @if (!$districts->isEmpty())
                                         @foreach ($districts as $district)
                                             <option value="{{ $district->id }}">{{ $district->name }}</option>
