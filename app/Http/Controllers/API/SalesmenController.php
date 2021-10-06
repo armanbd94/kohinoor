@@ -19,7 +19,7 @@ class SalesmenController extends APIController
         try {
             if(auth()->user()->id == $salesmen_id){
                 $routes = SalesMenDailyRoute::with('route')->where('salesmen_id',$salesmen_id)->get();
-                if($routes){
+                if(!$routes->isEmpty()){
                     foreach ($routes as $value) {
                         $data[] = [
                             'id' => $value->id,
@@ -50,9 +50,9 @@ class SalesmenController extends APIController
             $route = DB::table('sales_men_daily_routes')->where(['id' => $route_id, 'salesmen_id' => auth()->user()->id])->first();
             if($route)
             {
-                $customers = DB::table('locations')->where(['parent_id'=>$route->route_id,'status'=>1])->pluck('name','id');
-                if($customers){
-                    foreach ($customers as $id => $name) {
+                $areas = DB::table('locations')->where(['parent_id'=>$route->route_id,'status'=>1])->pluck('name','id');
+                if(!$areas->isEmpty()){
+                    foreach ($areas as $id => $name) {
                         $data[] = [
                             'id'   => $id,
                             'name' => $name
@@ -83,7 +83,7 @@ class SalesmenController extends APIController
         $status  = true;
         try {
             $customers = DB::table('customers')->where(['area_id'=>$area_id,'status'=>1])->get();
-            if($customers){
+            if(!$customers->isEmpty()){
                 foreach ($customers as $value) {
                     $data[] = [
                         'id' => $value->id,
