@@ -10,6 +10,7 @@ use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Production\Entities\Production;
 use Modules\Material\Entities\WarehouseMaterial;
+use Modules\Product\Entities\WarehouseProduct;
 use Modules\Production\Entities\ProductionProduct;
 use Modules\Production\Http\Requests\OperationRequest;
 use Modules\Production\Entities\ProductionProductMaterial;
@@ -117,6 +118,8 @@ class ProductionOperationController extends BaseController
                     DB::beginTransaction();
                     try {
                         $productionData = $this->model->find($request->production_id);
+                        $warehouse_id = $productionData->warehouse_id;
+                        $batch_no = $productionData->batch_no;
                         $approve_status = $productionData->status;
                         $productionData->production_status = $request->production_status;
                         if($request->production_status == 3)
@@ -133,7 +136,7 @@ class ProductionOperationController extends BaseController
                                                         ->where([['p.id',$request->production_id],['p.status',1],['ppm.odd_qty','>',0]])
                                                         ->select('ppm.material_id','ppm.odd_qty')
                                                         ->get();
-                                if($production_materials){
+                                if(!$production_materials->isEmpty()){
                                     foreach ($production_materials as $material) {
                                         $warehouse_material = WarehouseMaterial::where([
                                             ['warehouse_id', 1],
@@ -149,6 +152,30 @@ class ProductionOperationController extends BaseController
                                         if ($material_data) {
                                             $material_data->qty += $material->odd_qty;
                                             $material_data->update();
+                                        }
+                                    }
+                                }
+                                $production_products = DB::table('production_products')
+                                ->where('production_id',$request->production_id)
+                                ->get();
+                                if(!$production_products->isEmpty())
+                                {
+                                    foreach ($production_products as  $value) {
+                                        $warehouse_product = WarehouseProduct::where([
+                                            ['batch_no', $batch_no],
+                                            ['warehouse_id', $warehouse_id],
+                                            ['product_id', $value->product_id]
+                                        ])->first();
+                                        if ($warehouse_product) {
+                                            $warehouse_product->qty += $value->base_unit_qty;
+                                            $warehouse_product->update();
+                                        }else{
+                                            WarehouseProduct::create([
+                                                'batch_no'=> $batch_no,
+                                                'warehouse_id'=> $warehouse_id,
+                                                'product_id'=> $value->product_id,
+                                                'qty'=> $value->base_unit_qty,
+                                            ]);
                                         }
                                     }
                                 }

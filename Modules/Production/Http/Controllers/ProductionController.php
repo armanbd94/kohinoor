@@ -10,6 +10,7 @@ use Modules\Setting\Entities\Warehouse;
 use App\Http\Controllers\BaseController;
 use Modules\Production\Entities\Production;
 use Modules\Material\Entities\WarehouseMaterial;
+use Modules\Product\Entities\WarehouseProduct;
 use Modules\Production\Entities\ProductionCoupon;
 use Modules\Production\Entities\ProductionProduct;
 use Modules\Production\Http\Requests\ProductionRequest;
@@ -456,6 +457,7 @@ class ProductionController extends BaseController
                             $product = ProductionProduct::with('materials','coupons')->find($item->id);
                             if($product)
                             {
+                                
                                 if(!$product->materials->isEmpty())
                                 {
                                     if ($productionData->status == 1 && $productionData->production_status != 3) {
@@ -476,7 +478,16 @@ class ProductionController extends BaseController
                                                 $material_data->update();
                                             }
                                         }
+                                        if(!$product->coupons->isEmpty())
+                                        {
+                                            $product->coupons()->delete();
+                                        }
                                     }elseif ($productionData->status == 1 && $productionData->production_status == 3) {
+                                        $warehouse_product = WarehouseProduct::where([
+                                            ['batch_no', $productionData->batch_no],
+                                            ['warehouse_id', $productionData->warehouse_id],
+                                            ['product_id', $product->product_id]
+                                        ])->delete();
                                         foreach ($product->materials as $value) {
                                             $used_qty = $value->pivot->used_qty + ($value->pivot->damaged_qty ? $value->pivot->damaged_qty : 0);
                                             $warehouse_material = WarehouseMaterial::where([
