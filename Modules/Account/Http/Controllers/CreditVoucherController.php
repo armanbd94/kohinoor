@@ -166,6 +166,29 @@ class CreditVoucherController extends BaseController
             return response()->json($this->unauthorized());
         }
     }
+
+    public function show(Request $request)
+    {
+        if($request->ajax()){
+            if(permission('credit-voucher-view')){
+                $debit_voucher = DB::table('transactions as t')
+                ->join('chart_of_accounts as coa','t.chart_of_account_id','=','coa.id')
+                ->join('warehouses as w','t.warehouse_id','=','w.id')
+                ->select('t.*','coa.name','w.name as warehouse_name')
+                ->where(['voucher_no'=>$request->id,'credit'=>'0'])
+                ->groupBy('t.chart_of_account_id')
+                ->first();
+                $credit_vouchers = DB::table('transactions as t')
+                ->join('chart_of_accounts as coa','t.chart_of_account_id','=','coa.id')
+                ->join('warehouses as w','t.warehouse_id','=','w.id')
+                ->select('t.*','coa.name','w.name as warehouse_name')
+                ->where(['voucher_no'=>$request->id,'debit'=>'0'])
+                ->get();
+                return view('account::credit-voucher.view-modal-data',compact('debit_voucher','credit_vouchers'))->render();
+            }
+        }
+    }
+
     public function update(CreditVoucherFormRequest $request)
     {
         if($request->ajax()){
