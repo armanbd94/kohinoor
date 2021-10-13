@@ -246,7 +246,11 @@ $(document).ready(function () {
         calculateTotal();
     });
 
+    @if (!$adjustment->products->isEmpty())
+    var count = "{{ count($adjustment->products) + 1 }}";
+    @else
     var count = 1;
+    @endif
 
     function productSearch(data) {
         $.ajax({
