@@ -193,14 +193,14 @@ $(document).ready(function(){
 
 
     @if(config('settings.logo'))
-    $('#site_logo img.spartan_image_placeholder').css('display','none');
+    $('#site_logo img').css('display','none');
     $('#site_logo .spartan_remove_row').css('display','none');
     $('#site_logo .img_').css('display','block');
     $('#site_logo .img_').attr('src',"{{ asset('storage/'.LOGO_PATH.config('settings.logo'))}}");
     @endif
 
     @if(config('settings.favicon'))
-    $('#site_favicon img.spartan_image_placeholder').css('display','none');
+    $('#site_favicon img').css('display','none');
     $('#site_favicon .spartan_remove_row').css('display','none');
     $('#site_favicon .img_').css('display','block');
     $('#site_favicon .img_').attr('src',"{{ asset('storage/'.LOGO_PATH.config('settings.favicon'))}}");
