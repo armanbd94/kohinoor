@@ -453,7 +453,12 @@ class PurchaseController extends BaseController
                     {
                         $payment_status = 3;//due
                     }else{
-                        $payment_status = 2;//partial
+                        if($purchaseData->paid_amount > 0)
+                        {
+                            $payment_status = 2;//partial
+                        }else{
+                            $payment_status = 3;//due
+                        }
                     }
                     $purchase_data = [
                         'item'             => $request->item,
